@@ -7,6 +7,11 @@ export interface CrystalBead {
   emoji: string;
 }
 
+export function calculateBeadPrice(basePrice: number, beadSize: BeadSize): number {
+  const sizeMultiplier = beadSize === 6 ? 0.8 : beadSize === 8 ? 1.0 : 1.3;
+  return basePrice * sizeMultiplier;
+}
+
 export const CRYSTAL_LIBRARY: CrystalBead[] = [
   { id: "amethyst", name: "Amethyst", color: "#9B59B6", gradient: "linear-gradient(135deg, #9B59B6, #8E44AD)", price: 3.50, emoji: "💜" },
   { id: "rose-quartz", name: "Rose Quartz", color: "#F5B7C5", gradient: "linear-gradient(135deg, #F5B7C5, #E8A0B5)", price: 2.80, emoji: "🩷" },

@@ -43,7 +43,12 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
           <button
             key={bead.id}
             onClick={() => onSelectBead(bead)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.effectAllowed = "copy";
+              e.dataTransfer.setData("application/json", JSON.stringify(bead));
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group cursor-grab active:cursor-grabbing"
           >
             <div
               className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm"
@@ -53,7 +58,9 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
               <p className="text-sm font-medium text-foreground truncate">{bead.name}</p>
               <p className="text-xs text-muted-foreground">${bead.price.toFixed(2)} / bead</p>
             </div>
-            <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">Add</span>
+            <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              Drag or Click
+            </span>
           </button>
         ))}
       </div>

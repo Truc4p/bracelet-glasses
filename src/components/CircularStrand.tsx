@@ -1,14 +1,15 @@
-import { type PlacedBead, type BeadSize } from "@/lib/luxe-data";
+import { type PlacedBead, type BeadSize, type CrystalBead } from "@/lib/luxe-data";
 
 interface CircularStrandProps {
   beadCount: number;
   placedBeads: PlacedBead[];
   onSlotClick: (position: number, beadSize: BeadSize) => void;
+  onBeadDrop?: (position: number, bead: CrystalBead) => void;
   label?: string;
   wristSize: number;
 }
 
-const CircularStrand = ({ beadCount, placedBeads, onSlotClick, label, wristSize }: CircularStrandProps) => {
+const CircularStrand = ({ beadCount, placedBeads, onSlotClick, onBeadDrop, label, wristSize }: CircularStrandProps) => {
   const canvasSize = 320;
   const center = canvasSize / 2;
   const radius = canvasSize / 2 - 36;
@@ -40,14 +41,25 @@ const CircularStrand = ({ beadCount, placedBeads, onSlotClick, label, wristSize 
         </svg>
         {/* Bead slots */}
         {slots.map((slot) => {
-          const BEAD_SIZES: BeadSize[] = [6, 8, 10];
-          const currentBeadSize = slot.placed?.beadSize || 8;
-          const nextBeadSize = BEAD_SIZES[(BEAD_SIZES.indexOf(currentBeadSize) + 1) % BEAD_SIZES.length];
-
           return (
             <button
               key={slot.index}
-              onClick={() => onSlotClick(slot.index, nextBeadSize)}
+              onClick={() => onSlotClick(slot.index, slot.placed?.beadSize || 8)}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "copy";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (onBeadDrop) {
+                  try {
+                    const beadData = JSON.parse(e.dataTransfer.getData("application/json"));
+                    onBeadDrop(slot.index, beadData);
+                  } catch (err) {
+                    console.error("Failed to parse bead data:", err);
+                  }
+                }
+              }}
               className="absolute rounded-full border transition-all duration-200 hover:scale-110 active:scale-95 group"
               style={{
                 width: slot.beadPixelSize,

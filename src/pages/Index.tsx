@@ -17,7 +17,7 @@ const Index = () => {
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-5 border-b border-border">
         <h1 className="font-display text-xl font-semibold tracking-tight text-foreground">
-          Luxe Builder
+          Bino Foundry
         </h1>
         <nav className="flex gap-1 rounded-lg border border-border p-1">
           {([
