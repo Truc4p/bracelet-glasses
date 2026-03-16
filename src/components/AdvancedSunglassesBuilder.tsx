@@ -74,127 +74,186 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   };
 
   const renderLens = (side: "left" | "right") => {
-    const xOffset = side === "left" ? -65 : 65;
-    const lensStyle = getLensGradient();
+    const xOffset = side === "left" ? -70 : 70;
+    const opacity = 1 - vlt / 100;
 
     const shapes: Record<string, JSX.Element> = {
       "cat-eye": (
         <g>
           <defs>
             <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={lensStyle} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : lensStyle} stopOpacity={gradientMode ? "0.3" : "1"} />
+              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
+              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
             </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="30%" cy="30%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="white" stopOpacity="0.1" />
+            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1a1a1a" />
+              <stop offset="50%" stopColor="#2a2a2a" />
+              <stop offset="100%" stopColor="#1a1a1a" />
+            </linearGradient>
+            <radialGradient id={`specular-${side}`} cx="35%" cy="30%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.25" />
+              <stop offset="60%" stopColor="white" stopOpacity="0.05" />
               <stop offset="100%" stopColor="white" stopOpacity="0" />
             </radialGradient>
           </defs>
           <path
-            d={`M${xOffset - 40},0 Q${xOffset - 45},-35 ${xOffset - 15},-38 Q${xOffset + 15},-30 ${xOffset + 40},-5 Q${xOffset + 40},30 ${xOffset},35 Q${xOffset - 40},30 ${xOffset - 40},0 Z`}
-            fill={gradientMode ? `url(#lens-grad-${side})` : lensStyle}
-            stroke="hsl(var(--foreground))"
-            strokeWidth="2.5"
+            d={`M${xOffset - 48},5 Q${xOffset - 50},-35 ${xOffset - 18},-40 Q${xOffset + 18},-35 ${xOffset + 45},-8 Q${xOffset + 46},28 ${xOffset + 5},38 Q${xOffset - 35},38 ${xOffset - 48},5 Z`}
+            fill={`url(#frame-${side})`}
+            stroke="#0a0a0a"
+            strokeWidth="1"
           />
-          <ellipse cx={xOffset - 10} cy={-10} rx={20} ry={15} fill={`url(#specular-${side})`} />
+          <path
+            d={`M${xOffset - 45},5 Q${xOffset - 47},-32 ${xOffset - 18},-37 Q${xOffset + 18},-32 ${xOffset + 42},-8 Q${xOffset + 43},26 ${xOffset + 5},35 Q${xOffset - 32},35 ${xOffset - 45},5 Z`}
+            fill={`url(#lens-grad-${side})`}
+            stroke="none"
+          />
+          <ellipse cx={xOffset - 8} cy={-10} rx={28} ry={20} fill={`url(#specular-${side})`} />
         </g>
       ),
       aviator: (
         <g>
           <defs>
             <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={1 - vlt / 100} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? 0.3 : 1 - vlt / 100} />
+              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
+              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
             </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="35%" cy="25%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.5" />
-              <stop offset="40%" stopColor="white" stopOpacity="0.15" />
+            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#c9b037" />
+              <stop offset="50%" stopColor="#f4e58c" />
+              <stop offset="100%" stopColor="#c9b037" />
+            </linearGradient>
+            <radialGradient id={`specular-${side}`} cx="38%" cy="28%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.3" />
+              <stop offset="55%" stopColor="white" stopOpacity="0.08" />
               <stop offset="100%" stopColor="white" stopOpacity="0" />
             </radialGradient>
           </defs>
           <path
-            d={`M${xOffset - 42},-15 Q${xOffset - 42},-38 ${xOffset},-38 Q${xOffset + 42},-38 ${xOffset + 42},-15 Q${xOffset + 42},25 ${xOffset + 10},35 Q${xOffset - 10},38 ${xOffset - 30},30 Q${xOffset - 42},20 ${xOffset - 42},-15 Z`}
-            fill={`url(#lens-grad-${side})`}
-            stroke="hsl(var(--foreground))"
-            strokeWidth="2.5"
+            d={`M${xOffset - 48},-12 Q${xOffset - 48},-42 ${xOffset},-42 Q${xOffset + 48},-42 ${xOffset + 48},-12 Q${xOffset + 48},28 ${xOffset + 12},40 Q${xOffset - 12},42 ${xOffset - 35},32 Q${xOffset - 48},22 ${xOffset - 48},-12 Z`}
+            fill={`url(#frame-${side})`}
+            stroke="#a58f2f"
+            strokeWidth="1"
           />
-          <ellipse cx={xOffset - 8} cy={-12} rx={22} ry={18} fill={`url(#specular-${side})`} />
+          <path
+            d={`M${xOffset - 45},-12 Q${xOffset - 45},-39 ${xOffset},-39 Q${xOffset + 45},-39 ${xOffset + 45},-12 Q${xOffset + 45},26 ${xOffset + 12},37 Q${xOffset - 12},39 ${xOffset - 32},30 Q${xOffset - 45},20 ${xOffset - 45},-12 Z`}
+            fill={`url(#lens-grad-${side})`}
+            stroke="none"
+          />
+          <ellipse cx={xOffset - 6} cy={-10} rx={26} ry={22} fill={`url(#specular-${side})`} />
         </g>
       ),
       wayfarer: (
         <g>
           <defs>
             <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={1 - vlt / 100} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? 0.3 : 1 - vlt / 100} />
+              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
+              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
             </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="30%" cy="30%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.45" />
-              <stop offset="50%" stopColor="white" stopOpacity="0.12" />
+            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#0a0a0a" />
+              <stop offset="50%" stopColor="#1a1a1a" />
+              <stop offset="100%" stopColor="#0a0a0a" />
+            </linearGradient>
+            <radialGradient id={`specular-${side}`} cx="35%" cy="32%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.28" />
+              <stop offset="58%" stopColor="white" stopOpacity="0.06" />
               <stop offset="100%" stopColor="white" stopOpacity="0" />
             </radialGradient>
           </defs>
           <rect
-            x={xOffset - 40}
-            y={-35}
-            width={80}
-            height={65}
-            rx={8}
-            fill={`url(#lens-grad-${side})`}
-            stroke="hsl(var(--foreground))"
-            strokeWidth="2.5"
+            x={xOffset - 46}
+            y={-38}
+            width={92}
+            height={72}
+            rx={6}
+            fill={`url(#frame-${side})`}
+            stroke="#000"
+            strokeWidth="1"
           />
-          <ellipse cx={xOffset - 10} cy={-8} rx={25} ry={20} fill={`url(#specular-${side})`} />
+          <rect
+            x={xOffset - 43}
+            y={-35}
+            width={86}
+            height={66}
+            rx={5}
+            fill={`url(#lens-grad-${side})`}
+            stroke="none"
+          />
+          <ellipse cx={xOffset - 8} cy={-6} rx={30} ry={24} fill={`url(#specular-${side})`} />
         </g>
       ),
       round: (
         <g>
           <defs>
             <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={1 - vlt / 100} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? 0.3 : 1 - vlt / 100} />
+              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
+              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
             </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="35%" cy="30%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.5" />
-              <stop offset="40%" stopColor="white" stopOpacity="0.15" />
+            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#3a2f2f" />
+              <stop offset="50%" stopColor="#5a4a4a" />
+              <stop offset="100%" stopColor="#3a2f2f" />
+            </linearGradient>
+            <radialGradient id={`specular-${side}`} cx="38%" cy="32%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.32" />
+              <stop offset="50%" stopColor="white" stopOpacity="0.1" />
               <stop offset="100%" stopColor="white" stopOpacity="0" />
             </radialGradient>
           </defs>
           <circle
             cx={xOffset}
             cy={0}
-            r={36}
-            fill={`url(#lens-grad-${side})`}
-            stroke="hsl(var(--foreground))"
-            strokeWidth="2.5"
+            r={42}
+            fill={`url(#frame-${side})`}
+            stroke="#2a1f1f"
+            strokeWidth="1"
           />
-          <circle cx={xOffset - 8} cy={-10} r={18} fill={`url(#specular-${side})`} />
+          <circle
+            cx={xOffset}
+            cy={0}
+            r={39}
+            fill={`url(#lens-grad-${side})`}
+            stroke="none"
+          />
+          <circle cx={xOffset - 10} cy={-12} r={22} fill={`url(#specular-${side})`} />
         </g>
       ),
       oversized: (
         <g>
           <defs>
             <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={1 - vlt / 100} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? 0.3 : 1 - vlt / 100} />
+              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
+              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
             </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="32%" cy="28%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.48" />
-              <stop offset="45%" stopColor="white" stopOpacity="0.14" />
+            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#1a1a1a" />
+              <stop offset="50%" stopColor="#2a2a2a" />
+              <stop offset="100%" stopColor="#1a1a1a" />
+            </linearGradient>
+            <radialGradient id={`specular-${side}`} cx="36%" cy="30%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="white" stopOpacity="0.08" />
               <stop offset="100%" stopColor="white" stopOpacity="0" />
             </radialGradient>
           </defs>
           <ellipse
             cx={xOffset}
             cy={0}
-            rx={48}
-            ry={40}
-            fill={`url(#lens-grad-${side})`}
-            stroke="hsl(var(--foreground))"
-            strokeWidth="2.5"
+            rx={54}
+            ry={44}
+            fill={`url(#frame-${side})`}
+            stroke="#0a0a0a"
+            strokeWidth="1"
           />
-          <ellipse cx={xOffset - 10} cy={-10} rx={24} ry={20} fill={`url(#specular-${side})`} />
+          <ellipse
+            cx={xOffset}
+            cy={0}
+            rx={51}
+            ry={41}
+            fill={`url(#lens-grad-${side})`}
+            stroke="none"
+          />
+          <ellipse cx={xOffset - 12} cy={-10} rx={30} ry={24} fill={`url(#specular-${side})`} />
         </g>
       ),
     };
@@ -202,26 +261,55 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   };
 
   const renderSideView = () => {
-    const lensStyle = getLensGradient();
+    const opacity = 1 - vlt / 100;
     return (
-      <svg viewBox="-120 -80 240 160" className="w-full max-w-md">
+      <svg viewBox="-120 -80 240 160" className="w-full max-w-md drop-shadow-2xl">
         <defs>
           <linearGradient id="lens-grad-side" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={baseColor} stopOpacity={1 - vlt / 100} />
-            <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? 0.3 : 1 - vlt / 100} />
+            <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
+            <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
           </linearGradient>
-          <radialGradient id="specular-side" cx="40%" cy="35%">
-            <stop offset="0%" stopColor="white" stopOpacity="0.5" />
-            <stop offset="50%" stopColor="white" stopOpacity="0.15" />
+          <linearGradient id="frame-side" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#2a2a2a" />
+            <stop offset="50%" stopColor="#1a1a1a" />
+            <stop offset="100%" stopColor="#2a2a2a" />
+          </linearGradient>
+          <radialGradient id="specular-side" cx="45%" cy="35%">
+            <stop offset="0%" stopColor="white" stopOpacity="0.25" />
+            <stop offset="50%" stopColor="white" stopOpacity="0.08" />
             <stop offset="100%" stopColor="white" stopOpacity="0" />
           </radialGradient>
         </defs>
-        <line x1="40" y1="-20" x2="110" y2="-30" stroke="hsl(var(--foreground))" strokeWidth="3" strokeLinecap="round" />
-        <line x1="110" y1="-30" x2="115" y2="-10" stroke="hsl(var(--foreground))" strokeWidth="2.5" strokeLinecap="round" />
-        <ellipse cx={0} cy={0} rx={15} ry={35} fill="url(#lens-grad-side)" stroke="hsl(var(--foreground))" strokeWidth="2.5" />
-        <ellipse cx={-3} cy={-8} rx={8} ry={15} fill="url(#specular-side)" />
-        <line x1="-15" y1="-35" x2="-60" y2="-35" stroke="hsl(var(--foreground))" strokeWidth="2.5" strokeLinecap="round" />
-        <line x1="-15" y1="10" x2="-25" y2="30" stroke="hsl(var(--foreground))" strokeWidth="2" strokeLinecap="round" />
+
+        {/* Temple arm extending back */}
+        <path
+          d="M42,-22 Q80,-26 110,-28 Q120,-26 124,-18"
+          stroke="url(#frame-side)"
+          strokeWidth="4.5"
+          fill="none"
+          strokeLinecap="round"
+        />
+
+        {/* Frame front edge */}
+        <ellipse cx={0} cy={0} rx={18} ry={40} fill="url(#frame-side)" stroke="#0a0a0a" strokeWidth="1" />
+
+        {/* Lens side profile */}
+        <ellipse cx={0} cy={0} rx={14} ry={37} fill="url(#lens-grad-side)" stroke="none" />
+        <ellipse cx={-2} cy={-10} rx={9} ry={18} fill="url(#specular-side)" />
+
+        {/* Front frame extension */}
+        <line x1="-18" y1="-38" x2="-65" y2="-38" stroke="url(#frame-side)" strokeWidth="3.5" strokeLinecap="round" />
+        <line x1="-18" y1="38" x2="-65" y2="38" stroke="url(#frame-side)" strokeWidth="3.5" strokeLinecap="round" />
+
+        {/* Nose pad */}
+        <path
+          d="M-16,8 Q-20,18 -22,28"
+          stroke="#d0d0d0"
+          strokeWidth="2.5"
+          fill="none"
+          strokeLinecap="round"
+          opacity="0.7"
+        />
       </svg>
     );
   };
@@ -250,14 +338,52 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
       )}
 
       {/* 3D Viewport */}
-      <div className="flex-1 flex items-center justify-center p-8 relative">
+      <div className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20">
         {view === "front" ? (
-          <svg viewBox="-160 -80 320 160" className="w-full max-w-lg">
-            <path d="M-22,-15 Q0,-25 22,-15" fill="none" stroke="hsl(var(--foreground))" strokeWidth="2.5" />
+          <svg viewBox="-180 -80 360 160" className="w-full max-w-2xl drop-shadow-2xl">
+            <defs>
+              <linearGradient id="bridge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#2a2a2a" />
+                <stop offset="50%" stopColor="#1a1a1a" />
+                <stop offset="100%" stopColor="#2a2a2a" />
+              </linearGradient>
+              <linearGradient id="temple-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#3a3a3a" />
+                <stop offset="50%" stopColor="#2a2a2a" />
+                <stop offset="100%" stopColor="#1a1a1a" />
+              </linearGradient>
+            </defs>
+
+            {/* Bridge */}
+            <path
+              d="M-24,-15 Q-12,-22 0,-24 Q12,-22 24,-15"
+              fill="none"
+              stroke="url(#bridge-grad)"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+            />
+
+            {/* Lenses */}
             {renderLens("left")}
             {renderLens("right")}
-            <line x1="-105" y1="-20" x2="-130" y2="-25" stroke="hsl(var(--foreground))" strokeWidth="2.5" strokeLinecap="round" />
-            <line x1="105" y1="-20" x2="130" y2="-25" stroke="hsl(var(--foreground))" strokeWidth="2.5" strokeLinecap="round" />
+
+            {/* Temple arms */}
+            <path
+              d="M-118,-18 L-145,-22"
+              stroke="url(#temple-grad)"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+            <path
+              d="M118,-18 L145,-22"
+              stroke="url(#temple-grad)"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+
+            {/* Nose pads */}
+            <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
+            <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
           </svg>
         ) : (
           renderSideView()
