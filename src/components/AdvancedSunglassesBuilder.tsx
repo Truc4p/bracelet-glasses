@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { RotateCw, Eye, EyeOff } from "lucide-react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { RotateCw, Eye, EyeOff, User, Rotate3d, MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE } from "@/lib/luxe-data";
 import { Slider } from "@/components/ui/slider";
@@ -35,6 +35,11 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const [gradientSecondary, setGradientSecondary] = useState<FashionTint>("clear");
   const [view, setView] = useState<"front" | "side">("front");
   const [povPreview, setPovPreview] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [tryOnMode, setTryOnMode] = useState(false);
+  const dragStartX = useRef(0);
+  const lastRotation = useRef(0);
 
   const selectedFrame = FRAME_OPTIONS.find((f) => f.id === frame)!;
   const baseColor = BASE_MATERIALS.find((m) => m.id === baseMaterial)!.color;
@@ -260,6 +265,102 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     return shapes[frame] || shapes.aviator;
   };
 
+  const renderQuarterView = (direction: "left" | "right") => {
+    const opacity = 1 - vlt / 100;
+    const xScale = direction === "left" ? -0.7 : 0.7;
+
+    return (
+      <svg viewBox="-180 -80 360 160" className="w-full max-w-2xl drop-shadow-2xl">
+        <defs>
+          <linearGradient id="lens-grad-quarter" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
+            <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
+          </linearGradient>
+          <linearGradient id="frame-quarter" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#2a2a2a" />
+            <stop offset="50%" stopColor="#1a1a1a" />
+            <stop offset="100%" stopColor="#2a2a2a" />
+          </linearGradient>
+          <radialGradient id="specular-quarter" cx="40%" cy="30%">
+            <stop offset="0%" stopColor="white" stopOpacity="0.25" />
+            <stop offset="50%" stopColor="white" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="white" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        <g transform={`scale(${xScale}, 1)`}>
+          {/* Bridge */}
+          <path
+            d="M-24,-15 Q-12,-22 0,-24 Q12,-22 24,-15"
+            fill="none"
+            stroke="url(#frame-quarter)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+          />
+
+          {/* Visible lens (perspective) */}
+          <ellipse
+            cx={direction === "left" ? 70 : -70}
+            cy={0}
+            rx={48}
+            ry={40}
+            fill="url(#frame-quarter)"
+            stroke="#0a0a0a"
+            strokeWidth="1"
+          />
+          <ellipse
+            cx={direction === "left" ? 70 : -70}
+            cy={0}
+            rx={45}
+            ry={37}
+            fill="url(#lens-grad-quarter)"
+            stroke="none"
+          />
+          <ellipse
+            cx={direction === "left" ? 62 : -62}
+            cy={-10}
+            rx={26}
+            ry={22}
+            fill="url(#specular-quarter)"
+          />
+
+          {/* Partial second lens */}
+          <ellipse
+            cx={direction === "left" ? -40 : 40}
+            cy={0}
+            rx={28}
+            ry={38}
+            fill="url(#frame-quarter)"
+            stroke="#0a0a0a"
+            strokeWidth="1"
+            opacity="0.8"
+          />
+          <ellipse
+            cx={direction === "left" ? -40 : 40}
+            cy={0}
+            rx={25}
+            ry={35}
+            fill="url(#lens-grad-quarter)"
+            stroke="none"
+            opacity="0.8"
+          />
+
+          {/* Temple arm */}
+          <path
+            d={direction === "left" ? "M118,-18 L150,-24" : "M-118,-18 L-140,-22"}
+            stroke="url(#frame-quarter)"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+
+          {/* Nose pads */}
+          <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.5" />
+          <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.5" />
+        </g>
+      </svg>
+    );
+  };
+
   const renderSideView = () => {
     const opacity = 1 - vlt / 100;
     return (
@@ -320,6 +421,31 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     return `${filterColor}${Math.round(opacity * 180).toString(16).padStart(2, '0')}`;
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    dragStartX.current = e.clientX;
+    lastRotation.current = rotation;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const delta = e.clientX - dragStartX.current;
+    const newRotation = lastRotation.current + delta * 0.5;
+    setRotation(newRotation % 360);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const getRotationView = (): "front" | "side" | "quarter-left" | "quarter-right" => {
+    const normalizedRotation = ((rotation % 360) + 360) % 360;
+    if (normalizedRotation < 45 || normalizedRotation >= 315) return "front";
+    if (normalizedRotation >= 45 && normalizedRotation < 135) return "quarter-right";
+    if (normalizedRotation >= 135 && normalizedRotation < 225) return "side";
+    return "quarter-left";
+  };
+
   return (
     <div className="flex-1 flex flex-col animate-fade-in relative">
       {/* POV Preview Overlay */}
@@ -338,9 +464,80 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
       )}
 
       {/* 3D Viewport */}
-      <div className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20">
-        {view === "front" ? (
-          <svg viewBox="-180 -80 360 160" className="w-full max-w-2xl drop-shadow-2xl">
+      <div
+        className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20 overflow-hidden"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      >
+        {tryOnMode && (
+          <div className="absolute inset-0 flex items-start justify-center pt-12">
+            <div className="relative">
+              <div className="w-64 h-80 bg-gradient-to-b from-amber-50 to-amber-100 rounded-t-full rounded-b-3xl border-4 border-amber-200/50 relative overflow-hidden">
+                <div className="absolute top-16 left-1/2 -translate-x-1/2 w-full flex justify-center gap-12">
+                  <div className="w-8 h-12 bg-gradient-to-b from-amber-800/40 to-amber-900/60 rounded-full" />
+                  <div className="w-8 h-12 bg-gradient-to-b from-amber-800/40 to-amber-900/60 rounded-full" />
+                </div>
+                <div className="absolute top-36 left-1/2 -translate-x-1/2 w-12 h-16 bg-gradient-to-b from-amber-200 to-amber-300 rounded-b-xl" />
+                <div className="absolute top-48 left-1/2 -translate-x-1/2 w-20 h-1 bg-amber-300/50 rounded-full" />
+              </div>
+              <div className="absolute top-28 left-1/2 -translate-x-1/2 z-10" style={{ transform: `translateX(-50%) scale(${tryOnMode ? 0.85 : 1})` }}>
+                {view === "front" ? (
+                  <svg viewBox="-180 -80 360 160" className="w-96 drop-shadow-2xl">
+                    <defs>
+                      <linearGradient id="bridge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#2a2a2a" />
+                        <stop offset="50%" stopColor="#1a1a1a" />
+                        <stop offset="100%" stopColor="#2a2a2a" />
+                      </linearGradient>
+                      <linearGradient id="temple-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#3a3a3a" />
+                        <stop offset="50%" stopColor="#2a2a2a" />
+                        <stop offset="100%" stopColor="#1a1a1a" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M-24,-15 Q-12,-22 0,-24 Q12,-22 24,-15"
+                      fill="none"
+                      stroke="url(#bridge-grad)"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
+                    {renderLens("left")}
+                    {renderLens("right")}
+                    <path
+                      d="M-118,-18 L-145,-22"
+                      stroke="url(#temple-grad)"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M118,-18 L145,-22"
+                      stroke="url(#temple-grad)"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                    <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
+                    <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
+                  </svg>
+                ) : getRotationView() === "quarter-left" ? (
+                  renderQuarterView("left")
+                ) : getRotationView() === "quarter-right" ? (
+                  renderQuarterView("right")
+                ) : (
+                  renderSideView()
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!tryOnMode && (
+          <>
+            {view === "front" && getRotationView() === "front" ? (
+              <svg viewBox="-180 -80 360 160" className="w-full max-w-2xl drop-shadow-2xl">
             <defs>
               <linearGradient id="bridge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#2a2a2a" />
@@ -385,24 +582,102 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
             <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
           </svg>
-        ) : (
+        ) : getRotationView() === "quarter-left" ? (
+          renderQuarterView("left")
+        ) : getRotationView() === "quarter-right" ? (
+          renderQuarterView("right")
+        ) : getRotationView() === "side" ? (
           renderSideView()
+        ) : (
+          <svg viewBox="-180 -80 360 160" className="w-full max-w-2xl drop-shadow-2xl">
+            <defs>
+              <linearGradient id="bridge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#2a2a2a" />
+                <stop offset="50%" stopColor="#1a1a1a" />
+                <stop offset="100%" stopColor="#2a2a2a" />
+              </linearGradient>
+              <linearGradient id="temple-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#3a3a3a" />
+                <stop offset="50%" stopColor="#2a2a2a" />
+                <stop offset="100%" stopColor="#1a1a1a" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M-24,-15 Q-12,-22 0,-24 Q12,-22 24,-15"
+              fill="none"
+              stroke="url(#bridge-grad)"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+            />
+            {renderLens("left")}
+            {renderLens("right")}
+            <path
+              d="M-118,-18 L-145,-22"
+              stroke="url(#temple-grad)"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+            <path
+              d="M118,-18 L145,-22"
+              stroke="url(#temple-grad)"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+            <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
+            <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
+          </svg>
+        )}
+          </>
         )}
 
         <div className="absolute top-4 right-4 flex gap-2">
           <Button
+            variant={tryOnMode ? "default" : "luxe-outline"}
+            size="sm"
+            onClick={() => {
+              setTryOnMode(!tryOnMode);
+              if (!tryOnMode) {
+                setRotation(0);
+                setView("front");
+              }
+            }}
+          >
+            <User className="w-3.5 h-3.5" />
+            Try On
+          </Button>
+          <Button
             variant={povPreview ? "default" : "luxe-outline"}
             size="sm"
             onClick={() => setPovPreview(!povPreview)}
+            disabled={tryOnMode}
           >
             {povPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
             POV
           </Button>
-          <Button variant="luxe-outline" size="sm" onClick={() => setView(view === "front" ? "side" : "front")}>
+          <Button
+            variant="luxe-outline"
+            size="sm"
+            onClick={() => setView(view === "front" ? "side" : "front")}
+            disabled={tryOnMode}
+          >
             <RotateCw className="w-3.5 h-3.5" />
             {view === "front" ? "Side" : "Front"}
           </Button>
         </div>
+
+        {!tryOnMode && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-background/80 backdrop-blur px-4 py-2 rounded-full border border-border shadow-lg">
+            <Rotate3d className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-body">Drag to rotate 360°</span>
+            <MousePointer2 className="w-3.5 h-3.5 text-muted-foreground animate-pulse" />
+          </div>
+        )}
+
+        {tryOnMode && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur px-4 py-2 rounded-full border border-border shadow-lg">
+            <span className="text-xs text-muted-foreground font-body">Virtual Try-On Mode Active</span>
+          </div>
+        )}
       </div>
 
       {/* Configuration bar */}
