@@ -1,25 +1,25 @@
-import { type PlacedBead } from "@/lib/luxe-data";
+import { type PlacedBead, type BeadSize } from "@/lib/luxe-data";
 
 interface CircularStrandProps {
   beadCount: number;
   placedBeads: PlacedBead[];
-  beadSizeMm: number;
-  onSlotClick: (position: number) => void;
+  onSlotClick: (position: number, beadSize: BeadSize) => void;
   label?: string;
+  wristSize: number;
 }
 
-const CircularStrand = ({ beadCount, placedBeads, beadSizeMm, onSlotClick, label }: CircularStrandProps) => {
+const CircularStrand = ({ beadCount, placedBeads, onSlotClick, label, wristSize }: CircularStrandProps) => {
   const canvasSize = 320;
   const center = canvasSize / 2;
   const radius = canvasSize / 2 - 36;
-  const beadPixelSize = beadSizeMm === 6 ? 18 : beadSizeMm === 8 ? 22 : 26;
 
   const slots = Array.from({ length: beadCount }, (_, i) => {
     const angle = (2 * Math.PI * i) / beadCount - Math.PI / 2;
     const x = center + radius * Math.cos(angle);
     const y = center + radius * Math.sin(angle);
     const placed = placedBeads.find((b) => b.position === i);
-    return { index: i, x, y, placed };
+    const beadPixelSize = placed ? (placed.beadSize === 6 ? 18 : placed.beadSize === 8 ? 22 : 26) : 20;
+    return { index: i, x, y, placed, beadPixelSize };
   });
 
   return (
@@ -39,25 +39,37 @@ const CircularStrand = ({ beadCount, placedBeads, beadSizeMm, onSlotClick, label
           />
         </svg>
         {/* Bead slots */}
-        {slots.map((slot) => (
-          <button
-            key={slot.index}
-            onClick={() => onSlotClick(slot.index)}
-            className="absolute rounded-full border transition-all duration-200 hover:scale-110 active:scale-95"
-            style={{
-              width: beadPixelSize,
-              height: beadPixelSize,
-              left: slot.x - beadPixelSize / 2,
-              top: slot.y - beadPixelSize / 2,
-              background: slot.placed
-                ? slot.placed.crystal.gradient || slot.placed.crystal.color
-                : "hsl(var(--muted))",
-              borderColor: slot.placed ? "transparent" : "hsl(var(--border))",
-              boxShadow: slot.placed ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
-            }}
-            title={slot.placed ? slot.placed.crystal.name : `Slot ${slot.index + 1} — click to fill`}
-          />
-        ))}
+        {slots.map((slot) => {
+          const BEAD_SIZES: BeadSize[] = [6, 8, 10];
+          const currentBeadSize = slot.placed?.beadSize || 8;
+          const nextBeadSize = BEAD_SIZES[(BEAD_SIZES.indexOf(currentBeadSize) + 1) % BEAD_SIZES.length];
+
+          return (
+            <button
+              key={slot.index}
+              onClick={() => onSlotClick(slot.index, nextBeadSize)}
+              className="absolute rounded-full border transition-all duration-200 hover:scale-110 active:scale-95 group"
+              style={{
+                width: slot.beadPixelSize,
+                height: slot.beadPixelSize,
+                left: slot.x - slot.beadPixelSize / 2,
+                top: slot.y - slot.beadPixelSize / 2,
+                background: slot.placed
+                  ? slot.placed.crystal.gradient || slot.placed.crystal.color
+                  : "hsl(var(--muted))",
+                borderColor: slot.placed ? "transparent" : "hsl(var(--border))",
+                boxShadow: slot.placed ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
+              }}
+              title={slot.placed ? `${slot.placed.crystal.name} (${slot.placed.beadSize}mm)` : `Slot ${slot.index + 1}`}
+            >
+              {slot.placed && (
+                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                  {slot.placed.beadSize}mm
+                </span>
+              )}
+            </button>
+          );
+        })}
         {/* Center info */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">

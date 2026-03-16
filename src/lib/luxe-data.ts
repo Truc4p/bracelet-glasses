@@ -31,6 +31,7 @@ export type BeadSize = 6 | 8 | 10;
 export interface PlacedBead {
   position: number;
   crystal: CrystalBead;
+  beadSize: BeadSize;
 }
 
 export interface SunglassesConfig {

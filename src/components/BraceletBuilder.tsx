@@ -17,41 +17,56 @@ interface BraceletBuilderProps {
 const BEAD_SIZES: BeadSize[] = [6, 8, 10];
 
 const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
-  const [wristSize, setWristSize] = useState(16);
-  const [unit, setUnit] = useState<"cm" | "in">("cm");
-  const [beadSize, setBeadSize] = useState<BeadSize>(8);
-  const [placedBeads, setPlacedBeads] = useState<PlacedBead[]>([]);
+  const [wristSizeA, setWristSizeA] = useState(16);
+  const [wristSizeB, setWristSizeB] = useState(16);
+  const [placedBeadsA, setPlacedBeadsA] = useState<PlacedBead[]>([]);
+  const [placedBeadsB, setPlacedBeadsB] = useState<PlacedBead[]>([]);
   const [twinning, setTwinning] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [selectedCrystal, setSelectedCrystal] = useState<CrystalBead | null>(null);
 
-  const wristCm = unit === "in" ? wristSize * 2.54 : wristSize;
-  const beadCount = calculateBeadCount(wristCm, beadSize);
+  const beadCountA = Math.max(
+    ...placedBeadsA.map((b) => b.position + 1),
+    Math.round((wristSizeA * 10) / 8)
+  );
+  const beadCountB = Math.max(
+    ...placedBeadsB.map((b) => b.position + 1),
+    Math.round((wristSizeB * 10) / 8)
+  );
 
-  const totalPrice = placedBeads.reduce((sum, b) => sum + b.crystal.price, 0) * (twinning ? 2 : 1);
-
-  // Update parent price
   const updatePrice = useCallback(
-    (beads: PlacedBead[], twin: boolean) => {
-      const p = beads.reduce((s, b) => s + b.crystal.price, 0) * (twin ? 2 : 1);
+    (beadsA: PlacedBead[], beadsB: PlacedBead[], twin: boolean) => {
+      const p =
+        beadsA.reduce((s, b) => s + b.crystal.price, 0) +
+        (twin ? beadsB.reduce((s, b) => s + b.crystal.price, 0) : 0);
       onPriceChange(p);
     },
     [onPriceChange]
   );
 
-  const handleSlotClick = (position: number) => {
+  const handleSlotClick = (bracelet: "A" | "B", position: number, beadSize: BeadSize) => {
+    const placedBeads = bracelet === "A" ? placedBeadsA : placedBeadsB;
+    const setPlacedBeads = bracelet === "A" ? setPlacedBeadsA : setPlacedBeadsB;
+
     const existing = placedBeads.find((b) => b.position === position);
     let updated: PlacedBead[];
+
     if (existing) {
       updated = placedBeads.filter((b) => b.position !== position);
     } else if (selectedCrystal) {
-      updated = [...placedBeads, { position, crystal: selectedCrystal }];
+      updated = [...placedBeads, { position, crystal: selectedCrystal, beadSize }];
     } else {
       setLibraryOpen(true);
       return;
     }
+
     setPlacedBeads(updated);
-    updatePrice(updated, twinning);
+
+    if (bracelet === "A") {
+      updatePrice(updated, placedBeadsB, twinning);
+    } else {
+      updatePrice(placedBeadsA, updated, twinning);
+    }
   };
 
   const handleSelectBead = (bead: CrystalBead) => {
@@ -59,65 +74,60 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   };
 
   const handleReset = () => {
-    setPlacedBeads([]);
+    setPlacedBeadsA([]);
+    setPlacedBeadsB([]);
     setSelectedCrystal(null);
-    updatePrice([], twinning);
+    updatePrice([], [], twinning);
   };
 
   const handleToggleTwinning = () => {
     const next = !twinning;
     setTwinning(next);
-    updatePrice(placedBeads, next);
+    if (!next) {
+      setPlacedBeadsB([]);
+      updatePrice(placedBeadsA, [], next);
+    } else {
+      updatePrice(placedBeadsA, placedBeadsB, next);
+    }
   };
 
   return (
     <div className="relative flex-1 flex flex-col animate-fade-in">
       {/* Controls bar */}
       <div className="flex flex-wrap items-center gap-4 px-6 py-4 border-b border-border">
-        {/* Wrist size */}
+        {/* Wrist size A */}
         <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground font-body uppercase tracking-wider">Wrist</label>
+          <label className="text-xs text-muted-foreground font-body uppercase tracking-wider">
+            {twinning ? "Wrist A" : "Wrist"}
+          </label>
           <input
             type="number"
-            value={wristSize}
-            onChange={(e) => setWristSize(Number(e.target.value))}
+            value={wristSizeA}
+            onChange={(e) => setWristSizeA(Number(e.target.value))}
             className="w-16 px-2 py-1.5 text-sm border border-border rounded-md bg-background font-body focus:outline-none focus:ring-1 focus:ring-primary"
             min={10}
             max={30}
             step={0.5}
           />
-          <div className="flex rounded-md border border-border overflow-hidden">
-            {(["cm", "in"] as const).map((u) => (
-              <button
-                key={u}
-                onClick={() => setUnit(u)}
-                className={`px-2.5 py-1 text-xs font-body transition-colors ${
-                  unit === u ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {u}
-              </button>
-            ))}
-          </div>
+          <span className="text-xs text-muted-foreground">cm</span>
         </div>
 
-        {/* Bead size */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground font-body uppercase tracking-wider">Bead</label>
-          <div className="flex rounded-md border border-border overflow-hidden">
-            {BEAD_SIZES.map((s) => (
-              <button
-                key={s}
-                onClick={() => setBeadSize(s)}
-                className={`px-3 py-1 text-xs font-body transition-colors ${
-                  beadSize === s ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {s}mm
-              </button>
-            ))}
+        {/* Wrist size B - only show when twinning */}
+        {twinning && (
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-muted-foreground font-body uppercase tracking-wider">Wrist B</label>
+            <input
+              type="number"
+              value={wristSizeB}
+              onChange={(e) => setWristSizeB(Number(e.target.value))}
+              className="w-16 px-2 py-1.5 text-sm border border-border rounded-md bg-background font-body focus:outline-none focus:ring-1 focus:ring-primary"
+              min={10}
+              max={30}
+              step={0.5}
+            />
+            <span className="text-xs text-muted-foreground">cm</span>
           </div>
-        </div>
+        )}
 
         <div className="flex items-center gap-2 ml-auto">
           {selectedCrystal && (
@@ -145,30 +155,38 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
         <BeadLibrary open={libraryOpen} onSelectBead={handleSelectBead} onClose={() => setLibraryOpen(false)} />
 
         <CircularStrand
-          beadCount={beadCount}
-          placedBeads={placedBeads}
-          beadSizeMm={beadSize}
-          onSlotClick={handleSlotClick}
+          beadCount={beadCountA}
+          placedBeads={placedBeadsA}
+          onSlotClick={(pos, size) => handleSlotClick("A", pos, size)}
           label={twinning ? "Bracelet A" : undefined}
+          wristSize={wristSizeA}
         />
 
         {twinning && (
           <CircularStrand
-            beadCount={beadCount}
-            placedBeads={placedBeads}
-            beadSizeMm={beadSize}
-            onSlotClick={handleSlotClick}
-            label="Bracelet B (Twin)"
+            beadCount={beadCountB}
+            placedBeads={placedBeadsB}
+            onSlotClick={(pos, size) => handleSlotClick("B", pos, size)}
+            label="Bracelet B"
+            wristSize={wristSizeB}
           />
         )}
       </div>
 
       {/* Info bar */}
       <div className="px-6 py-3 border-t border-border flex items-center gap-6 text-xs text-muted-foreground font-body">
-        <span>{beadCount} beads needed</span>
-        <span>{placedBeads.length} placed</span>
-        <span>{beadCount - placedBeads.length} remaining</span>
-        {twinning && <span className="text-primary">× 2 (Twin)</span>}
+        {!twinning ? (
+          <>
+            <span>A: {placedBeadsA.length} beads placed</span>
+            <span>Mixed sizes: {[...new Set(placedBeadsA.map(b => b.beadSize))].sort().join(', ') || 'none'}mm</span>
+          </>
+        ) : (
+          <>
+            <span>A: {placedBeadsA.length} beads</span>
+            <span>B: {placedBeadsB.length} beads</span>
+            <span>Total: {placedBeadsA.length + placedBeadsB.length} beads</span>
+          </>
+        )}
       </div>
     </div>
   );
