@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Library, RotateCcw, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BeadLibrary from "@/components/BeadLibrary";
-import CircularStrand from "@/components/CircularStrand";
+import SortableCircularStrand from "@/components/SortableCircularStrand";
 import {
   calculateBeadCount,
   calculateBeadPrice,
@@ -79,6 +79,17 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
       updatePrice(updated, placedBeadsB, twinning);
     } else {
       updatePrice(placedBeadsA, updated, twinning);
+    }
+  };
+
+  const handleBeadsReorder = (bracelet: "A" | "B", reorderedBeads: PlacedBead[]) => {
+    const setPlacedBeads = bracelet === "A" ? setPlacedBeadsA : setPlacedBeadsB;
+    setPlacedBeads(reorderedBeads);
+
+    if (bracelet === "A") {
+      updatePrice(reorderedBeads, placedBeadsB, twinning);
+    } else {
+      updatePrice(placedBeadsA, reorderedBeads, twinning);
     }
   };
 
@@ -189,9 +200,10 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
       <div className="flex-1 relative flex items-center justify-center gap-8 p-6">
         <BeadLibrary open={libraryOpen} onSelectBead={handleSelectBead} onClose={() => setLibraryOpen(false)} />
 
-        <CircularStrand
+        <SortableCircularStrand
           beadCount={beadCountA}
           placedBeads={placedBeadsA}
+          onBeadsReorder={(beads) => handleBeadsReorder("A", beads)}
           onSlotClick={(pos, size) => handleSlotClick("A", pos, size)}
           onBeadDrop={(pos, bead) => handleBeadDrop("A", pos, bead)}
           label={twinning ? "Bracelet I" : undefined}
@@ -199,9 +211,10 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
         />
 
         {twinning && (
-          <CircularStrand
+          <SortableCircularStrand
             beadCount={beadCountB}
             placedBeads={placedBeadsB}
+            onBeadsReorder={(beads) => handleBeadsReorder("B", beads)}
             onSlotClick={(pos, size) => handleSlotClick("B", pos, size)}
             onBeadDrop={(pos, bead) => handleBeadDrop("B", pos, bead)}
             label="Bracelet II"

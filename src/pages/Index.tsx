@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Gem, Glasses } from "lucide-react";
 import LivePrice from "@/components/LivePrice";
 import BraceletBuilder from "@/components/BraceletBuilder";
-import SunglassesBuilder from "@/components/SunglassesBuilder";
+import AdvancedSunglassesBuilder from "@/components/AdvancedSunglassesBuilder";
 
 type Module = "bracelet" | "sunglasses";
 
@@ -45,7 +45,7 @@ const Index = () => {
         {activeModule === "bracelet" ? (
           <BraceletBuilder onPriceChange={setPrice} />
         ) : (
-          <SunglassesBuilder onPriceChange={setPrice} />
+          <AdvancedSunglassesBuilder onPriceChange={setPrice} />
         )}
       </main>
     </div>
