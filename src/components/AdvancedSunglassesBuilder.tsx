@@ -185,25 +185,32 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             >
               <svg
                 className="absolute inset-0 w-full h-full"
-                viewBox="0 0 800 450"
+                viewBox="0 0 1000 560"
                 style={{ zIndex: 1 }}
+                preserveAspectRatio="xMidYMid meet"
               >
                 <defs>
-                  <clipPath id="lensClip">
-                    <ellipse cx="250" cy="225" rx="120" ry="100" />
-                    <ellipse cx="550" cy="225" rx="120" ry="100" />
-                  </clipPath>
                   <linearGradient id="lensGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor={lensColor.color} />
                     <stop offset="100%" stopColor={gradientMode ? gradientSecondary.color : lensColor.color} />
                   </linearGradient>
                 </defs>
-                <rect
-                  x="0"
-                  y="0"
-                  width="800"
-                  height="450"
-                  clipPath="url(#lensClip)"
+                <ellipse cx="310" cy="280" rx="140" ry="120" fill="white" />
+                <ellipse cx="690" cy="280" rx="140" ry="120" fill="white" />
+                <ellipse
+                  cx="310"
+                  cy="280"
+                  rx="140"
+                  ry="120"
+                  fill="url(#lensGradient)"
+                  opacity={getLensOpacity()}
+                  style={{ mixBlendMode: 'multiply' }}
+                />
+                <ellipse
+                  cx="690"
+                  cy="280"
+                  rx="140"
+                  ry="120"
                   fill="url(#lensGradient)"
                   opacity={getLensOpacity()}
                   style={{ mixBlendMode: 'multiply' }}
