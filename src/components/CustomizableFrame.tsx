@@ -59,6 +59,8 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         const brightness = (r + g + b) / 3;
 
         if (brightness > 180) {
+          data[i + 3] = 0;
+
           mask[i] = 255;
           mask[i + 1] = 255;
           mask[i + 2] = 255;
