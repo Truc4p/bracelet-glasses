@@ -7,6 +7,24 @@ export interface CrystalBead {
   emoji: string;
 }
 
+export interface Spacer {
+  id: string;
+  name: string;
+  color: string;
+  metallic: string;
+  price: number;
+  emoji: string;
+}
+
+export interface ZodiacCharm {
+  id: string;
+  name: string;
+  animal: string;
+  design: 'classic' | 'modern';
+  price: number;
+  emoji: string;
+}
+
 export function calculateBeadPrice(basePrice: number, beadSize: BeadSize): number {
   const sizeMultiplier = beadSize === 6 ? 0.8 : beadSize === 8 ? 1.0 : 1.3;
   return basePrice * sizeMultiplier;
@@ -25,6 +43,44 @@ export const CRYSTAL_LIBRARY: CrystalBead[] = [
   { id: "carnelian", name: "Carnelian", color: "#CC5500", gradient: "linear-gradient(135deg, #E06020, #CC5500)", price: 3.20, emoji: "❤️‍🔥" },
 ];
 
+export const SPACERS: Spacer[] = [
+  { id: "silver", name: "Silver", color: "#C0C0C0", metallic: "linear-gradient(135deg, #E8E8E8, #A0A0A0)", price: 1.50, emoji: "⚪" },
+  { id: "gold", name: "Gold", color: "#FFD700", metallic: "linear-gradient(135deg, #FFED4E, #D4AF37)", price: 2.00, emoji: "🟡" },
+  { id: "rose-gold", name: "Rose Gold", color: "#E0BFB8", metallic: "linear-gradient(135deg, #F5D5CB, #C9A99E)", price: 2.50, emoji: "🌸" },
+];
+
+export const ZODIAC_ANIMALS = [
+  "Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
+  "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"
+];
+
+export const ZODIAC_CHARMS: ZodiacCharm[] = [
+  { id: "rat-classic", name: "Rat", animal: "Rat", design: 'classic', price: 8.00, emoji: "🐀" },
+  { id: "rat-modern", name: "Rat", animal: "Rat", design: 'modern', price: 8.00, emoji: "🐀" },
+  { id: "ox-classic", name: "Ox", animal: "Ox", design: 'classic', price: 8.00, emoji: "🐂" },
+  { id: "ox-modern", name: "Ox", animal: "Ox", design: 'modern', price: 8.00, emoji: "🐂" },
+  { id: "tiger-classic", name: "Tiger", animal: "Tiger", design: 'classic', price: 8.00, emoji: "🐅" },
+  { id: "tiger-modern", name: "Tiger", animal: "Tiger", design: 'modern', price: 8.00, emoji: "🐅" },
+  { id: "rabbit-classic", name: "Rabbit", animal: "Rabbit", design: 'classic', price: 8.00, emoji: "🐇" },
+  { id: "rabbit-modern", name: "Rabbit", animal: "Rabbit", design: 'modern', price: 8.00, emoji: "🐇" },
+  { id: "dragon-classic", name: "Dragon", animal: "Dragon", design: 'classic', price: 8.00, emoji: "🐉" },
+  { id: "dragon-modern", name: "Dragon", animal: "Dragon", design: 'modern', price: 8.00, emoji: "🐉" },
+  { id: "snake-classic", name: "Snake", animal: "Snake", design: 'classic', price: 8.00, emoji: "🐍" },
+  { id: "snake-modern", name: "Snake", animal: "Snake", design: 'modern', price: 8.00, emoji: "🐍" },
+  { id: "horse-classic", name: "Horse", animal: "Horse", design: 'classic', price: 8.00, emoji: "🐴" },
+  { id: "horse-modern", name: "Horse", animal: "Horse", design: 'modern', price: 8.00, emoji: "🐴" },
+  { id: "goat-classic", name: "Goat", animal: "Goat", design: 'classic', price: 8.00, emoji: "🐐" },
+  { id: "goat-modern", name: "Goat", animal: "Goat", design: 'modern', price: 8.00, emoji: "🐐" },
+  { id: "monkey-classic", name: "Monkey", animal: "Monkey", design: 'classic', price: 8.00, emoji: "🐵" },
+  { id: "monkey-modern", name: "Monkey", animal: "Monkey", design: 'modern', price: 8.00, emoji: "🐵" },
+  { id: "rooster-classic", name: "Rooster", animal: "Rooster", design: 'classic', price: 8.00, emoji: "🐓" },
+  { id: "rooster-modern", name: "Rooster", animal: "Rooster", design: 'modern', price: 8.00, emoji: "🐓" },
+  { id: "dog-classic", name: "Dog", animal: "Dog", design: 'classic', price: 8.00, emoji: "🐕" },
+  { id: "dog-modern", name: "Dog", animal: "Dog", design: 'modern', price: 8.00, emoji: "🐕" },
+  { id: "pig-classic", name: "Pig", animal: "Pig", design: 'classic', price: 8.00, emoji: "🐖" },
+  { id: "pig-modern", name: "Pig", animal: "Pig", design: 'modern', price: 8.00, emoji: "🐖" },
+];
+
 export function calculateBeadCount(wristSizeCm: number, beadSizeMm: number): number {
   const wristCircumferenceMm = wristSizeCm * 10;
   const beadCount = Math.round(wristCircumferenceMm / beadSizeMm);
@@ -33,9 +89,14 @@ export function calculateBeadCount(wristSizeCm: number, beadSizeMm: number): num
 
 export type BeadSize = 6 | 8 | 10;
 
+export type ItemType = 'crystal' | 'spacer' | 'charm';
+
 export interface PlacedBead {
   position: number;
-  crystal: CrystalBead;
+  type: ItemType;
+  crystal?: CrystalBead;
+  spacer?: Spacer;
+  charm?: ZodiacCharm;
   beadSize: BeadSize;
 }
 

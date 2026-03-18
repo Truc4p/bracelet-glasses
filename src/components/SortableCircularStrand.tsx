@@ -24,7 +24,7 @@ interface SortableCircularStrandProps {
   placedBeads: PlacedBead[];
   onBeadsReorder: (beads: PlacedBead[]) => void;
   onSlotClick: (position: number, beadSize: BeadSize) => void;
-  onBeadDrop?: (position: number, bead: CrystalBead) => void;
+  onBeadDrop?: (position: number, data: any) => void;
   label?: string;
   wristSize: number;
 }
@@ -36,7 +36,7 @@ interface SortableBeadProps {
   y: number;
   beadPixelSize: number;
   onSlotClick: (position: number) => void;
-  onBeadDrop?: (position: number, bead: CrystalBead) => void;
+  onBeadDrop?: (position: number, data: any) => void;
 }
 
 function SortableBead({ bead, position, x, y, beadPixelSize, onSlotClick, onBeadDrop }: SortableBeadProps) {
@@ -52,6 +52,18 @@ function SortableBead({ bead, position, x, y, beadPixelSize, onSlotClick, onBead
     disabled: !bead,
   });
 
+  const getBeadBackground = () => {
+    if (!bead) return "hsl(var(--muted))";
+    if (bead.type === 'crystal' && bead.crystal) {
+      return bead.crystal.gradient || bead.crystal.color;
+    } else if (bead.type === 'spacer' && bead.spacer) {
+      return bead.spacer.metallic;
+    } else if (bead.type === 'charm' && bead.charm) {
+      return "#F5F5DC";
+    }
+    return "hsl(var(--muted))";
+  };
+
   const style = {
     width: beadPixelSize,
     height: beadPixelSize,
@@ -59,9 +71,7 @@ function SortableBead({ bead, position, x, y, beadPixelSize, onSlotClick, onBead
     top: y - beadPixelSize / 2,
     transform: CSS.Transform.toString(transform),
     transition,
-    background: bead
-      ? bead.crystal.gradient || bead.crystal.color
-      : "hsl(var(--muted))",
+    background: getBeadBackground(),
     borderColor: bead ? "transparent" : "hsl(var(--border))",
     boxShadow: bead ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
     opacity: isDragging ? 0.5 : 1,
@@ -89,12 +99,27 @@ function SortableBead({ bead, position, x, y, beadPixelSize, onSlotClick, onBead
           }
         }
       }}
-      className={`absolute rounded-full border transition-all duration-200 hover:scale-110 active:scale-95 group ${
+      className={`absolute border transition-all duration-200 hover:scale-110 active:scale-95 group ${
         bead ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
-      }`}
-      title={bead ? `${bead.crystal.name} (${bead.beadSize}mm) - Drag to reorder` : `Slot ${position + 1}`}
+      } ${bead?.type === 'charm' ? 'rounded' : 'rounded-full'}`}
+      title={
+        bead
+          ? bead.type === 'crystal' && bead.crystal
+            ? `${bead.crystal.name} (${bead.beadSize}mm) - Drag to reorder`
+            : bead.type === 'spacer' && bead.spacer
+            ? `${bead.spacer.name} Spacer - Drag to reorder`
+            : bead.type === 'charm' && bead.charm
+            ? `${bead.charm.animal} Charm (${bead.charm.design}) - Drag to reorder`
+            : `Slot ${position + 1}`
+          : `Slot ${position + 1}`
+      }
     >
-      {bead && (
+      {bead && bead.type === 'charm' && bead.charm && (
+        <span className="text-xs flex items-center justify-center h-full">
+          {bead.charm.emoji}
+        </span>
+      )}
+      {bead && bead.type === 'crystal' && (
         <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
           {bead.beadSize}mm
         </span>
@@ -165,6 +190,18 @@ const SortableCircularStrand = ({
     ? placedBeads.find((b) => `bead-${b.position}` === activeId)
     : null;
 
+  const getActiveBeadBackground = () => {
+    if (!activeBead) return "";
+    if (activeBead.type === 'crystal' && activeBead.crystal) {
+      return activeBead.crystal.gradient || activeBead.crystal.color;
+    } else if (activeBead.type === 'spacer' && activeBead.spacer) {
+      return activeBead.spacer.metallic;
+    } else if (activeBead.type === 'charm' && activeBead.charm) {
+      return "#F5F5DC";
+    }
+    return "";
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -205,13 +242,19 @@ const SortableCircularStrand = ({
           <DragOverlay>
             {activeBead ? (
               <div
-                className="rounded-full border-2 border-primary shadow-xl"
+                className={`border-2 border-primary shadow-xl flex items-center justify-center ${
+                  activeBead.type === 'charm' ? 'rounded' : 'rounded-full'
+                }`}
                 style={{
                   width: activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26,
                   height: activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26,
-                  background: activeBead.crystal.gradient || activeBead.crystal.color,
+                  background: getActiveBeadBackground(),
                 }}
-              />
+              >
+                {activeBead.type === 'charm' && activeBead.charm && (
+                  <span className="text-xs">{activeBead.charm.emoji}</span>
+                )}
+              </div>
             ) : null}
           </DragOverlay>
 

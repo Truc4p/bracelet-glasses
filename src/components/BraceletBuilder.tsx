@@ -9,6 +9,8 @@ import {
   type BeadSize,
   type PlacedBead,
   type CrystalBead,
+  type Spacer,
+  type ZodiacCharm,
 } from "@/lib/luxe-data";
 
 interface BraceletBuilderProps {
@@ -32,8 +34,19 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
 
   const updatePrice = useCallback(
     (beadsA: PlacedBead[], beadsB: PlacedBead[], twin: boolean) => {
-      const priceA = beadsA.reduce((s, b) => s + calculateBeadPrice(b.crystal.price, b.beadSize), 0);
-      const priceB = twin ? beadsB.reduce((s, b) => s + calculateBeadPrice(b.crystal.price, b.beadSize), 0) : 0;
+      const calculateItemPrice = (item: PlacedBead) => {
+        if (item.type === 'crystal' && item.crystal) {
+          return calculateBeadPrice(item.crystal.price, item.beadSize);
+        } else if (item.type === 'spacer' && item.spacer) {
+          return item.spacer.price;
+        } else if (item.type === 'charm' && item.charm) {
+          return item.charm.price;
+        }
+        return 0;
+      };
+
+      const priceA = beadsA.reduce((s, b) => s + calculateItemPrice(b), 0);
+      const priceB = twin ? beadsB.reduce((s, b) => s + calculateItemPrice(b), 0) : 0;
       onPriceChange(priceA + priceB);
     },
     [onPriceChange]
@@ -49,7 +62,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
     if (existing) {
       updated = placedBeads.filter((b) => b.position !== position);
     } else if (selectedCrystal) {
-      updated = [...placedBeads, { position, crystal: selectedCrystal, beadSize: defaultBeadSize }];
+      updated = [...placedBeads, { position, type: 'crystal', crystal: selectedCrystal, beadSize: defaultBeadSize }];
     } else {
       setLibraryOpen(true);
       return;
@@ -64,14 +77,26 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
     }
   };
 
-  const handleBeadDrop = (bracelet: "A" | "B", position: number, bead: CrystalBead) => {
+  const handleBeadDrop = (bracelet: "A" | "B", position: number, data: any) => {
     const placedBeads = bracelet === "A" ? placedBeadsA : placedBeadsB;
     const setPlacedBeads = bracelet === "A" ? setPlacedBeadsA : setPlacedBeadsB;
 
     const existing = placedBeads.find((b) => b.position === position);
+
+    let newItem: PlacedBead;
+    if (data.type === 'crystal') {
+      newItem = { position, type: 'crystal', crystal: data.item, beadSize: defaultBeadSize };
+    } else if (data.type === 'spacer') {
+      newItem = { position, type: 'spacer', spacer: data.item, beadSize: defaultBeadSize };
+    } else if (data.type === 'charm') {
+      newItem = { position, type: 'charm', charm: data.item, beadSize: defaultBeadSize };
+    } else {
+      return;
+    }
+
     const updated = existing
       ? placedBeads.filter((b) => b.position !== position)
-      : [...placedBeads, { position, crystal: bead, beadSize: defaultBeadSize }];
+      : [...placedBeads, newItem];
 
     setPlacedBeads(updated);
 
@@ -99,6 +124,14 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
 
   const handleSelectBead = (bead: CrystalBead) => {
     setSelectedCrystal(bead);
+  };
+
+  const handleSelectSpacer = (spacer: Spacer) => {
+    console.log("Spacer selected", spacer);
+  };
+
+  const handleSelectCharm = (charm: ZodiacCharm) => {
+    console.log("Charm selected", charm);
   };
 
   const handleReset = () => {
@@ -198,7 +231,13 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
 
       {/* Canvas area */}
       <div className="flex-1 relative flex items-center justify-center gap-8 p-6">
-        <BeadLibrary open={libraryOpen} onSelectBead={handleSelectBead} onClose={() => setLibraryOpen(false)} />
+        <BeadLibrary
+          open={libraryOpen}
+          onSelectBead={handleSelectBead}
+          onSelectSpacer={handleSelectSpacer}
+          onSelectCharm={handleSelectCharm}
+          onClose={() => setLibraryOpen(false)}
+        />
 
         <SortableCircularStrand
           beadCount={beadCountA}
