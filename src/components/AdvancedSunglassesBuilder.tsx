@@ -1,167 +1,254 @@
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
+import { Glasses, Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FRAME_OPTIONS, FRAME_BASE_PRICE } from "@/lib/luxe-data";
 import { Slider } from "@/components/ui/slider";
-import { CustomizableFrame } from "./CustomizableFrame";
+import FrameLibrary from "@/components/FrameLibrary";
+import SunglassesAccessoriesLibrary from "@/components/SunglassesAccessoriesLibrary";
+import { FRAME_OPTIONS, FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
 
 interface AdvancedSunglassesBuilderProps {
   onPriceChange: (price: number) => void;
 }
 
-type LensColor =
-  | "PK-Y-001" | "PK-Y-002" | "PK-Y-003" | "PK-Y-004"
-  | "PK-Y-005" | "PK-Y-006" | "PK-Y-007" | "PK-Y-008"
-  | "PK-Y-009" | "PK-Y-010" | "PK-Y-011" | "PK-Y-012";
+type LensColor = {
+  id: string;
+  name: string;
+  color: string;
+  gradient: string;
+};
 
-const LENS_COLORS = [
-  { id: "PK-Y-001" as LensColor, name: "PK-Y-001", color: "#3A3A3A", gradient: "linear-gradient(180deg, #3A3A3A, #3A3A3A)" },
-  { id: "PK-Y-002" as LensColor, name: "PK-Y-002", color: "#6B6B6B", gradient: "linear-gradient(180deg, #6B6B6B, #B8B8B8)" },
-  { id: "PK-Y-003" as LensColor, name: "PK-Y-003", color: "#4A1515", gradient: "linear-gradient(180deg, #4A1515, #4A1515)" },
-  { id: "PK-Y-004" as LensColor, name: "PK-Y-004", color: "#5C2E1A", gradient: "linear-gradient(180deg, #5C2E1A, #D4A574)" },
-  { id: "PK-Y-005" as LensColor, name: "PK-Y-005", color: "#8B2942", gradient: "linear-gradient(180deg, #8B2942, #8B2942)" },
-  { id: "PK-Y-006" as LensColor, name: "PK-Y-006", color: "#7A3B5D", gradient: "linear-gradient(180deg, #7A3B5D, #D4A5C4)" },
-  { id: "PK-Y-007" as LensColor, name: "PK-Y-007", color: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F, #1E3A5F)" },
-  { id: "PK-Y-008" as LensColor, name: "PK-Y-008", color: "#2E3A6B", gradient: "linear-gradient(180deg, #2E3A6B, #B8B8D4)" },
-  { id: "PK-Y-009" as LensColor, name: "PK-Y-009", color: "#90C878", gradient: "linear-gradient(180deg, #90C878, #90C878)" },
-  { id: "PK-Y-010" as LensColor, name: "PK-Y-010", color: "#E8B88B", gradient: "linear-gradient(180deg, #E8B88B, #E8B88B)" },
-  { id: "PK-Y-011" as LensColor, name: "PK-Y-011", color: "#C8A030", gradient: "linear-gradient(180deg, #C8A030, #C8A030)" },
-  { id: "PK-Y-012" as LensColor, name: "PK-Y-012", color: "#7BB8D4", gradient: "linear-gradient(180deg, #7BB8D4, #7BB8D4)" },
+const LENS_COLORS: LensColor[] = [
+  { id: "PK-Y-001", name: "PK-Y-001", color: "#3A3A3A", gradient: "linear-gradient(180deg, #3A3A3A, #3A3A3A)" },
+  { id: "PK-Y-002", name: "PK-Y-002", color: "#6B6B6B", gradient: "linear-gradient(180deg, #6B6B6B, #B8B8B8)" },
+  { id: "PK-Y-003", name: "PK-Y-003", color: "#4A1515", gradient: "linear-gradient(180deg, #4A1515, #4A1515)" },
+  { id: "PK-Y-004", name: "PK-Y-004", color: "#5C2E1A", gradient: "linear-gradient(180deg, #5C2E1A, #D4A574)" },
+  { id: "PK-Y-005", name: "PK-Y-005", color: "#8B2942", gradient: "linear-gradient(180deg, #8B2942, #8B2942)" },
+  { id: "PK-Y-006", name: "PK-Y-006", color: "#7A3B5D", gradient: "linear-gradient(180deg, #7A3B5D, #D4A5C4)" },
+  { id: "PK-Y-007", name: "PK-Y-007", color: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F, #1E3A5F)" },
+  { id: "PK-Y-008", name: "PK-Y-008", color: "#2E3A6B", gradient: "linear-gradient(180deg, #2E3A6B, #B8B8D4)" },
+  { id: "PK-Y-009", name: "PK-Y-009", color: "#90C878", gradient: "linear-gradient(180deg, #90C878, #90C878)" },
+  { id: "PK-Y-010", name: "PK-Y-010", color: "#E8B88B", gradient: "linear-gradient(180deg, #E8B88B, #E8B88B)" },
+  { id: "PK-Y-011", name: "PK-Y-011", color: "#C8A030", gradient: "linear-gradient(180deg, #C8A030, #C8A030)" },
+  { id: "PK-Y-012", name: "PK-Y-012", color: "#7BB8D4", gradient: "linear-gradient(180deg, #7BB8D4, #7BB8D4)" },
 ];
 
 const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderProps) => {
-  const [frame, setFrame] = useState("PK002");
-  const [lensColor, setLensColor] = useState<LensColor>("PK-Y-001");
+  const [selectedFrame, setSelectedFrame] = useState<FrameOption>(FRAME_OPTIONS[0]);
+  const [lensColor, setLensColor] = useState<LensColor>(LENS_COLORS[0]);
   const [vlt, setVlt] = useState(15);
   const [gradientMode, setGradientMode] = useState(false);
-  const [gradientSecondary, setGradientSecondary] = useState<LensColor>("PK-Y-002");
-  const selectedFrame = FRAME_OPTIONS.find((f) => f.id === frame)!;
-  const selectedLensColor = LENS_COLORS.find((c) => c.id === lensColor)!;
-  const baseColor = selectedLensColor.color;
-  const tintColor = selectedLensColor.color;
-  const secondaryColor = LENS_COLORS.find((c) => c.id === gradientSecondary)!.color;
+  const [gradientSecondary, setGradientSecondary] = useState<LensColor>(LENS_COLORS[1]);
+  const [placedAccessories, setPlacedAccessories] = useState<PlacedAccessory[]>([]);
+  const [frameLibraryOpen, setFrameLibraryOpen] = useState(false);
+  const [accessoriesOpen, setAccessoriesOpen] = useState(false);
+  const [draggedAccessory, setDraggedAccessory] = useState<SunglassesAccessory | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
-  const price = FRAME_BASE_PRICE + (vlt < 20 ? 25 : vlt < 50 ? 15 : 10) + (gradientMode ? 20 : 0);
+  const updatePrice = useCallback(
+    (accessories: PlacedAccessory[], currentVlt: number, isGradient: boolean) => {
+      const basePrice = FRAME_BASE_PRICE;
+      const vltPrice = currentVlt < 20 ? 25 : currentVlt < 50 ? 15 : 10;
+      const gradientPrice = isGradient ? 20 : 0;
+      const accessoriesPrice = accessories.reduce((sum, a) => sum + a.accessory.price, 0);
+      onPriceChange(basePrice + vltPrice + gradientPrice + accessoriesPrice);
+    },
+    [onPriceChange]
+  );
 
   useState(() => {
-    onPriceChange(price);
+    updatePrice(placedAccessories, vlt, gradientMode);
   });
 
-  const handleFrameChange = (id: string) => {
-    setFrame(id);
-    onPriceChange(price);
+  const handleFrameSelect = (frame: FrameOption) => {
+    setSelectedFrame(frame);
+    setPlacedAccessories([]);
+    updatePrice([], vlt, gradientMode);
   };
 
   const handleVltChange = (val: number[]) => {
     setVlt(val[0]);
-    const newPrice = FRAME_BASE_PRICE + (val[0] < 20 ? 25 : val[0] < 50 ? 15 : 10) + (gradientMode ? 20 : 0);
-    onPriceChange(newPrice);
+    updatePrice(placedAccessories, val[0], gradientMode);
+  };
+
+  const handleGradientToggle = (checked: boolean) => {
+    setGradientMode(checked);
+    updatePrice(placedAccessories, vlt, checked);
+  };
+
+  const handleCanvasDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (!canvasRef.current || !draggedAccessory) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    const newAccessory: PlacedAccessory = {
+      id: `${draggedAccessory.id}-${Date.now()}`,
+      accessory: draggedAccessory,
+      x,
+      y,
+      scale: 1,
+      rotation: 0,
+    };
+
+    const updated = [...placedAccessories, newAccessory];
+    setPlacedAccessories(updated);
+    setDraggedAccessory(null);
+    updatePrice(updated, vlt, gradientMode);
+  };
+
+  const handleAccessoryClick = (id: string) => {
+    const updated = placedAccessories.filter((a) => a.id !== id);
+    setPlacedAccessories(updated);
+    updatePrice(updated, vlt, gradientMode);
+  };
+
+  const handleReset = () => {
+    setPlacedAccessories([]);
+    setVlt(15);
+    setGradientMode(false);
+    setLensColor(LENS_COLORS[0]);
+    updatePrice([], 15, false);
+  };
+
+  const getLensOpacity = () => {
+    return Math.max(0.4, Math.min(0.95, 1 - vlt / 100));
   };
 
   return (
-    <div className="flex flex-col w-full h-screen">
-      <div className="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden min-h-0">
-        <div className="relative max-w-3xl w-full flex items-center justify-center">
-          <CustomizableFrame
-            imageSrc={selectedFrame.image}
-            alt={selectedFrame.name}
-            vlt={vlt}
-            baseColor={baseColor}
-            tintColor={tintColor}
-            gradientMode={gradientMode}
-            secondaryColor={secondaryColor}
-            maxWidth="600px"
-          />
+    <div className="relative flex-1 flex flex-col animate-fade-in">
+      <div className="flex flex-wrap items-center gap-4 px-6 py-4 border-b border-border">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Frame</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-body">
+            {selectedFrame.icon} {selectedFrame.name}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">VLT</span>
+          <div className="w-32">
+            <Slider value={[vlt]} onValueChange={handleVltChange} min={5} max={95} step={5} />
+          </div>
+          <span className="text-sm font-body">{vlt}%</span>
+        </div>
+
+        <div className="flex items-center gap-2 ml-auto">
+          <Button variant="luxe-outline" size="sm" onClick={() => {
+            setFrameLibraryOpen(!frameLibraryOpen);
+            setAccessoriesOpen(false);
+          }}>
+            <Glasses className="w-3.5 h-3.5" />
+            Frames
+          </Button>
+          <Button variant="luxe-outline" size="sm" onClick={() => {
+            setAccessoriesOpen(!accessoriesOpen);
+            setFrameLibraryOpen(false);
+          }}>
+            <Sparkles className="w-3.5 h-3.5" />
+            Customize
+          </Button>
+          <Button variant="ghost" size="icon" onClick={handleReset}>
+            <RotateCcw className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
-      <div className="flex-shrink-0 h-[400px] border-t bg-white p-6 overflow-y-scroll shadow-lg">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div>
-            <label className="text-sm font-medium mb-3 block font-heading">Select Frame</label>
-            <div className="grid grid-cols-5 gap-2">
-              {FRAME_OPTIONS.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => handleFrameChange(f.id)}
-                  className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
-                    frame === f.id
-                      ? "border-primary bg-primary/5 shadow-lg"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                >
-                  <div className="text-2xl mb-1">{f.icon}</div>
-                  <div className="text-xs font-medium font-heading">{f.name}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{f.dimensions}</div>
-                </button>
-              ))}
-            </div>
-          </div>
+      <div className="flex-1 relative flex items-center justify-center p-6">
+        <FrameLibrary
+          open={frameLibraryOpen}
+          onSelectFrame={handleFrameSelect}
+          onClose={() => setFrameLibraryOpen(false)}
+        />
 
-          <div>
-            <label className="text-sm font-medium mb-3 block font-heading">Lens Color</label>
-            <div className="grid grid-cols-6 gap-2">
-              {LENS_COLORS.map((color) => (
-                <button
-                  key={color.id}
-                  onClick={() => setLensColor(color.id)}
-                  className={`p-2 rounded-lg border-2 transition-all hover:scale-110 ${
-                    lensColor === color.id
-                      ? "border-primary bg-primary/5 shadow-lg"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                  title={color.name}
-                >
-                  <div
-                    className="w-8 h-8 rounded-full border mx-auto"
-                    style={{
-                      background: color.gradient,
-                    }}
-                  />
-                  <div className="text-xs font-medium font-heading mt-1 text-center">{color.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
+        <SunglassesAccessoriesLibrary
+          open={accessoriesOpen}
+          onSelectAccessory={(acc) => setDraggedAccessory(acc)}
+          onSelectLensColor={(color) => setLensColor(color)}
+          onClose={() => setAccessoriesOpen(false)}
+        />
 
-          <div>
-            <label className="text-sm font-medium mb-3 block font-heading">
-              VLT (Visible Light Transmission): {vlt}%
-            </label>
-            <Slider value={[vlt]} onValueChange={handleVltChange} min={5} max={95} step={5} className="mb-2" />
-            <p className="text-xs text-muted-foreground font-body">
-              Lower VLT = Darker lenses. 5-20% for bright sun, 50%+ for low light.
-            </p>
-          </div>
+        <div
+          ref={canvasRef}
+          className="relative max-w-4xl w-full"
+          onDrop={handleCanvasDrop}
+          onDragOver={(e) => e.preventDefault()}
+          onDragEnter={(e) => e.preventDefault()}
+        >
+          <div
+            className="relative overflow-hidden w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg"
+            style={{
+              paddingBottom: '56%',
+            }}
+          >
+            <img
+              src={selectedFrame.image}
+              alt={selectedFrame.name}
+              className="absolute w-full h-full object-contain drop-shadow-xl"
+              style={{ zIndex: 1 }}
+            />
 
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={gradientMode}
-                onChange={(e) => {
-                  setGradientMode(e.target.checked);
-                  const newPrice = FRAME_BASE_PRICE + (vlt < 20 ? 25 : vlt < 50 ? 15 : 10) + (e.target.checked ? 20 : 0);
-                  onPriceChange(newPrice);
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: gradientMode
+                  ? `linear-gradient(180deg, ${lensColor.color} 0%, ${gradientSecondary.color} 100%)`
+                  : lensColor.color,
+                opacity: getLensOpacity(),
+                mixBlendMode: 'multiply',
+                zIndex: 2,
+              }}
+            />
+
+            {placedAccessories.map((placed) => (
+              <button
+                key={placed.id}
+                onClick={() => handleAccessoryClick(placed.id)}
+                className="absolute text-3xl hover:scale-110 transition-transform cursor-pointer z-10"
+                style={{
+                  left: `${placed.x}%`,
+                  top: `${placed.y}%`,
+                  transform: `translate(-50%, -50%) scale(${placed.scale}) rotate(${placed.rotation}deg)`,
                 }}
-                className="w-4 h-4"
-              />
-              <span className="text-sm font-medium font-heading">Gradient Mode (+$20)</span>
-            </label>
-
-            {gradientMode && (
-              <select
-                value={gradientSecondary}
-                onChange={(e) => setGradientSecondary(e.target.value as LensColor)}
-                className="px-3 py-1.5 rounded-md border bg-background text-sm font-body"
+                title={`${placed.accessory.name} - Click to remove`}
               >
-                {LENS_COLORS.map((color) => (
-                  <option key={color.id} value={color.id}>
-                    {color.name}
-                  </option>
-                ))}
-              </select>
-            )}
+                {placed.accessory.emoji}
+              </button>
+            ))}
           </div>
+        </div>
+      </div>
+
+      <div className="px-6 py-4 border-t border-border space-y-4">
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={gradientMode}
+              onChange={(e) => handleGradientToggle(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span className="text-sm font-medium font-heading">Gradient Lens (+$20)</span>
+          </label>
+
+          {gradientMode && (
+            <select
+              value={gradientSecondary.id}
+              onChange={(e) => setGradientSecondary(LENS_COLORS.find(c => c.id === e.target.value)!)}
+              className="px-3 py-1.5 rounded-md border bg-background text-sm font-body"
+            >
+              {LENS_COLORS.map((color) => (
+                <option key={color.id} value={color.id}>
+                  {color.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        <div className="text-xs text-muted-foreground font-body">
+          {placedAccessories.length} accessories added • Drag items from the Customize panel to add them to your sunglasses
         </div>
       </div>
     </div>
