@@ -57,10 +57,22 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
       className={`relative ${className}`}
       style={{
         isolation: 'isolate',
-        backgroundColor: 'white',
+        backgroundColor: '#ffffff',
         maxWidth,
+        padding: '20px',
+        borderRadius: '8px',
       }}
     >
+      <img
+        src={imageSrc}
+        alt={alt}
+        className="w-full h-auto drop-shadow-2xl relative"
+        style={{
+          transform,
+          zIndex: 0,
+          position: 'relative',
+        }}
+      />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -72,13 +84,13 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
           WebkitMaskRepeat: "no-repeat",
           maskRepeat: "no-repeat",
           transform,
-          zIndex: 1,
+          zIndex: 10,
         }}
       />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.15) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 25% 30% at 30% 42%, rgba(255,255,255,0.3) 0%, transparent 60%), radial-gradient(ellipse 25% 30% at 70% 42%, rgba(255,255,255,0.3) 0%, transparent 60%)',
           WebkitMaskImage: `url("${maskDataUrl}")`,
           maskImage: `url("${maskDataUrl}")`,
           WebkitMaskSize: "100% 100%",
@@ -86,18 +98,8 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
           WebkitMaskRepeat: "no-repeat",
           maskRepeat: "no-repeat",
           transform,
-          zIndex: 3,
-        }}
-      />
-      <img
-        src={imageSrc}
-        alt={alt}
-        className="w-full h-auto drop-shadow-2xl relative"
-        style={{
-          transform,
-          mixBlendMode: "multiply",
-          zIndex: 2,
-          position: 'relative',
+          zIndex: 20,
+          filter: 'blur(2px)',
         }}
       />
     </div>
