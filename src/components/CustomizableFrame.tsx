@@ -25,7 +25,7 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   className = "",
 }) => {
   const getLensOpacity = () => {
-    return Math.max(0.3, Math.min(0.8, 1 - vlt / 100));
+    return Math.max(0.4, Math.min(0.95, 1 - vlt / 100));
   };
 
   return (
@@ -37,32 +37,32 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
       }}
     >
       <div
-        className="relative overflow-hidden w-full"
+        className="relative overflow-hidden w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg"
         style={{
           height: '0',
           paddingBottom: '56%',
         }}
       >
-        <img
-          src={imageSrc}
-          alt={alt}
-          className="absolute w-full h-full object-contain drop-shadow-2xl"
-          style={{
-            transform,
-            top: '0',
-            left: '0',
-          }}
-        />
-
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none flex items-center justify-center"
           style={{
             background: gradientMode
               ? `linear-gradient(180deg, ${tintColor} 0%, ${secondaryColor} 100%)`
               : tintColor,
             opacity: getLensOpacity(),
-            mixBlendMode: 'multiply',
             transform,
+          }}
+        />
+
+        <img
+          src={imageSrc}
+          alt={alt}
+          className="absolute w-full h-full object-contain drop-shadow-xl"
+          style={{
+            transform,
+            top: '0',
+            left: '0',
+            zIndex: 10,
           }}
         />
       </div>
