@@ -131,11 +131,18 @@ export const FRAME_OPTIONS: FrameOption[] = [
 ];
 
 export const LENS_COLORS = [
-  { id: "blue-clear", name: "Blue to Clear", color: "#4A90D9", gradient: "linear-gradient(180deg, #4A90D9 0%, transparent 100%)" },
+  { id: "classic-grey", name: "Classic Grey", color: "#4A4A4A", gradient: "linear-gradient(180deg, #4A4A4A, #4A4A4A)" },
+  { id: "warm-brown", name: "Warm Brown", color: "#6B4423", gradient: "linear-gradient(180deg, #6B4423, #6B4423)" },
+  { id: "forest-green", name: "Forest Green", color: "#2D5016", gradient: "linear-gradient(180deg, #2D5016, #2D5016)" },
+  { id: "rose-gold", name: "Rose Gold", color: "#E8A0B5", gradient: "linear-gradient(180deg, #D4A5C4, #E8A0B5)" },
+  { id: "midnight-blue", name: "Midnight Blue", color: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F, #2E5A8F)" },
+  { id: "amber-honey", name: "Amber Honey", color: "#D4894A", gradient: "linear-gradient(180deg, #D4894A, #F4C490)" },
+  { id: "gradient-smoke", name: "Gradient Smoke", color: "#3A3A3A", gradient: "linear-gradient(180deg, #3A3A3A 0%, rgba(58,58,58,0.2) 100%)" },
+  { id: "gradient-ocean", name: "Gradient Ocean", color: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F 0%, rgba(30,58,95,0.2) 100%)" },
+  { id: "gradient-sunset", name: "Gradient Sunset", color: "#D4894A", gradient: "linear-gradient(180deg, #D4894A 0%, rgba(212,137,74,0.2) 100%)" },
+  { id: "gradient-lavender", name: "Gradient Lavender", color: "#9B7BB8", gradient: "linear-gradient(180deg, #9B7BB8 0%, rgba(155,123,184,0.2) 100%)" },
   { id: "solid-black", name: "Solid Black", color: "#1C1C1C", gradient: "linear-gradient(180deg, #1C1C1C, #1C1C1C)" },
-  { id: "amber", name: "Amber", color: "#F4A460", gradient: "linear-gradient(180deg, #D4894A, #F4C490)" },
-  { id: "rose", name: "Rose", color: "#E8A0B5", gradient: "linear-gradient(180deg, #E8A0B5 0%, transparent 100%)" },
-  { id: "emerald", name: "Emerald", color: "#2E8B57", gradient: "linear-gradient(180deg, #2E8B57 0%, transparent 100%)" },
+  { id: "crystal-clear", name: "Crystal Clear", color: "#FFFFFF", gradient: "linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1))" },
 ];
 
 export const FRAME_BASE_PRICE = 45;

@@ -7,6 +7,8 @@ type TabType = 'accessories' | 'lensColors';
 interface SunglassesAccessoriesLibraryProps {
   onSelectAccessory: (accessory: SunglassesAccessory) => void;
   onSelectLensColor: (lensColor: { id: string; name: string; color: string; gradient: string }) => void;
+  onSelectSecondaryColor: (lensColor: { id: string; name: string; color: string; gradient: string }) => void;
+  gradientMode: boolean;
   open: boolean;
   onClose: () => void;
 }
@@ -14,6 +16,8 @@ interface SunglassesAccessoriesLibraryProps {
 const SunglassesAccessoriesLibrary = ({
   onSelectAccessory,
   onSelectLensColor,
+  onSelectSecondaryColor,
+  gradientMode,
   open,
   onClose
 }: SunglassesAccessoriesLibraryProps) => {
@@ -60,7 +64,7 @@ const SunglassesAccessoriesLibrary = ({
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           }`}
         >
-          Lens Colors
+          Shade Profile
         </button>
       </div>
 
@@ -123,24 +127,54 @@ const SunglassesAccessoriesLibrary = ({
       )}
 
       {activeTab === 'lensColors' && (
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          {LENS_COLORS.map((lensColor) => (
-            <button
-              key={lensColor.id}
-              onClick={() => {
-                onSelectLensColor(lensColor);
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
-            >
-              <div
-                className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0"
-                style={{ background: lensColor.gradient || lensColor.color }}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>
+        <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          <div>
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              {gradientMode ? 'Top Color' : 'Base Material'}
+            </h4>
+            <div className="space-y-1">
+              {LENS_COLORS.map((lensColor) => (
+                <button
+                  key={lensColor.id}
+                  onClick={() => onSelectLensColor(lensColor)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
+                >
+                  <div
+                    className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0"
+                    style={{ background: lensColor.gradient || lensColor.color }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {gradientMode && (
+            <div>
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Bottom Color
+              </h4>
+              <div className="space-y-1">
+                {LENS_COLORS.map((lensColor) => (
+                  <button
+                    key={`secondary-${lensColor.id}`}
+                    onClick={() => onSelectSecondaryColor(lensColor)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
+                  >
+                    <div
+                      className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0"
+                      style={{ background: lensColor.gradient || lensColor.color }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
-            </button>
-          ))}
+            </div>
+          )}
         </div>
       )}
     </div>

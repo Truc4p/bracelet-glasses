@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { Glasses, Sparkles, RotateCcw } from "lucide-react";
+import { Glasses, Sparkles, RotateCcw, Waves } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
@@ -127,12 +127,21 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">VLT</span>
+          <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Lens Density</span>
           <div className="w-32">
-            <Slider value={[vlt]} onValueChange={handleVltChange} min={5} max={95} step={5} />
+            <Slider value={[vlt]} onValueChange={handleVltChange} min={0} max={100} step={5} />
           </div>
-          <span className="text-sm font-body">{vlt}%</span>
+          <span className="text-sm font-body">{vlt}% VLT</span>
         </div>
+
+        <Button
+          variant={gradientMode ? "default" : "luxe-outline"}
+          size="sm"
+          onClick={() => setGradientMode(!gradientMode)}
+        >
+          <Waves className="w-3.5 h-3.5" />
+          Gradient
+        </Button>
 
         <div className="flex items-center gap-2 ml-auto">
           <Button variant="luxe-outline" size="sm" onClick={() => {
@@ -167,6 +176,8 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             open={accessoriesOpen}
             onSelectAccessory={(acc) => setDraggedAccessory(acc)}
             onSelectLensColor={(color) => setLensColor(color)}
+            onSelectSecondaryColor={(color) => setGradientSecondary(color)}
+            gradientMode={gradientMode}
             onClose={() => setAccessoriesOpen(false)}
           />
 
@@ -183,16 +194,33 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 paddingBottom: '56%',
               }}
             >
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: gradientMode
-                    ? `linear-gradient(180deg, ${lensColor.color} 0%, ${gradientSecondary.color} 100%)`
-                    : lensColor.color,
-                  opacity: getLensOpacity(),
-                  zIndex: 1,
-                }}
-              />
+              <svg
+                className="absolute inset-0 w-full h-full"
+                viewBox="0 0 1000 560"
+                style={{ zIndex: 1 }}
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <defs>
+                  <linearGradient id="lensGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={lensColor.color} />
+                    <stop offset="100%" stopColor={gradientMode ? gradientSecondary.color : lensColor.color} />
+                  </linearGradient>
+                  <radialGradient id="glassHighlight" cx="30%" cy="30%">
+                    <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
+                    <stop offset="50%" stopColor="rgba(255,255,255,0.1)" />
+                    <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                  </radialGradient>
+                </defs>
+
+                <ellipse cx="310" cy="280" rx="145" ry="125" fill="url(#lensGradient)" opacity={getLensOpacity()} />
+                <ellipse cx="690" cy="280" rx="145" ry="125" fill="url(#lensGradient)" opacity={getLensOpacity()} />
+
+                <ellipse cx="310" cy="280" rx="145" ry="125" fill="url(#glassHighlight)" />
+                <ellipse cx="690" cy="280" rx="145" ry="125" fill="url(#glassHighlight)" />
+
+                <line x1="250" y1="230" x2="340" y2="190" stroke="rgba(255,255,255,0.6)" strokeWidth="3" strokeLinecap="round" />
+                <line x1="630" y1="230" x2="720" y2="190" stroke="rgba(255,255,255,0.6)" strokeWidth="3" strokeLinecap="round" />
+              </svg>
 
               <img
                 src={selectedFrame.image}
