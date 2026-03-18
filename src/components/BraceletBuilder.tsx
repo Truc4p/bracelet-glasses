@@ -168,8 +168,8 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
             value={wristSizeA}
             onChange={(e) => setWristSizeA(Number(e.target.value))}
             className="w-16 px-2 py-1.5 text-sm border border-border rounded-md bg-background font-body focus:outline-none focus:ring-1 focus:ring-primary"
-            min={10}
-            max={30}
+            min={14}
+            max={20}
             step={0.5}
           />
           <span className="text-xs text-muted-foreground">cm</span>
@@ -184,8 +184,8 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
               value={wristSizeB}
               onChange={(e) => setWristSizeB(Number(e.target.value))}
               className="w-16 px-2 py-1.5 text-sm border border-border rounded-md bg-background font-body focus:outline-none focus:ring-1 focus:ring-primary"
-              min={10}
-              max={30}
+              min={14}
+              max={20}
               step={0.5}
             />
             <span className="text-xs text-muted-foreground">cm</span>
