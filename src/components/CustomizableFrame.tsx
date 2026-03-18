@@ -25,21 +25,18 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   transform,
   className = "",
 }) => {
-  const getLensFilter = () => {
-    const opacity = Math.max(0.2, Math.min(0.85, 1 - vlt / 100));
-    const finalColor = tintColor === "transparent" ? baseColor : tintColor;
+  const getTintStyle = () => {
+    const opacity = Math.max(0.3, Math.min(0.95, 1 - vlt / 100));
 
     if (gradientMode) {
-      const topColor = tintColor === "transparent" ? baseColor : tintColor;
-      const bottomColor = secondaryColor === "transparent" ? baseColor : secondaryColor;
       return {
-        background: `linear-gradient(180deg, ${topColor} 0%, ${bottomColor} 100%)`,
+        background: `linear-gradient(180deg, ${tintColor} 0%, ${secondaryColor} 100%)`,
         opacity: opacity,
       };
     }
 
     return {
-      backgroundColor: finalColor,
+      backgroundColor: tintColor,
       opacity: opacity,
     };
   };
@@ -54,18 +51,11 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   const maskDataUrl = `data:image/svg+xml;base64,${btoa(lensAreaMask)}`;
 
   return (
-    <div className={`relative ${className}`}>
-      <img
-        src={imageSrc}
-        alt={alt}
-        className="w-full h-auto drop-shadow-2xl relative z-10"
-        style={{ maxWidth, transform }}
-      />
+    <div className={`relative ${className}`} style={{ backgroundColor: 'transparent' }}>
       <div
-        className="absolute inset-0 pointer-events-none z-20"
+        className="absolute inset-0 pointer-events-none z-10"
         style={{
-          ...getLensFilter(),
-          mixBlendMode: "multiply",
+          ...getTintStyle(),
           WebkitMaskImage: `url("${maskDataUrl}")`,
           maskImage: `url("${maskDataUrl}")`,
           WebkitMaskSize: "100% 100%",
@@ -73,6 +63,16 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
           WebkitMaskRepeat: "no-repeat",
           maskRepeat: "no-repeat",
           transform,
+        }}
+      />
+      <img
+        src={imageSrc}
+        alt={alt}
+        className="w-full h-auto drop-shadow-2xl relative z-20"
+        style={{
+          maxWidth,
+          transform,
+          mixBlendMode: "multiply",
         }}
       />
     </div>
