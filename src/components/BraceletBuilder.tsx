@@ -23,6 +23,19 @@ const BEAD_SIZES: BeadSize[] = [6, 8, 10];
 const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   const [wristSizeA, setWristSizeA] = useState(16);
   const [wristSizeB, setWristSizeB] = useState(16);
+
+  const clampWristSize = (value: number) => {
+    const clamped = Math.max(14, Math.min(20, value));
+    return Math.round(clamped * 2) / 2;
+  };
+
+  const handleWristSizeAChange = (value: number) => {
+    setWristSizeA(clampWristSize(value));
+  };
+
+  const handleWristSizeBChange = (value: number) => {
+    setWristSizeB(clampWristSize(value));
+  };
   const [defaultBeadSize, setDefaultBeadSize] = useState<BeadSize>(8);
   const [placedBeadsA, setPlacedBeadsA] = useState<PlacedBead[]>([]);
   const [placedBeadsB, setPlacedBeadsB] = useState<PlacedBead[]>([]);
@@ -166,7 +179,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
           <input
             type="number"
             value={wristSizeA}
-            onChange={(e) => setWristSizeA(Number(e.target.value))}
+            onChange={(e) => handleWristSizeAChange(Number(e.target.value))}
             className="w-16 px-2 py-1.5 text-sm border border-border rounded-md bg-background font-body focus:outline-none focus:ring-1 focus:ring-primary"
             min={14}
             max={20}
@@ -182,7 +195,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
             <input
               type="number"
               value={wristSizeB}
-              onChange={(e) => setWristSizeB(Number(e.target.value))}
+              onChange={(e) => handleWristSizeBChange(Number(e.target.value))}
               className="w-16 px-2 py-1.5 text-sm border border-border rounded-md bg-background font-body focus:outline-none focus:ring-1 focus:ring-primary"
               min={14}
               max={20}
