@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 interface CustomizableFrameProps {
   imageSrc: string;
@@ -17,7 +17,6 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   imageSrc,
   alt,
   vlt,
-  baseColor,
   tintColor,
   gradientMode,
   secondaryColor,
@@ -25,88 +24,20 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   transform,
   className = "",
 }) => {
-  const [frameOnlyUrl, setFrameOnlyUrl] = useState<string>("");
-  const [lensMaskUrl, setLensMaskUrl] = useState<string>("");
+  const getLensOpacity = () => {
+    return Math.max(0.3, Math.min(0.8, 1 - vlt / 100));
+  };
 
-  useEffect(() => {
-    const canvas = document.createElement("canvas");
-    const lensMaskCanvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const maskCtx = lensMaskCanvas.getContext("2d");
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = imageSrc;
-
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      lensMaskCanvas.width = img.width;
-      lensMaskCanvas.height = img.height;
-
-      if (!ctx || !maskCtx) return;
-
-      ctx.drawImage(img, 0, 0);
-
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const maskData = maskCtx.createImageData(canvas.width, canvas.height);
-      const data = imageData.data;
-      const mask = maskData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const a = data[i + 3];
-
-        const brightness = (r + g + b) / 3;
-        const saturation = Math.max(r, g, b) - Math.min(r, g, b);
-
-        const isLensArea = (
-          a > 50 &&
-          brightness >= 35 &&
-          brightness <= 155 &&
-          saturation < 60
-        );
-
-        if (isLensArea) {
-          data[i + 3] = 0;
-
-          mask[i] = 255;
-          mask[i + 1] = 255;
-          mask[i + 2] = 255;
-          mask[i + 3] = 255;
-        } else {
-          mask[i] = 0;
-          mask[i + 1] = 0;
-          mask[i + 2] = 0;
-          mask[i + 3] = 0;
-        }
-      }
-
-      ctx.putImageData(imageData, 0, 0);
-      maskCtx.putImageData(maskData, 0, 0);
-
-      setFrameOnlyUrl(canvas.toDataURL());
-      setLensMaskUrl(lensMaskCanvas.toDataURL());
-    };
-  }, [imageSrc]);
-
-  const getTintStyle = () => {
-    const opacity = Math.max(0.25, Math.min(0.75, 1 - vlt / 100));
-
+  const getLensFill = () => {
     if (gradientMode) {
-      return {
-        background: `linear-gradient(180deg, ${tintColor} 0%, ${secondaryColor} 100%)`,
-        opacity: opacity,
-        mixBlendMode: 'multiply' as const,
-      };
+      return (
+        <linearGradient id="lensGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style={{ stopColor: tintColor, stopOpacity: getLensOpacity() }} />
+          <stop offset="100%" style={{ stopColor: secondaryColor, stopOpacity: getLensOpacity() * 0.6 }} />
+        </linearGradient>
+      );
     }
-
-    return {
-      backgroundColor: tintColor,
-      opacity: opacity,
-      mixBlendMode: 'multiply' as const,
-    };
+    return null;
   };
 
   return (
@@ -116,45 +47,69 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         maxWidth,
       }}
     >
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          ...getTintStyle(),
-          WebkitMaskImage: `url("${lensMaskUrl}")`,
-          maskImage: `url("${lensMaskUrl}")`,
-          WebkitMaskSize: "100% 100%",
-          maskSize: "100% 100%",
-          WebkitMaskRepeat: "no-repeat",
-          maskRepeat: "no-repeat",
-          transform,
-          zIndex: 1,
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 20% 25% at 30% 40%, rgba(255,255,255,0.3) 0%, transparent 60%), radial-gradient(ellipse 20% 25% at 70% 40%, rgba(255,255,255,0.3) 0%, transparent 60%)',
-          WebkitMaskImage: `url("${lensMaskUrl}")`,
-          maskImage: `url("${lensMaskUrl}")`,
-          WebkitMaskSize: "100% 100%",
-          maskSize: "100% 100%",
-          WebkitMaskRepeat: "no-repeat",
-          maskRepeat: "no-repeat",
-          transform,
-          zIndex: 2,
-          mixBlendMode: 'overlay',
-        }}
-      />
       <img
-        src={frameOnlyUrl}
+        src={imageSrc}
         alt={alt}
-        className="w-full h-auto drop-shadow-2xl relative"
+        className="w-full h-auto drop-shadow-2xl"
         style={{
           transform,
-          zIndex: 3,
-          position: 'relative',
         }}
       />
+
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        style={{ transform }}
+      >
+        <defs>
+          {getLensFill()}
+          <radialGradient id="lensHighlight">
+            <stop offset="0%" style={{ stopColor: 'white', stopOpacity: 0.25 }} />
+            <stop offset="70%" style={{ stopColor: 'white', stopOpacity: 0 }} />
+          </radialGradient>
+        </defs>
+
+        {/* Left lens */}
+        <ellipse
+          cx="30"
+          cy="42"
+          rx="18"
+          ry="22"
+          fill={gradientMode ? "url(#lensGradient)" : tintColor}
+          opacity={gradientMode ? 1 : getLensOpacity()}
+          style={{ mixBlendMode: 'multiply' }}
+        />
+
+        {/* Right lens */}
+        <ellipse
+          cx="70"
+          cy="42"
+          rx="18"
+          ry="22"
+          fill={gradientMode ? "url(#lensGradient)" : tintColor}
+          opacity={gradientMode ? 1 : getLensOpacity()}
+          style={{ mixBlendMode: 'multiply' }}
+        />
+
+        {/* Highlights on left lens */}
+        <ellipse
+          cx="27"
+          cy="38"
+          rx="6"
+          ry="8"
+          fill="url(#lensHighlight)"
+        />
+
+        {/* Highlights on right lens */}
+        <ellipse
+          cx="67"
+          cy="38"
+          rx="6"
+          ry="8"
+          fill="url(#lensHighlight)"
+        />
+      </svg>
     </div>
   );
 };
