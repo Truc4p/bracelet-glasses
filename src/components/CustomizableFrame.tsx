@@ -56,9 +56,17 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
-        const brightness = (r + g + b) / 3;
+        const a = data[i + 3];
 
-        if (brightness > 180) {
+        const brightness = (r + g + b) / 3;
+        const saturation = Math.max(r, g, b) - Math.min(r, g, b);
+
+        const isLensArea = (
+          (brightness >= 40 && brightness <= 140 && saturation < 50) ||
+          (a > 0 && a < 255 && brightness < 150)
+        );
+
+        if (isLensArea) {
           data[i + 3] = 0;
 
           mask[i] = 255;
