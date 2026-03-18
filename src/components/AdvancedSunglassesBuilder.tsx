@@ -1,9 +1,10 @@
 import { useState, useCallback, useRef } from "react";
-import { Glasses, Sparkles, RotateCcw, Waves } from "lucide-react";
+import { Glasses, Sparkles, RotateCcw, Waves, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
 import SunglassesAccessoriesLibrary from "@/components/SunglassesAccessoriesLibrary";
+import LensRenderer from "@/components/LensRenderer";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
 
 interface AdvancedSunglassesBuilderProps {
@@ -42,6 +43,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const [frameLibraryOpen, setFrameLibraryOpen] = useState(false);
   const [accessoriesOpen, setAccessoriesOpen] = useState(false);
   const [draggedAccessory, setDraggedAccessory] = useState<SunglassesAccessory | null>(null);
+  const [povMode, setPovMode] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const updatePrice = useCallback(
@@ -112,10 +114,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     updatePrice([], 15, false);
   };
 
-  const getLensOpacity = () => {
-    return Math.max(0.4, Math.min(0.95, 1 - vlt / 100));
-  };
-
   return (
     <div className="relative flex-1 flex flex-col animate-fade-in h-full overflow-hidden">
       <div className="flex-shrink-0 flex flex-wrap items-center gap-4 px-6 py-4 border-b border-border bg-white">
@@ -144,6 +142,14 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         </Button>
 
         <div className="flex items-center gap-2 ml-auto">
+          <Button
+            variant={povMode ? "default" : "luxe-outline"}
+            size="sm"
+            onClick={() => setPovMode(!povMode)}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            Visual Filter
+          </Button>
           <Button variant="luxe-outline" size="sm" onClick={() => {
             setFrameLibraryOpen(!frameLibraryOpen);
             setAccessoriesOpen(false);
@@ -189,43 +195,22 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             onDragEnter={(e) => e.preventDefault()}
           >
             <div
-              className="relative w-full bg-white rounded-lg"
+              className="relative w-full bg-white rounded-lg overflow-hidden"
               style={{
                 paddingBottom: '56%',
               }}
             >
-              <svg
-                className="absolute inset-0 w-full h-full"
-                viewBox="0 0 1000 560"
-                style={{ zIndex: 1 }}
-                preserveAspectRatio="xMidYMid meet"
-              >
-                <defs>
-                  <linearGradient id="lensGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor={lensColor.color} />
-                    <stop offset="100%" stopColor={gradientMode ? gradientSecondary.color : lensColor.color} />
-                  </linearGradient>
-                  <radialGradient id="glassHighlight" cx="30%" cy="30%">
-                    <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
-                    <stop offset="50%" stopColor="rgba(255,255,255,0.1)" />
-                    <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-                  </radialGradient>
-                </defs>
-
-                <ellipse cx="310" cy="280" rx="145" ry="125" fill="url(#lensGradient)" opacity={getLensOpacity()} />
-                <ellipse cx="690" cy="280" rx="145" ry="125" fill="url(#lensGradient)" opacity={getLensOpacity()} />
-
-                <ellipse cx="310" cy="280" rx="145" ry="125" fill="url(#glassHighlight)" />
-                <ellipse cx="690" cy="280" rx="145" ry="125" fill="url(#glassHighlight)" />
-
-                <line x1="250" y1="230" x2="340" y2="190" stroke="rgba(255,255,255,0.6)" strokeWidth="3" strokeLinecap="round" />
-                <line x1="630" y1="230" x2="720" y2="190" stroke="rgba(255,255,255,0.6)" strokeWidth="3" strokeLinecap="round" />
-              </svg>
+              <LensRenderer
+                primaryColor={lensColor.color}
+                secondaryColor={gradientSecondary.color}
+                vlt={vlt}
+                gradientMode={gradientMode}
+              />
 
               <img
                 src={selectedFrame.image}
                 alt={selectedFrame.name}
-                className="absolute w-full h-full object-contain drop-shadow-2xl"
+                className="absolute w-full h-full object-contain drop-shadow-2xl pointer-events-none"
                 style={{ zIndex: 2 }}
               />
 
@@ -247,6 +232,23 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
               ))}
             </div>
           </div>
+
+          {povMode && (
+            <div
+              className="fixed inset-0 pointer-events-none transition-all duration-500"
+              style={{
+                background: gradientMode
+                  ? `linear-gradient(180deg, ${lensColor.color} 0%, ${gradientSecondary.color} 100%)`
+                  : lensColor.color,
+                opacity: Math.max(0.15, Math.min(0.6, 1 - vlt / 100)),
+                zIndex: 9999,
+              }}
+            >
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
+                POV Preview: {vlt}% VLT
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
