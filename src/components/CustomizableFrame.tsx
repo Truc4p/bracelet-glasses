@@ -47,20 +47,26 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         maxWidth,
       }}
     >
-      <img
-        src={imageSrc}
-        alt={alt}
-        className="w-full h-auto drop-shadow-2xl"
-        style={{
-          transform,
-        }}
-      />
+      <div className="relative overflow-hidden" style={{ paddingBottom: '35%' }}>
+        <img
+          src={imageSrc}
+          alt={alt}
+          className="absolute top-0 left-0 w-full drop-shadow-2xl"
+          style={{
+            transform,
+            clipPath: 'inset(0 0 50% 0)',
+          }}
+        />
+      </div>
 
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        viewBox="0 0 100 100"
+        className="absolute top-0 left-0 w-full pointer-events-none"
+        viewBox="0 0 100 50"
         preserveAspectRatio="none"
-        style={{ transform }}
+        style={{
+          transform,
+          height: '100%',
+        }}
       >
         <defs>
           {getLensFill()}
@@ -73,9 +79,9 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         {/* Left lens */}
         <ellipse
           cx="30"
-          cy="42"
+          cy="25"
           rx="18"
-          ry="22"
+          ry="18"
           fill={gradientMode ? "url(#lensGradient)" : tintColor}
           opacity={gradientMode ? 1 : getLensOpacity()}
           style={{ mixBlendMode: 'multiply' }}
@@ -84,9 +90,9 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         {/* Right lens */}
         <ellipse
           cx="70"
-          cy="42"
+          cy="25"
           rx="18"
-          ry="22"
+          ry="18"
           fill={gradientMode ? "url(#lensGradient)" : tintColor}
           opacity={gradientMode ? 1 : getLensOpacity()}
           style={{ mixBlendMode: 'multiply' }}
@@ -95,18 +101,18 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         {/* Highlights on left lens */}
         <ellipse
           cx="27"
-          cy="38"
+          cy="22"
           rx="6"
-          ry="8"
+          ry="7"
           fill="url(#lensHighlight)"
         />
 
         {/* Highlights on right lens */}
         <ellipse
           cx="67"
-          cy="38"
+          cy="22"
           rx="6"
-          ry="8"
+          ry="7"
           fill="url(#lensHighlight)"
         />
       </svg>
