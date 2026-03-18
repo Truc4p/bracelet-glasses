@@ -51,81 +51,33 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         className="relative overflow-hidden w-full"
         style={{
           height: '0',
-          paddingBottom: '35%',
+          paddingBottom: '56%',
         }}
       >
         <img
           src={imageSrc}
           alt={alt}
-          className="absolute w-full h-auto drop-shadow-2xl"
+          className="absolute w-full h-full object-contain drop-shadow-2xl"
           style={{
             transform,
             top: '0',
             left: '0',
-            objectFit: 'cover',
-            objectPosition: 'top',
-            height: '70%',
+          }}
+        />
+
+        {/* Tint overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: gradientMode
+              ? `linear-gradient(180deg, ${tintColor} 0%, ${secondaryColor} 100%)`
+              : tintColor,
+            opacity: getLensOpacity(),
+            mixBlendMode: 'multiply',
+            transform,
           }}
         />
       </div>
-
-      <svg
-        className="absolute top-0 left-0 w-full pointer-events-none"
-        viewBox="0 0 100 50"
-        preserveAspectRatio="none"
-        style={{
-          transform,
-          height: '100%',
-        }}
-      >
-        <defs>
-          {getLensFill()}
-          <radialGradient id="lensHighlight">
-            <stop offset="0%" style={{ stopColor: 'white', stopOpacity: 0.25 }} />
-            <stop offset="70%" style={{ stopColor: 'white', stopOpacity: 0 }} />
-          </radialGradient>
-        </defs>
-
-        {/* Left lens */}
-        <ellipse
-          cx="30"
-          cy="25"
-          rx="18"
-          ry="18"
-          fill={gradientMode ? "url(#lensGradient)" : tintColor}
-          opacity={gradientMode ? 1 : getLensOpacity()}
-          style={{ mixBlendMode: 'multiply' }}
-        />
-
-        {/* Right lens */}
-        <ellipse
-          cx="70"
-          cy="25"
-          rx="18"
-          ry="18"
-          fill={gradientMode ? "url(#lensGradient)" : tintColor}
-          opacity={gradientMode ? 1 : getLensOpacity()}
-          style={{ mixBlendMode: 'multiply' }}
-        />
-
-        {/* Highlights on left lens */}
-        <ellipse
-          cx="27"
-          cy="22"
-          rx="6"
-          ry="7"
-          fill="url(#lensHighlight)"
-        />
-
-        {/* Highlights on right lens */}
-        <ellipse
-          cx="67"
-          cy="22"
-          rx="6"
-          ry="7"
-          fill="url(#lensHighlight)"
-        />
-      </svg>
     </div>
   );
 };
