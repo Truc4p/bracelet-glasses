@@ -26,18 +26,20 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   className = "",
 }) => {
   const getTintStyle = () => {
-    const opacity = Math.max(0.3, Math.min(0.95, 1 - vlt / 100));
+    const opacity = Math.max(0.4, Math.min(0.9, 1 - vlt / 100));
 
     if (gradientMode) {
       return {
         background: `linear-gradient(180deg, ${tintColor} 0%, ${secondaryColor} 100%)`,
         opacity: opacity,
+        mixBlendMode: 'multiply' as const,
       };
     }
 
     return {
       backgroundColor: tintColor,
       opacity: opacity,
+      mixBlendMode: 'multiply' as const,
     };
   };
 
@@ -55,7 +57,7 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
       className={`relative ${className}`}
       style={{
         isolation: 'isolate',
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
         maxWidth,
       }}
     >
@@ -71,6 +73,20 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
           maskRepeat: "no-repeat",
           transform,
           zIndex: 1,
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.15) 0%, transparent 70%)',
+          WebkitMaskImage: `url("${maskDataUrl}")`,
+          maskImage: `url("${maskDataUrl}")`,
+          WebkitMaskSize: "100% 100%",
+          maskSize: "100% 100%",
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          transform,
+          zIndex: 3,
         }}
       />
       <img
