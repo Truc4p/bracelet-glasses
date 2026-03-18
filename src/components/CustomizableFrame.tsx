@@ -62,8 +62,10 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         const saturation = Math.max(r, g, b) - Math.min(r, g, b);
 
         const isLensArea = (
-          (brightness >= 40 && brightness <= 140 && saturation < 50) ||
-          (a > 0 && a < 255 && brightness < 150)
+          a > 50 &&
+          brightness >= 35 &&
+          brightness <= 155 &&
+          saturation < 60
         );
 
         if (isLensArea) {
@@ -90,18 +92,20 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   }, [imageSrc]);
 
   const getTintStyle = () => {
-    const opacity = Math.max(0.5, Math.min(0.95, 1 - vlt / 100));
+    const opacity = Math.max(0.25, Math.min(0.75, 1 - vlt / 100));
 
     if (gradientMode) {
       return {
         background: `linear-gradient(180deg, ${tintColor} 0%, ${secondaryColor} 100%)`,
         opacity: opacity,
+        mixBlendMode: 'multiply' as const,
       };
     }
 
     return {
       backgroundColor: tintColor,
       opacity: opacity,
+      mixBlendMode: 'multiply' as const,
     };
   };
 
@@ -129,7 +133,7 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 15% 20% at 30% 45%, rgba(255,255,255,0.5) 0%, transparent 70%), radial-gradient(ellipse 15% 20% at 70% 45%, rgba(255,255,255,0.5) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 20% 25% at 30% 40%, rgba(255,255,255,0.3) 0%, transparent 60%), radial-gradient(ellipse 20% 25% at 70% 40%, rgba(255,255,255,0.3) 0%, transparent 60%)',
           WebkitMaskImage: `url("${lensMaskUrl}")`,
           maskImage: `url("${lensMaskUrl}")`,
           WebkitMaskSize: "100% 100%",
@@ -138,6 +142,7 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
           maskRepeat: "no-repeat",
           transform,
           zIndex: 2,
+          mixBlendMode: 'overlay',
         }}
       />
       <img

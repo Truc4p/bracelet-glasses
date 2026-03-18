@@ -24,7 +24,7 @@ const LENS_COLORS = [
   { id: "PK-Y-008" as LensColor, name: "PK-Y-008", color: "#2E3A6B", gradient: "linear-gradient(180deg, #2E3A6B, #B8B8D4)" },
   { id: "PK-Y-009" as LensColor, name: "PK-Y-009", color: "#90C878", gradient: "linear-gradient(180deg, #90C878, #90C878)" },
   { id: "PK-Y-010" as LensColor, name: "PK-Y-010", color: "#E8B88B", gradient: "linear-gradient(180deg, #E8B88B, #E8B88B)" },
-  { id: "PK-Y-011" as LensColor, name: "PK-Y-011", color: "#E8D639", gradient: "linear-gradient(180deg, #E8D639, #E8D639)" },
+  { id: "PK-Y-011" as LensColor, name: "PK-Y-011", color: "#C8A030", gradient: "linear-gradient(180deg, #C8A030, #C8A030)" },
   { id: "PK-Y-012" as LensColor, name: "PK-Y-012", color: "#7BB8D4", gradient: "linear-gradient(180deg, #7BB8D4, #7BB8D4)" },
 ];
 
@@ -34,8 +34,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const [vlt, setVlt] = useState(15);
   const [gradientMode, setGradientMode] = useState(false);
   const [gradientSecondary, setGradientSecondary] = useState<LensColor>("PK-Y-002");
-  const [view, setView] = useState<"front" | "side">("front");
-
   const selectedFrame = FRAME_OPTIONS.find((f) => f.id === frame)!;
   const selectedLensColor = LENS_COLORS.find((c) => c.id === lensColor)!;
   const baseColor = selectedLensColor.color;
@@ -59,41 +57,21 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     onPriceChange(newPrice);
   };
 
-  const showFront = view === "front";
-  const showSide = view === "side";
-
   return (
     <div className="flex flex-col h-screen">
       <div className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20 overflow-hidden">
         <div className="relative max-w-4xl w-full flex items-center justify-center">
-          {showFront && (
-            <CustomizableFrame
-              imageSrc={selectedFrame.image}
-              alt={selectedFrame.name}
-              vlt={vlt}
-              baseColor={baseColor}
-              tintColor={tintColor}
-              gradientMode={gradientMode}
-              secondaryColor={secondaryColor}
-              maxWidth="800px"
-            />
-          )}
-
-          {showSide && (
-            <CustomizableFrame
-              imageSrc={selectedFrame.image}
-              alt={`${selectedFrame.name} - Side View`}
-              vlt={vlt}
-              baseColor={baseColor}
-              tintColor={tintColor}
-              gradientMode={gradientMode}
-              secondaryColor={secondaryColor}
-              maxWidth="800px"
-              transform="perspective(1200px) rotateY(45deg) scale(0.95)"
-            />
-          )}
+          <CustomizableFrame
+            imageSrc={selectedFrame.image}
+            alt={selectedFrame.name}
+            vlt={vlt}
+            baseColor={baseColor}
+            tintColor={tintColor}
+            gradientMode={gradientMode}
+            secondaryColor={secondaryColor}
+            maxWidth="800px"
+          />
         </div>
-
       </div>
 
       <div className="h-80 border-t bg-card/50 backdrop-blur-sm p-6 overflow-y-auto">
