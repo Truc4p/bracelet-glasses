@@ -117,8 +117,8 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   };
 
   return (
-    <div className="relative flex-1 flex flex-col animate-fade-in">
-      <div className="flex flex-wrap items-center gap-4 px-6 py-4 border-b border-border">
+    <div className="relative flex-1 flex flex-col animate-fade-in h-full overflow-hidden">
+      <div className="flex-shrink-0 flex flex-wrap items-center gap-4 px-6 py-4 border-b border-border bg-white">
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Frame</span>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-body">
@@ -155,72 +155,62 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         </div>
       </div>
 
-      <div className="flex-1 relative flex items-center justify-center p-6">
-        <FrameLibrary
-          open={frameLibraryOpen}
-          onSelectFrame={handleFrameSelect}
-          onClose={() => setFrameLibraryOpen(false)}
-        />
+      <div className="flex-1 relative overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-6">
+          <FrameLibrary
+            open={frameLibraryOpen}
+            onSelectFrame={handleFrameSelect}
+            onClose={() => setFrameLibraryOpen(false)}
+          />
 
-        <SunglassesAccessoriesLibrary
-          open={accessoriesOpen}
-          onSelectAccessory={(acc) => setDraggedAccessory(acc)}
-          onSelectLensColor={(color) => setLensColor(color)}
-          onClose={() => setAccessoriesOpen(false)}
-        />
+          <SunglassesAccessoriesLibrary
+            open={accessoriesOpen}
+            onSelectAccessory={(acc) => setDraggedAccessory(acc)}
+            onSelectLensColor={(color) => setLensColor(color)}
+            onClose={() => setAccessoriesOpen(false)}
+          />
 
-        <div
-          ref={canvasRef}
-          className="relative max-w-4xl w-full"
-          onDrop={handleCanvasDrop}
-          onDragOver={(e) => e.preventDefault()}
-          onDragEnter={(e) => e.preventDefault()}
-        >
           <div
-            className="relative overflow-hidden w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg"
-            style={{
-              paddingBottom: '56%',
-            }}
+            ref={canvasRef}
+            className="relative max-w-4xl w-full"
+            onDrop={handleCanvasDrop}
+            onDragOver={(e) => e.preventDefault()}
+            onDragEnter={(e) => e.preventDefault()}
           >
-            <img
-              src={selectedFrame.image}
-              alt={selectedFrame.name}
-              className="absolute w-full h-full object-contain drop-shadow-xl"
-              style={{ zIndex: 1 }}
-            />
-
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="relative overflow-visible w-full"
               style={{
-                background: gradientMode
-                  ? `linear-gradient(180deg, ${lensColor.color} 0%, ${gradientSecondary.color} 100%)`
-                  : lensColor.color,
-                opacity: getLensOpacity(),
-                mixBlendMode: 'multiply',
-                zIndex: 2,
+                paddingBottom: '56%',
               }}
-            />
+            >
+              <img
+                src={selectedFrame.image}
+                alt={selectedFrame.name}
+                className="absolute w-full h-full object-contain drop-shadow-xl"
+                style={{ zIndex: 3 }}
+              />
 
-            {placedAccessories.map((placed) => (
-              <button
-                key={placed.id}
-                onClick={() => handleAccessoryClick(placed.id)}
-                className="absolute text-3xl hover:scale-110 transition-transform cursor-pointer z-10"
-                style={{
-                  left: `${placed.x}%`,
-                  top: `${placed.y}%`,
-                  transform: `translate(-50%, -50%) scale(${placed.scale}) rotate(${placed.rotation}deg)`,
-                }}
-                title={`${placed.accessory.name} - Click to remove`}
-              >
-                {placed.accessory.emoji}
-              </button>
-            ))}
+              {placedAccessories.map((placed) => (
+                <button
+                  key={placed.id}
+                  onClick={() => handleAccessoryClick(placed.id)}
+                  className="absolute text-3xl hover:scale-110 transition-transform cursor-pointer z-10"
+                  style={{
+                    left: `${placed.x}%`,
+                    top: `${placed.y}%`,
+                    transform: `translate(-50%, -50%) scale(${placed.scale}) rotate(${placed.rotation}deg)`,
+                  }}
+                  title={`${placed.accessory.name} - Click to remove`}
+                >
+                  {placed.accessory.emoji}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="px-6 py-4 border-t border-border space-y-4">
+      <div className="flex-shrink-0 px-6 py-4 border-t border-border bg-white space-y-4">
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
