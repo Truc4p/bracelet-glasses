@@ -1,7 +1,8 @@
 import { useState, useCallback } from "react";
-import { Library, RotateCcw, Copy } from "lucide-react";
+import { Library, RotateCcw, Copy, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BeadLibrary from "@/components/BeadLibrary";
+import AccessoriesLibrary from "@/components/AccessoriesLibrary";
 import SortableCircularStrand from "@/components/SortableCircularStrand";
 import {
   calculateBeadCount,
@@ -27,6 +28,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   const [placedBeadsB, setPlacedBeadsB] = useState<PlacedBead[]>([]);
   const [twinning, setTwinning] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [accessoriesOpen, setAccessoriesOpen] = useState(false);
   const [selectedCrystal, setSelectedCrystal] = useState<CrystalBead | null>(null);
 
   const beadCountA = calculateBeadCount(wristSizeA, defaultBeadSize);
@@ -215,9 +217,19 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
               {selectedCrystal.name}
             </div>
           )}
-          <Button variant="luxe-outline" size="sm" onClick={() => setLibraryOpen(!libraryOpen)}>
+          <Button variant="luxe-outline" size="sm" onClick={() => {
+            setLibraryOpen(!libraryOpen);
+            setAccessoriesOpen(false);
+          }}>
             <Library className="w-3.5 h-3.5" />
             Crystals
+          </Button>
+          <Button variant="luxe-outline" size="sm" onClick={() => {
+            setAccessoriesOpen(!accessoriesOpen);
+            setLibraryOpen(false);
+          }}>
+            <Sparkles className="w-3.5 h-3.5" />
+            Accessories
           </Button>
           <Button variant="luxe-outline" size="sm" onClick={handleToggleTwinning}>
             <Copy className="w-3.5 h-3.5" />
@@ -234,9 +246,14 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
         <BeadLibrary
           open={libraryOpen}
           onSelectBead={handleSelectBead}
+          onClose={() => setLibraryOpen(false)}
+        />
+
+        <AccessoriesLibrary
+          open={accessoriesOpen}
           onSelectSpacer={handleSelectSpacer}
           onSelectCharm={handleSelectCharm}
-          onClose={() => setLibraryOpen(false)}
+          onClose={() => setAccessoriesOpen(false)}
         />
 
         <SortableCircularStrand
