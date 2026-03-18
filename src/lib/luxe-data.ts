@@ -47,11 +47,11 @@ export interface SunglassesConfig {
 }
 
 export const FRAME_OPTIONS = [
-  { id: "cat-eye", name: "Cat-eye", icon: "👓" },
-  { id: "aviator", name: "Aviator", icon: "🕶️" },
-  { id: "wayfarer", name: "Wayfarer", icon: "😎" },
-  { id: "round", name: "Round", icon: "⭕" },
-  { id: "oversized", name: "Oversized", icon: "🔲" },
+  { id: "PK008", name: "PK008", icon: "👓", dimensions: "53□22-150", image: "/PK008.png" },
+  { id: "PK009", name: "PK009", icon: "🕶️", dimensions: "53□23-149", image: "/PK009.png" },
+  { id: "PK010", name: "PK010", icon: "😎", dimensions: "55□20-149", image: "/PK010.png" },
+  { id: "PK011", name: "PK011", icon: "⭕", dimensions: "55□22-149", image: "/PK011.png" },
+  { id: "PK8018", name: "PK8018-S", icon: "🔲", dimensions: "63□17-150", image: "/PK8018.png" },
 ];
 
 export const LENS_COLORS = [

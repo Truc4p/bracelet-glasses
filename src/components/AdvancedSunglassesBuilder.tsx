@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { RotateCw, Eye, EyeOff, User, Rotate3d, MousePointer2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { Eye, EyeOff, User, Rotate3d, MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE } from "@/lib/luxe-data";
 import { Slider } from "@/components/ui/slider";
@@ -27,7 +27,7 @@ const FASHION_TINTS = [
 ];
 
 const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderProps) => {
-  const [frame, setFrame] = useState("aviator");
+  const [frame, setFrame] = useState("PK008");
   const [baseMaterial, setBaseMaterial] = useState<BaseMaterial>("grey");
   const [fashionTint, setFashionTint] = useState<FashionTint>("clear");
   const [vlt, setVlt] = useState(15);
@@ -63,358 +63,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     onPriceChange(newPrice);
   };
 
-  const getLensGradient = () => {
-    const opacity = 1 - vlt / 100;
-
-    if (gradientMode) {
-      const topColor = tintColor === "transparent" ? baseColor : tintColor;
-      const bottomColor = secondaryColor === "transparent" ? "rgba(255,255,255,0.1)" : secondaryColor;
-      return `linear-gradient(180deg,
-        ${topColor}${Math.round(opacity * 255).toString(16).padStart(2, '0')} 0%,
-        ${bottomColor}${Math.round((opacity * 0.3) * 255).toString(16).padStart(2, '0')} 100%)`;
-    }
-
-    const finalColor = tintColor === "transparent" ? baseColor : tintColor;
-    return `${finalColor}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`;
-  };
-
-  const renderLens = (side: "left" | "right") => {
-    const xOffset = side === "left" ? -70 : 70;
-    const opacity = 1 - vlt / 100;
-
-    const shapes: Record<string, JSX.Element> = {
-      "cat-eye": (
-        <g>
-          <defs>
-            <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
-            </linearGradient>
-            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#1a1a1a" />
-              <stop offset="50%" stopColor="#2a2a2a" />
-              <stop offset="100%" stopColor="#1a1a1a" />
-            </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="35%" cy="30%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.25" />
-              <stop offset="60%" stopColor="white" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="white" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <path
-            d={`M${xOffset - 48},5 Q${xOffset - 50},-35 ${xOffset - 18},-40 Q${xOffset + 18},-35 ${xOffset + 45},-8 Q${xOffset + 46},28 ${xOffset + 5},38 Q${xOffset - 35},38 ${xOffset - 48},5 Z`}
-            fill={`url(#frame-${side})`}
-            stroke="#0a0a0a"
-            strokeWidth="1"
-          />
-          <path
-            d={`M${xOffset - 45},5 Q${xOffset - 47},-32 ${xOffset - 18},-37 Q${xOffset + 18},-32 ${xOffset + 42},-8 Q${xOffset + 43},26 ${xOffset + 5},35 Q${xOffset - 32},35 ${xOffset - 45},5 Z`}
-            fill={`url(#lens-grad-${side})`}
-            stroke="none"
-          />
-          <ellipse cx={xOffset - 8} cy={-10} rx={28} ry={20} fill={`url(#specular-${side})`} />
-        </g>
-      ),
-      aviator: (
-        <g>
-          <defs>
-            <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
-            </linearGradient>
-            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#c9b037" />
-              <stop offset="50%" stopColor="#f4e58c" />
-              <stop offset="100%" stopColor="#c9b037" />
-            </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="38%" cy="28%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.3" />
-              <stop offset="55%" stopColor="white" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="white" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <path
-            d={`M${xOffset - 48},-12 Q${xOffset - 48},-42 ${xOffset},-42 Q${xOffset + 48},-42 ${xOffset + 48},-12 Q${xOffset + 48},28 ${xOffset + 12},40 Q${xOffset - 12},42 ${xOffset - 35},32 Q${xOffset - 48},22 ${xOffset - 48},-12 Z`}
-            fill={`url(#frame-${side})`}
-            stroke="#a58f2f"
-            strokeWidth="1"
-          />
-          <path
-            d={`M${xOffset - 45},-12 Q${xOffset - 45},-39 ${xOffset},-39 Q${xOffset + 45},-39 ${xOffset + 45},-12 Q${xOffset + 45},26 ${xOffset + 12},37 Q${xOffset - 12},39 ${xOffset - 32},30 Q${xOffset - 45},20 ${xOffset - 45},-12 Z`}
-            fill={`url(#lens-grad-${side})`}
-            stroke="none"
-          />
-          <ellipse cx={xOffset - 6} cy={-10} rx={26} ry={22} fill={`url(#specular-${side})`} />
-        </g>
-      ),
-      wayfarer: (
-        <g>
-          <defs>
-            <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
-            </linearGradient>
-            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0a0a0a" />
-              <stop offset="50%" stopColor="#1a1a1a" />
-              <stop offset="100%" stopColor="#0a0a0a" />
-            </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="35%" cy="32%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.28" />
-              <stop offset="58%" stopColor="white" stopOpacity="0.06" />
-              <stop offset="100%" stopColor="white" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <rect
-            x={xOffset - 46}
-            y={-38}
-            width={92}
-            height={72}
-            rx={6}
-            fill={`url(#frame-${side})`}
-            stroke="#000"
-            strokeWidth="1"
-          />
-          <rect
-            x={xOffset - 43}
-            y={-35}
-            width={86}
-            height={66}
-            rx={5}
-            fill={`url(#lens-grad-${side})`}
-            stroke="none"
-          />
-          <ellipse cx={xOffset - 8} cy={-6} rx={30} ry={24} fill={`url(#specular-${side})`} />
-        </g>
-      ),
-      round: (
-        <g>
-          <defs>
-            <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
-            </linearGradient>
-            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3a2f2f" />
-              <stop offset="50%" stopColor="#5a4a4a" />
-              <stop offset="100%" stopColor="#3a2f2f" />
-            </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="38%" cy="32%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.32" />
-              <stop offset="50%" stopColor="white" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="white" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle
-            cx={xOffset}
-            cy={0}
-            r={42}
-            fill={`url(#frame-${side})`}
-            stroke="#2a1f1f"
-            strokeWidth="1"
-          />
-          <circle
-            cx={xOffset}
-            cy={0}
-            r={39}
-            fill={`url(#lens-grad-${side})`}
-            stroke="none"
-          />
-          <circle cx={xOffset - 10} cy={-12} r={22} fill={`url(#specular-${side})`} />
-        </g>
-      ),
-      oversized: (
-        <g>
-          <defs>
-            <linearGradient id={`lens-grad-${side}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
-              <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
-            </linearGradient>
-            <linearGradient id={`frame-${side}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#1a1a1a" />
-              <stop offset="50%" stopColor="#2a2a2a" />
-              <stop offset="100%" stopColor="#1a1a1a" />
-            </linearGradient>
-            <radialGradient id={`specular-${side}`} cx="36%" cy="30%">
-              <stop offset="0%" stopColor="white" stopOpacity="0.3" />
-              <stop offset="50%" stopColor="white" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="white" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <ellipse
-            cx={xOffset}
-            cy={0}
-            rx={54}
-            ry={44}
-            fill={`url(#frame-${side})`}
-            stroke="#0a0a0a"
-            strokeWidth="1"
-          />
-          <ellipse
-            cx={xOffset}
-            cy={0}
-            rx={51}
-            ry={41}
-            fill={`url(#lens-grad-${side})`}
-            stroke="none"
-          />
-          <ellipse cx={xOffset - 12} cy={-10} rx={30} ry={24} fill={`url(#specular-${side})`} />
-        </g>
-      ),
-    };
-    return shapes[frame] || shapes.aviator;
-  };
-
-  const renderQuarterView = (direction: "left" | "right") => {
-    const opacity = 1 - vlt / 100;
-    const xScale = direction === "left" ? -0.7 : 0.7;
-
-    return (
-      <svg viewBox="-180 -80 360 160" className="w-full max-w-2xl drop-shadow-2xl">
-        <defs>
-          <linearGradient id="lens-grad-quarter" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
-            <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
-          </linearGradient>
-          <linearGradient id="frame-quarter" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2a2a2a" />
-            <stop offset="50%" stopColor="#1a1a1a" />
-            <stop offset="100%" stopColor="#2a2a2a" />
-          </linearGradient>
-          <radialGradient id="specular-quarter" cx="40%" cy="30%">
-            <stop offset="0%" stopColor="white" stopOpacity="0.25" />
-            <stop offset="50%" stopColor="white" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="white" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-
-        <g transform={`scale(${xScale}, 1)`}>
-          {/* Bridge */}
-          <path
-            d="M-24,-15 Q-12,-22 0,-24 Q12,-22 24,-15"
-            fill="none"
-            stroke="url(#frame-quarter)"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-          />
-
-          {/* Visible lens (perspective) */}
-          <ellipse
-            cx={direction === "left" ? 70 : -70}
-            cy={0}
-            rx={48}
-            ry={40}
-            fill="url(#frame-quarter)"
-            stroke="#0a0a0a"
-            strokeWidth="1"
-          />
-          <ellipse
-            cx={direction === "left" ? 70 : -70}
-            cy={0}
-            rx={45}
-            ry={37}
-            fill="url(#lens-grad-quarter)"
-            stroke="none"
-          />
-          <ellipse
-            cx={direction === "left" ? 62 : -62}
-            cy={-10}
-            rx={26}
-            ry={22}
-            fill="url(#specular-quarter)"
-          />
-
-          {/* Partial second lens */}
-          <ellipse
-            cx={direction === "left" ? -40 : 40}
-            cy={0}
-            rx={28}
-            ry={38}
-            fill="url(#frame-quarter)"
-            stroke="#0a0a0a"
-            strokeWidth="1"
-            opacity="0.8"
-          />
-          <ellipse
-            cx={direction === "left" ? -40 : 40}
-            cy={0}
-            rx={25}
-            ry={35}
-            fill="url(#lens-grad-quarter)"
-            stroke="none"
-            opacity="0.8"
-          />
-
-          {/* Temple arm */}
-          <path
-            d={direction === "left" ? "M118,-18 L150,-24" : "M-118,-18 L-140,-22"}
-            stroke="url(#frame-quarter)"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-
-          {/* Nose pads */}
-          <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.5" />
-          <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.5" />
-        </g>
-      </svg>
-    );
-  };
-
-  const renderSideView = () => {
-    const opacity = 1 - vlt / 100;
-    return (
-      <svg viewBox="-120 -80 240 160" className="w-full max-w-md drop-shadow-2xl">
-        <defs>
-          <linearGradient id="lens-grad-side" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={baseColor} stopOpacity={opacity} />
-            <stop offset="100%" stopColor={gradientMode ? secondaryColor : baseColor} stopOpacity={gradientMode ? opacity * 0.3 : opacity} />
-          </linearGradient>
-          <linearGradient id="frame-side" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2a2a2a" />
-            <stop offset="50%" stopColor="#1a1a1a" />
-            <stop offset="100%" stopColor="#2a2a2a" />
-          </linearGradient>
-          <radialGradient id="specular-side" cx="45%" cy="35%">
-            <stop offset="0%" stopColor="white" stopOpacity="0.25" />
-            <stop offset="50%" stopColor="white" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="white" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-
-        {/* Temple arm extending back */}
-        <path
-          d="M42,-22 Q80,-26 110,-28 Q120,-26 124,-18"
-          stroke="url(#frame-side)"
-          strokeWidth="4.5"
-          fill="none"
-          strokeLinecap="round"
-        />
-
-        {/* Frame front edge */}
-        <ellipse cx={0} cy={0} rx={18} ry={40} fill="url(#frame-side)" stroke="#0a0a0a" strokeWidth="1" />
-
-        {/* Lens side profile */}
-        <ellipse cx={0} cy={0} rx={14} ry={37} fill="url(#lens-grad-side)" stroke="none" />
-        <ellipse cx={-2} cy={-10} rx={9} ry={18} fill="url(#specular-side)" />
-
-        {/* Front frame extension */}
-        <line x1="-18" y1="-38" x2="-65" y2="-38" stroke="url(#frame-side)" strokeWidth="3.5" strokeLinecap="round" />
-        <line x1="-18" y1="38" x2="-65" y2="38" stroke="url(#frame-side)" strokeWidth="3.5" strokeLinecap="round" />
-
-        {/* Nose pad */}
-        <path
-          d="M-16,8 Q-20,18 -22,28"
-          stroke="#d0d0d0"
-          strokeWidth="2.5"
-          fill="none"
-          strokeLinecap="round"
-          opacity="0.7"
-        />
-      </svg>
-    );
-  };
-
   const getPovFilter = () => {
     const opacity = 1 - vlt / 100;
     const filterColor = tintColor === "transparent" ? baseColor : tintColor;
@@ -438,32 +86,37 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     setIsDragging(false);
   };
 
-  const getRotationView = (): "front" | "side" | "quarter-left" | "quarter-right" => {
+  const getRotationView = (): "front" | "side" => {
     const normalizedRotation = ((rotation % 360) + 360) % 360;
-    if (normalizedRotation < 45 || normalizedRotation >= 315) return "front";
-    if (normalizedRotation >= 45 && normalizedRotation < 135) return "quarter-right";
-    if (normalizedRotation >= 135 && normalizedRotation < 225) return "side";
-    return "quarter-left";
+    if (normalizedRotation < 90 || normalizedRotation >= 270) return "front";
+    return "side";
   };
 
-  return (
-    <div className="flex-1 flex flex-col animate-fade-in relative">
-      {/* POV Preview Overlay */}
-      {povPreview && (
-        <div
-          className="absolute inset-0 z-10 pointer-events-none transition-all duration-500"
-          style={{
-            backgroundColor: getPovFilter(),
-            backdropFilter: `blur(${vlt < 30 ? '0.5px' : '0px'})`,
-          }}
-        >
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm font-body px-4 py-2 bg-black/40 rounded-full backdrop-blur">
-            POV Preview: {vlt}% VLT
-          </div>
-        </div>
-      )}
+  const getLensTintStyle = () => {
+    const opacity = Math.max(0, Math.min(1, 1 - vlt / 100));
+    const finalColor = tintColor === "transparent" ? baseColor : tintColor;
 
-      {/* 3D Viewport */}
+    if (gradientMode) {
+      const topColor = tintColor === "transparent" ? baseColor : tintColor;
+      const bottomColor = secondaryColor === "transparent" ? baseColor : secondaryColor;
+      return {
+        background: `linear-gradient(180deg, ${topColor} 0%, ${bottomColor} 100%)`,
+        opacity: opacity,
+      };
+    }
+
+    return {
+      backgroundColor: finalColor,
+      opacity: opacity,
+    };
+  };
+
+  const currentView = getRotationView();
+  const showFront = (view === "front" && currentView === "front") || tryOnMode;
+  const showSide = view === "side" || (view === "front" && currentView === "side");
+
+  return (
+    <div className="flex flex-col h-screen">
       <div
         className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20 overflow-hidden"
         onMouseDown={handleMouseDown}
@@ -483,151 +136,54 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 <div className="absolute top-36 left-1/2 -translate-x-1/2 w-12 h-16 bg-gradient-to-b from-amber-200 to-amber-300 rounded-b-xl" />
                 <div className="absolute top-48 left-1/2 -translate-x-1/2 w-20 h-1 bg-amber-300/50 rounded-full" />
               </div>
-              <div className="absolute top-28 left-1/2 -translate-x-1/2 z-10" style={{ transform: `translateX(-50%) scale(${tryOnMode ? 0.85 : 1})` }}>
-                {view === "front" ? (
-                  <svg viewBox="-180 -80 360 160" className="w-96 drop-shadow-2xl">
-                    <defs>
-                      <linearGradient id="bridge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#2a2a2a" />
-                        <stop offset="50%" stopColor="#1a1a1a" />
-                        <stop offset="100%" stopColor="#2a2a2a" />
-                      </linearGradient>
-                      <linearGradient id="temple-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#3a3a3a" />
-                        <stop offset="50%" stopColor="#2a2a2a" />
-                        <stop offset="100%" stopColor="#1a1a1a" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M-24,-15 Q-12,-22 0,-24 Q12,-22 24,-15"
-                      fill="none"
-                      stroke="url(#bridge-grad)"
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                    />
-                    {renderLens("left")}
-                    {renderLens("right")}
-                    <path
-                      d="M-118,-18 L-145,-22"
-                      stroke="url(#temple-grad)"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M118,-18 L145,-22"
-                      stroke="url(#temple-grad)"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                    />
-                    <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
-                    <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
-                  </svg>
-                ) : getRotationView() === "quarter-left" ? (
-                  renderQuarterView("left")
-                ) : getRotationView() === "quarter-right" ? (
-                  renderQuarterView("right")
-                ) : (
-                  renderSideView()
-                )}
+              <div className="absolute top-28 left-1/2 -translate-x-1/2 z-10">
+                <div className="relative w-96">
+                  <img
+                    src={selectedFrame.image}
+                    alt={selectedFrame.name}
+                    className="w-full h-auto drop-shadow-2xl"
+                    style={{
+                      maxWidth: '400px',
+                      transform: 'scale(0.85)'
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {!tryOnMode && (
-          <>
-            {view === "front" && getRotationView() === "front" ? (
-              <svg viewBox="-180 -80 360 160" className="w-full max-w-2xl drop-shadow-2xl">
-            <defs>
-              <linearGradient id="bridge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#2a2a2a" />
-                <stop offset="50%" stopColor="#1a1a1a" />
-                <stop offset="100%" stopColor="#2a2a2a" />
-              </linearGradient>
-              <linearGradient id="temple-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#3a3a3a" />
-                <stop offset="50%" stopColor="#2a2a2a" />
-                <stop offset="100%" stopColor="#1a1a1a" />
-              </linearGradient>
-            </defs>
+          <div className="relative max-w-4xl w-full flex items-center justify-center">
+            {showFront && (
+              <div className="relative">
+                <img
+                  src={selectedFrame.image}
+                  alt={selectedFrame.name}
+                  className="w-full h-auto drop-shadow-2xl"
+                  style={{ maxWidth: '800px' }}
+                />
+              </div>
+            )}
 
-            {/* Bridge */}
-            <path
-              d="M-24,-15 Q-12,-22 0,-24 Q12,-22 24,-15"
-              fill="none"
-              stroke="url(#bridge-grad)"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-            />
-
-            {/* Lenses */}
-            {renderLens("left")}
-            {renderLens("right")}
-
-            {/* Temple arms */}
-            <path
-              d="M-118,-18 L-145,-22"
-              stroke="url(#temple-grad)"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-            <path
-              d="M118,-18 L145,-22"
-              stroke="url(#temple-grad)"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-
-            {/* Nose pads */}
-            <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
-            <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
-          </svg>
-        ) : getRotationView() === "quarter-left" ? (
-          renderQuarterView("left")
-        ) : getRotationView() === "quarter-right" ? (
-          renderQuarterView("right")
-        ) : getRotationView() === "side" ? (
-          renderSideView()
-        ) : (
-          <svg viewBox="-180 -80 360 160" className="w-full max-w-2xl drop-shadow-2xl">
-            <defs>
-              <linearGradient id="bridge-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#2a2a2a" />
-                <stop offset="50%" stopColor="#1a1a1a" />
-                <stop offset="100%" stopColor="#2a2a2a" />
-              </linearGradient>
-              <linearGradient id="temple-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#3a3a3a" />
-                <stop offset="50%" stopColor="#2a2a2a" />
-                <stop offset="100%" stopColor="#1a1a1a" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M-24,-15 Q-12,-22 0,-24 Q12,-22 24,-15"
-              fill="none"
-              stroke="url(#bridge-grad)"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-            />
-            {renderLens("left")}
-            {renderLens("right")}
-            <path
-              d="M-118,-18 L-145,-22"
-              stroke="url(#temple-grad)"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-            <path
-              d="M118,-18 L145,-22"
-              stroke="url(#temple-grad)"
-              strokeWidth="4"
-              strokeLinecap="round"
-            />
-            <ellipse cx="-16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
-            <ellipse cx="16" cy="-8" rx="3" ry="6" fill="#d0d0d0" opacity="0.6" />
-          </svg>
+            {showSide && (
+              <div className="relative">
+                <img
+                  src={selectedFrame.image}
+                  alt={`${selectedFrame.name} - Side View`}
+                  className="w-full h-auto drop-shadow-2xl"
+                  style={{
+                    maxWidth: '800px',
+                    transform: 'perspective(1200px) rotateY(45deg) scale(0.95)'
+                  }}
+                />
+              </div>
+            )}
+          </div>
         )}
-          </>
+
+        {povPreview && !tryOnMode && (
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: getPovFilter() }} />
         )}
 
         <div className="absolute top-4 right-4 flex gap-2">
@@ -654,15 +210,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             {povPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
             POV
           </Button>
-          <Button
-            variant="luxe-outline"
-            size="sm"
-            onClick={() => setView(view === "front" ? "side" : "front")}
-            disabled={tryOnMode}
-          >
-            <RotateCw className="w-3.5 h-3.5" />
-            {view === "front" ? "Side" : "Front"}
-          </Button>
         </div>
 
         {!tryOnMode && (
@@ -680,116 +227,111 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         )}
       </div>
 
-      {/* Configuration bar */}
-      <div className="border-t border-border px-6 py-5 space-y-5">
-        {/* Frames */}
-        <div>
-          <label className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2 block">Frame Style</label>
-          <div className="flex gap-2">
-            {FRAME_OPTIONS.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => handleFrameChange(f.id)}
-                className={`flex flex-col items-center gap-1 px-4 py-2.5 rounded-lg border transition-all text-sm font-body ${
-                  frame === f.id
-                    ? "border-primary bg-primary/5 text-foreground"
-                    : "border-border text-muted-foreground hover:border-primary/30"
-                }`}
-              >
-                <span className="text-lg">{f.icon}</span>
-                <span className="text-[11px]">{f.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Base Material & Fashion Tint */}
-        <div className="grid grid-cols-2 gap-6">
+      <div className="h-80 border-t bg-card/50 backdrop-blur-sm p-6 overflow-y-auto">
+        <div className="max-w-4xl mx-auto space-y-6">
           <div>
-            <label className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2 block">Base Material</label>
-            <div className="flex gap-2">
-              {BASE_MATERIALS.map((m) => (
+            <label className="text-sm font-medium mb-3 block font-heading">Select Frame</label>
+            <div className="grid grid-cols-5 gap-3">
+              {FRAME_OPTIONS.map((f) => (
                 <button
-                  key={m.id}
-                  onClick={() => setBaseMaterial(m.id)}
-                  className={`flex-1 py-2 px-3 rounded-md border text-xs font-body transition-all ${
-                    baseMaterial === m.id
-                      ? "border-primary bg-primary/5 text-foreground"
-                      : "border-border text-muted-foreground hover:border-primary/30"
+                  key={f.id}
+                  onClick={() => handleFrameChange(f.id)}
+                  className={`p-4 rounded-lg border-2 transition-all hover:scale-105 ${
+                    frame === f.id
+                      ? "border-primary bg-primary/5 shadow-lg"
+                      : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <div className="w-4 h-4 rounded-full mx-auto mb-1" style={{ backgroundColor: m.color }} />
-                  {m.name}
+                  <div className="text-3xl mb-2">{f.icon}</div>
+                  <div className="text-xs font-medium font-heading">{f.name}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{f.dimensions}</div>
                 </button>
               ))}
             </div>
           </div>
 
-          <div>
-            <label className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2 block">Fashion Tint</label>
-            <div className="flex gap-2">
-              {FASHION_TINTS.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setFashionTint(t.id)}
-                  className={`w-10 h-10 rounded-full border-2 transition-all ${
-                    fashionTint === t.id ? "border-primary scale-110 ring-2 ring-primary/20" : "border-border hover:scale-105"
-                  }`}
-                  style={{ backgroundColor: t.color === "transparent" ? "#fff" : t.color, border: t.color === "transparent" ? "2px dashed #ccc" : undefined }}
-                  title={t.name}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Lens Density (VLT) */}
-        <div>
-          <label className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2 block">
-            Lens Density — {vlt}% VLT (Visible Light Transmission)
-          </label>
-          <Slider
-            value={[vlt]}
-            onValueChange={handleVltChange}
-            min={5}
-            max={95}
-            step={5}
-            className="w-full"
-          />
-          <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-            <span>Dark (5%)</span>
-            <span>Light (95%)</span>
-          </div>
-        </div>
-
-        {/* Gradient Mode */}
-        <div className="flex items-center justify-between">
-          <div>
-            <label className="text-xs text-muted-foreground font-body uppercase tracking-wider block">Shade Profile</label>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Gradient transition effect</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant={gradientMode ? "default" : "luxe-outline"}
-              size="sm"
-              onClick={() => setGradientMode(!gradientMode)}
-            >
-              {gradientMode ? "Gradient Active" : "Solid Tint"}
-            </Button>
-            {gradientMode && (
-              <div className="flex gap-1.5">
-                {FASHION_TINTS.map((t) => (
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <label className="text-sm font-medium mb-3 block font-heading">Base Material</label>
+              <div className="grid grid-cols-2 gap-2">
+                {BASE_MATERIALS.map((mat) => (
                   <button
-                    key={t.id}
-                    onClick={() => setGradientSecondary(t.id)}
-                    className={`w-7 h-7 rounded-full border-2 transition-all ${
-                      gradientSecondary === t.id ? "border-primary scale-110" : "border-border/50 hover:scale-105"
+                    key={mat.id}
+                    onClick={() => setBaseMaterial(mat.id)}
+                    className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
+                      baseMaterial === mat.id
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
                     }`}
-                    style={{ backgroundColor: t.color === "transparent" ? "#fff" : t.color, border: t.color === "transparent" ? "2px dashed #ccc" : undefined }}
-                    title={`Bottom: ${t.name}`}
-                  />
+                  >
+                    <div className="w-5 h-5 rounded-full border" style={{ backgroundColor: mat.color }} />
+                    <span className="text-sm font-body">{mat.name}</span>
+                  </button>
                 ))}
               </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-3 block font-heading">Fashion Tint</label>
+              <div className="grid grid-cols-2 gap-2">
+                {FASHION_TINTS.slice(0, 4).map((tint) => (
+                  <button
+                    key={tint.id}
+                    onClick={() => setFashionTint(tint.id)}
+                    className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
+                      fashionTint === tint.id
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full border"
+                      style={{ backgroundColor: tint.color === "transparent" ? "#fff" : tint.color }}
+                    />
+                    <span className="text-sm font-body">{tint.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-3 block font-heading">
+              VLT (Visible Light Transmission): {vlt}%
+            </label>
+            <Slider value={[vlt]} onValueChange={handleVltChange} min={5} max={95} step={5} className="mb-2" />
+            <p className="text-xs text-muted-foreground font-body">
+              Lower VLT = Darker lenses. 5-20% for bright sun, 50%+ for low light.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={gradientMode}
+                onChange={(e) => {
+                  setGradientMode(e.target.checked);
+                  const newPrice = FRAME_BASE_PRICE + (vlt < 20 ? 25 : vlt < 50 ? 15 : 10) + (e.target.checked ? 20 : 0);
+                  onPriceChange(newPrice);
+                }}
+                className="w-4 h-4"
+              />
+              <span className="text-sm font-medium font-heading">Gradient Mode (+$20)</span>
+            </label>
+
+            {gradientMode && (
+              <select
+                value={gradientSecondary}
+                onChange={(e) => setGradientSecondary(e.target.value as FashionTint)}
+                className="px-3 py-1.5 rounded-md border bg-background text-sm font-body"
+              >
+                {FASHION_TINTS.map((tint) => (
+                  <option key={tint.id} value={tint.id}>
+                    {tint.name}
+                  </option>
+                ))}
+              </select>
             )}
           </div>
         </div>
