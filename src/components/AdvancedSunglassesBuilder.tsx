@@ -3,6 +3,7 @@ import { Eye, EyeOff, User, Rotate3d, MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE } from "@/lib/luxe-data";
 import { Slider } from "@/components/ui/slider";
+import { CustomizableFrame } from "./CustomizableFrame";
 
 interface AdvancedSunglassesBuilderProps {
   onPriceChange: (price: number) => void;
@@ -27,7 +28,7 @@ const FASHION_TINTS = [
 ];
 
 const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderProps) => {
-  const [frame, setFrame] = useState("PK008");
+  const [frame, setFrame] = useState("PK002");
   const [baseMaterial, setBaseMaterial] = useState<BaseMaterial>("grey");
   const [fashionTint, setFashionTint] = useState<FashionTint>("clear");
   const [vlt, setVlt] = useState(15);
@@ -137,15 +138,17 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 <div className="absolute top-48 left-1/2 -translate-x-1/2 w-20 h-1 bg-amber-300/50 rounded-full" />
               </div>
               <div className="absolute top-28 left-1/2 -translate-x-1/2 z-10">
-                <div className="relative w-96">
-                  <img
-                    src={selectedFrame.image}
+                <div className="w-96">
+                  <CustomizableFrame
+                    imageSrc={selectedFrame.image}
                     alt={selectedFrame.name}
-                    className="w-full h-auto drop-shadow-2xl"
-                    style={{
-                      maxWidth: '400px',
-                      transform: 'scale(0.85)'
-                    }}
+                    vlt={vlt}
+                    baseColor={baseColor}
+                    tintColor={tintColor}
+                    gradientMode={gradientMode}
+                    secondaryColor={secondaryColor}
+                    maxWidth="400px"
+                    transform="scale(0.85)"
                   />
                 </div>
               </div>
@@ -156,28 +159,30 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         {!tryOnMode && (
           <div className="relative max-w-4xl w-full flex items-center justify-center">
             {showFront && (
-              <div className="relative">
-                <img
-                  src={selectedFrame.image}
-                  alt={selectedFrame.name}
-                  className="w-full h-auto drop-shadow-2xl"
-                  style={{ maxWidth: '800px' }}
-                />
-              </div>
+              <CustomizableFrame
+                imageSrc={selectedFrame.image}
+                alt={selectedFrame.name}
+                vlt={vlt}
+                baseColor={baseColor}
+                tintColor={tintColor}
+                gradientMode={gradientMode}
+                secondaryColor={secondaryColor}
+                maxWidth="800px"
+              />
             )}
 
             {showSide && (
-              <div className="relative">
-                <img
-                  src={selectedFrame.image}
-                  alt={`${selectedFrame.name} - Side View`}
-                  className="w-full h-auto drop-shadow-2xl"
-                  style={{
-                    maxWidth: '800px',
-                    transform: 'perspective(1200px) rotateY(45deg) scale(0.95)'
-                  }}
-                />
-              </div>
+              <CustomizableFrame
+                imageSrc={selectedFrame.image}
+                alt={`${selectedFrame.name} - Side View`}
+                vlt={vlt}
+                baseColor={baseColor}
+                tintColor={tintColor}
+                gradientMode={gradientMode}
+                secondaryColor={secondaryColor}
+                maxWidth="800px"
+                transform="perspective(1200px) rotateY(45deg) scale(0.95)"
+              />
             )}
           </div>
         )}
@@ -231,20 +236,20 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         <div className="max-w-4xl mx-auto space-y-6">
           <div>
             <label className="text-sm font-medium mb-3 block font-heading">Select Frame</label>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-5 gap-2">
               {FRAME_OPTIONS.map((f) => (
                 <button
                   key={f.id}
                   onClick={() => handleFrameChange(f.id)}
-                  className={`p-4 rounded-lg border-2 transition-all hover:scale-105 ${
+                  className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
                     frame === f.id
                       ? "border-primary bg-primary/5 shadow-lg"
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <div className="text-3xl mb-2">{f.icon}</div>
+                  <div className="text-2xl mb-1">{f.icon}</div>
                   <div className="text-xs font-medium font-heading">{f.name}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{f.dimensions}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{f.dimensions}</div>
                 </button>
               ))}
             </div>

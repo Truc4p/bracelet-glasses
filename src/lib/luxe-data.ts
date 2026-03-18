@@ -47,6 +47,11 @@ export interface SunglassesConfig {
 }
 
 export const FRAME_OPTIONS = [
+  { id: "PK002", name: "PK002", icon: "👓", dimensions: "52□23-149", image: "/PK002.png" },
+  { id: "PK003", name: "PK003", icon: "🕶️", dimensions: "53□23-150", image: "/PK003.png" },
+  { id: "PK005", name: "PK005", icon: "😎", dimensions: "51□24-149", image: "/PK005.png" },
+  { id: "PK006", name: "PK006", icon: "⭕", dimensions: "53□24-149", image: "/PK006.png" },
+  { id: "PK007", name: "PK007", icon: "🔲", dimensions: "53□21-150", image: "/PK007.png" },
   { id: "PK008", name: "PK008", icon: "👓", dimensions: "53□22-150", image: "/PK008.png" },
   { id: "PK009", name: "PK009", icon: "🕶️", dimensions: "53□23-149", image: "/PK009.png" },
   { id: "PK010", name: "PK010", icon: "😎", dimensions: "55□20-149", image: "/PK010.png" },
