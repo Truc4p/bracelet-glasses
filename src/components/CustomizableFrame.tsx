@@ -51,9 +51,16 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   const maskDataUrl = `data:image/svg+xml;base64,${btoa(lensAreaMask)}`;
 
   return (
-    <div className={`relative ${className}`} style={{ backgroundColor: 'transparent' }}>
+    <div
+      className={`relative ${className}`}
+      style={{
+        isolation: 'isolate',
+        backgroundColor: 'transparent',
+        maxWidth,
+      }}
+    >
       <div
-        className="absolute inset-0 pointer-events-none z-10"
+        className="absolute inset-0 pointer-events-none"
         style={{
           ...getTintStyle(),
           WebkitMaskImage: `url("${maskDataUrl}")`,
@@ -63,16 +70,18 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
           WebkitMaskRepeat: "no-repeat",
           maskRepeat: "no-repeat",
           transform,
+          zIndex: 1,
         }}
       />
       <img
         src={imageSrc}
         alt={alt}
-        className="w-full h-auto drop-shadow-2xl relative z-20"
+        className="w-full h-auto drop-shadow-2xl relative"
         style={{
-          maxWidth,
           transform,
           mixBlendMode: "multiply",
+          zIndex: 2,
+          position: 'relative',
         }}
       />
     </div>
