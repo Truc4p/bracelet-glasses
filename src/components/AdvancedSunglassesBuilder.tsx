@@ -178,44 +178,21 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             onDragEnter={(e) => e.preventDefault()}
           >
             <div
-              className="relative w-full"
+              className="relative w-full bg-white rounded-lg"
               style={{
                 paddingBottom: '56%',
               }}
             >
-              <svg
-                className="absolute inset-0 w-full h-full"
-                viewBox="0 0 1000 560"
-                style={{ zIndex: 1 }}
-                preserveAspectRatio="xMidYMid meet"
-              >
-                <defs>
-                  <linearGradient id="lensGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor={lensColor.color} />
-                    <stop offset="100%" stopColor={gradientMode ? gradientSecondary.color : lensColor.color} />
-                  </linearGradient>
-                </defs>
-                <ellipse cx="310" cy="280" rx="140" ry="120" fill="white" />
-                <ellipse cx="690" cy="280" rx="140" ry="120" fill="white" />
-                <ellipse
-                  cx="310"
-                  cy="280"
-                  rx="140"
-                  ry="120"
-                  fill="url(#lensGradient)"
-                  opacity={getLensOpacity()}
-                  style={{ mixBlendMode: 'multiply' }}
-                />
-                <ellipse
-                  cx="690"
-                  cy="280"
-                  rx="140"
-                  ry="120"
-                  fill="url(#lensGradient)"
-                  opacity={getLensOpacity()}
-                  style={{ mixBlendMode: 'multiply' }}
-                />
-              </svg>
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: gradientMode
+                    ? `linear-gradient(180deg, ${lensColor.color} 0%, ${gradientSecondary.color} 100%)`
+                    : lensColor.color,
+                  opacity: getLensOpacity(),
+                  zIndex: 1,
+                }}
+              />
 
               <img
                 src={selectedFrame.image}
