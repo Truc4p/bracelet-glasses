@@ -43,17 +43,6 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
           paddingBottom: '56%',
         }}
       >
-        <div
-          className="absolute inset-0 pointer-events-none flex items-center justify-center"
-          style={{
-            background: gradientMode
-              ? `linear-gradient(180deg, ${tintColor} 0%, ${secondaryColor} 100%)`
-              : tintColor,
-            opacity: getLensOpacity(),
-            transform,
-          }}
-        />
-
         <img
           src={imageSrc}
           alt={alt}
@@ -62,7 +51,20 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
             transform,
             top: '0',
             left: '0',
-            zIndex: 10,
+            zIndex: 1,
+          }}
+        />
+
+        <div
+          className="absolute inset-0 pointer-events-none flex items-center justify-center"
+          style={{
+            background: gradientMode
+              ? `linear-gradient(180deg, ${tintColor} 0%, ${secondaryColor} 100%)`
+              : tintColor,
+            opacity: getLensOpacity(),
+            mixBlendMode: 'multiply',
+            transform,
+            zIndex: 2,
           }}
         />
       </div>
