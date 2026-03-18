@@ -57,14 +57,12 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     onPriceChange(newPrice);
   };
 
-  const frameImage = (vlt >= 80 && selectedFrame.clearImage) ? selectedFrame.clearImage : selectedFrame.image;
-
   return (
     <div className="flex flex-col h-screen">
       <div className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20 overflow-hidden">
         <div className="relative max-w-4xl w-full flex items-center justify-center">
           <CustomizableFrame
-            imageSrc={frameImage}
+            imageSrc={selectedFrame.image}
             alt={selectedFrame.name}
             vlt={vlt}
             baseColor={baseColor}

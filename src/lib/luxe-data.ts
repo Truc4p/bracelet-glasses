@@ -123,11 +123,11 @@ export const FRAME_OPTIONS: FrameOption[] = [
   { id: "PK005", name: "PK005", icon: "😎", dimensions: "51□24-149", image: "/PK005.png" },
   { id: "PK006", name: "PK006", icon: "⭕", dimensions: "53□24-149", image: "/PK006.png" },
   { id: "PK007", name: "PK007", icon: "🔲", dimensions: "53□21-150", image: "/PK007.png" },
-  { id: "PK008", name: "PK008", icon: "👓", dimensions: "53□22-150", image: "/PK008.png", clearImage: "/PK008_-_CLEAR.png" },
-  { id: "PK009", name: "PK009", icon: "🕶️", dimensions: "53□23-149", image: "/PK009.png", clearImage: "/PK009_-_CLEAR.png" },
-  { id: "PK010", name: "PK010", icon: "😎", dimensions: "55□20-149", image: "/PK010.png", clearImage: "/PK010_-_CLEAR.png" },
-  { id: "PK011", name: "PK011", icon: "⭕", dimensions: "55□22-149", image: "/PK011.png", clearImage: "/PK011_-_CLEAR.png" },
-  { id: "PK8018", name: "PK8018-S", icon: "🔲", dimensions: "63□17-150", image: "/PK8018.png", clearImage: "/PK8018_-_CLEAR.png" },
+  { id: "PK008", name: "PK008", icon: "👓", dimensions: "53□22-150", image: "/PK008_-_CLEAR.png" },
+  { id: "PK009", name: "PK009", icon: "🕶️", dimensions: "53□23-149", image: "/PK009_-_CLEAR.png" },
+  { id: "PK010", name: "PK010", icon: "😎", dimensions: "55□20-149", image: "/PK010_-_CLEAR.png" },
+  { id: "PK011", name: "PK011", icon: "⭕", dimensions: "55□22-149", image: "/PK011_-_CLEAR.png" },
+  { id: "PK8018", name: "PK8018-S", icon: "🔲", dimensions: "63□17-150", image: "/PK8018_-_CLEAR.png" },
 ];
 
 export const LENS_COLORS = [
