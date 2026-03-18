@@ -5,6 +5,7 @@ export interface CrystalBead {
   gradient?: string;
   price: number;
   emoji: string;
+  image?: string;
 }
 
 export interface Spacer {
@@ -31,16 +32,16 @@ export function calculateBeadPrice(basePrice: number, beadSize: BeadSize): numbe
 }
 
 export const CRYSTAL_LIBRARY: CrystalBead[] = [
-  { id: "amethyst", name: "Amethyst", color: "#9B59B6", gradient: "linear-gradient(135deg, #9B59B6, #8E44AD)", price: 3.50, emoji: "💜" },
-  { id: "rose-quartz", name: "Rose Quartz", color: "#F5B7C5", gradient: "linear-gradient(135deg, #F5B7C5, #E8A0B5)", price: 2.80, emoji: "🩷" },
-  { id: "clear-quartz", name: "Clear Quartz", color: "#E8E8E8", gradient: "linear-gradient(135deg, #F0F0F0, #D8D8D8)", price: 2.00, emoji: "🤍" },
-  { id: "tigers-eye", name: "Tiger's Eye", color: "#B8860B", gradient: "linear-gradient(135deg, #DAA520, #B8860B)", price: 4.00, emoji: "🧡" },
-  { id: "lapis-lazuli", name: "Lapis Lazuli", color: "#1E3A5F", gradient: "linear-gradient(135deg, #26508E, #1E3A5F)", price: 5.00, emoji: "💙" },
-  { id: "jade", name: "Jade", color: "#00A86B", gradient: "linear-gradient(135deg, #00C878, #00A86B)", price: 4.50, emoji: "💚" },
-  { id: "citrine", name: "Citrine", color: "#F4C430", gradient: "linear-gradient(135deg, #FFD700, #F4C430)", price: 3.00, emoji: "💛" },
-  { id: "obsidian", name: "Obsidian", color: "#2C2C2C", gradient: "linear-gradient(135deg, #3C3C3C, #1C1C1C)", price: 2.50, emoji: "🖤" },
-  { id: "moonstone", name: "Moonstone", color: "#C4C4DE", gradient: "linear-gradient(135deg, #D4D4EE, #B4B4CE)", price: 4.20, emoji: "🩶" },
-  { id: "carnelian", name: "Carnelian", color: "#CC5500", gradient: "linear-gradient(135deg, #E06020, #CC5500)", price: 3.20, emoji: "❤️‍🔥" },
+  { id: "amethyst", name: "Amethyst", color: "#9B59B6", gradient: "linear-gradient(135deg, #9B59B6, #8E44AD)", price: 3.50, emoji: "💜", image: "/crystals/amethyst.jpg" },
+  { id: "rose-quartz", name: "Rose Quartz", color: "#F5B7C5", gradient: "linear-gradient(135deg, #F5B7C5, #E8A0B5)", price: 2.80, emoji: "🩷", image: "/crystals/rose-quartz.jpg" },
+  { id: "clear-quartz", name: "Clear Quartz", color: "#E8E8E8", gradient: "linear-gradient(135deg, #F0F0F0, #D8D8D8)", price: 2.00, emoji: "🤍", image: "/crystals/clear-quartz.jpg" },
+  { id: "tigers-eye", name: "Tiger's Eye", color: "#B8860B", gradient: "linear-gradient(135deg, #DAA520, #B8860B)", price: 4.00, emoji: "🧡", image: "/crystals/tigers-eye.jpg" },
+  { id: "lapis-lazuli", name: "Lapis Lazuli", color: "#1E3A5F", gradient: "linear-gradient(135deg, #26508E, #1E3A5F)", price: 5.00, emoji: "💙", image: "/crystals/lapis-lazuli.jpg" },
+  { id: "jade", name: "Jade", color: "#00A86B", gradient: "linear-gradient(135deg, #00C878, #00A86B)", price: 4.50, emoji: "💚", image: "/crystals/jade.jpg" },
+  { id: "citrine", name: "Citrine", color: "#F4C430", gradient: "linear-gradient(135deg, #FFD700, #F4C430)", price: 3.00, emoji: "💛", image: "/crystals/citrine.jpg" },
+  { id: "obsidian", name: "Obsidian", color: "#2C2C2C", gradient: "linear-gradient(135deg, #3C3C3C, #1C1C1C)", price: 2.50, emoji: "🖤", image: "/crystals/obsidian.jpg" },
+  { id: "moonstone", name: "Moonstone", color: "#C4C4DE", gradient: "linear-gradient(135deg, #D4D4EE, #B4B4CE)", price: 4.20, emoji: "🩶", image: "/crystals/moonstone.jpg" },
+  { id: "carnelian", name: "Carnelian", color: "#CC5500", gradient: "linear-gradient(135deg, #E06020, #CC5500)", price: 3.20, emoji: "❤️‍🔥", image: "/crystals/carnelian.jpg" },
 ];
 
 export const SPACERS: Spacer[] = [

@@ -52,10 +52,18 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
             }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group cursor-grab active:cursor-grabbing"
           >
-            <div
-              className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm"
-              style={{ background: bead.gradient || bead.color }}
-            />
+            {bead.image ? (
+              <img
+                src={bead.image}
+                alt={bead.name}
+                className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm object-cover"
+              />
+            ) : (
+              <div
+                className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm"
+                style={{ background: bead.gradient || bead.color }}
+              />
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{bead.name}</p>
               <p className="text-xs text-muted-foreground">${bead.price.toFixed(2)} / bead</p>
