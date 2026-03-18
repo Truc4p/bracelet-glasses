@@ -1,5 +1,4 @@
-import { useState, useRef } from "react";
-import { Eye, EyeOff, User, Rotate3d, MousePointer2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE } from "@/lib/luxe-data";
 import { Slider } from "@/components/ui/slider";
@@ -36,12 +35,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const [gradientMode, setGradientMode] = useState(false);
   const [gradientSecondary, setGradientSecondary] = useState<LensColor>("PK-Y-002");
   const [view, setView] = useState<"front" | "side">("front");
-  const [povPreview, setPovPreview] = useState(false);
-  const [rotation, setRotation] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [tryOnMode, setTryOnMode] = useState(false);
-  const dragStartX = useRef(0);
-  const lastRotation = useRef(0);
 
   const selectedFrame = FRAME_OPTIONS.find((f) => f.id === frame)!;
   const selectedLensColor = LENS_COLORS.find((c) => c.id === lensColor)!;
@@ -66,172 +59,41 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     onPriceChange(newPrice);
   };
 
-  const getPovFilter = () => {
-    const opacity = 1 - vlt / 100;
-    const filterColor = tintColor;
-    return `${filterColor}${Math.round(opacity * 180).toString(16).padStart(2, '0')}`;
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    dragStartX.current = e.clientX;
-    lastRotation.current = rotation;
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const delta = e.clientX - dragStartX.current;
-    const newRotation = lastRotation.current + delta * 0.5;
-    setRotation(newRotation % 360);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const getRotationView = (): "front" | "side" => {
-    const normalizedRotation = ((rotation % 360) + 360) % 360;
-    if (normalizedRotation < 90 || normalizedRotation >= 270) return "front";
-    return "side";
-  };
-
-  const getLensTintStyle = () => {
-    const opacity = Math.max(0, Math.min(1, 1 - vlt / 100));
-    const finalColor = tintColor === "transparent" ? baseColor : tintColor;
-
-    if (gradientMode) {
-      const topColor = tintColor === "transparent" ? baseColor : tintColor;
-      const bottomColor = secondaryColor === "transparent" ? baseColor : secondaryColor;
-      return {
-        background: `linear-gradient(180deg, ${topColor} 0%, ${bottomColor} 100%)`,
-        opacity: opacity,
-      };
-    }
-
-    return {
-      backgroundColor: finalColor,
-      opacity: opacity,
-    };
-  };
-
-  const currentView = getRotationView();
-  const showFront = (view === "front" && currentView === "front") || tryOnMode;
-  const showSide = view === "side" || (view === "front" && currentView === "side");
+  const showFront = view === "front";
+  const showSide = view === "side";
 
   return (
     <div className="flex flex-col h-screen">
-      <div
-        className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20 overflow-hidden"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
-      >
-        {tryOnMode && (
-          <div className="absolute inset-0 flex items-start justify-center pt-12">
-            <div className="relative">
-              <div className="w-64 h-80 bg-gradient-to-b from-amber-50 to-amber-100 rounded-t-full rounded-b-3xl border-4 border-amber-200/50 relative overflow-hidden">
-                <div className="absolute top-16 left-1/2 -translate-x-1/2 w-full flex justify-center gap-12">
-                  <div className="w-8 h-12 bg-gradient-to-b from-amber-800/40 to-amber-900/60 rounded-full" />
-                  <div className="w-8 h-12 bg-gradient-to-b from-amber-800/40 to-amber-900/60 rounded-full" />
-                </div>
-                <div className="absolute top-36 left-1/2 -translate-x-1/2 w-12 h-16 bg-gradient-to-b from-amber-200 to-amber-300 rounded-b-xl" />
-                <div className="absolute top-48 left-1/2 -translate-x-1/2 w-20 h-1 bg-amber-300/50 rounded-full" />
-              </div>
-              <div className="absolute top-28 left-1/2 -translate-x-1/2 z-10">
-                <div className="w-96">
-                  <CustomizableFrame
-                    imageSrc={selectedFrame.image}
-                    alt={selectedFrame.name}
-                    vlt={vlt}
-                    baseColor={baseColor}
-                    tintColor={tintColor}
-                    gradientMode={gradientMode}
-                    secondaryColor={secondaryColor}
-                    maxWidth="400px"
-                    transform="scale(0.85)"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+        <div className="relative max-w-4xl w-full flex items-center justify-center">
+          {showFront && (
+            <CustomizableFrame
+              imageSrc={selectedFrame.image}
+              alt={selectedFrame.name}
+              vlt={vlt}
+              baseColor={baseColor}
+              tintColor={tintColor}
+              gradientMode={gradientMode}
+              secondaryColor={secondaryColor}
+              maxWidth="800px"
+            />
+          )}
 
-        {!tryOnMode && (
-          <div className="relative max-w-4xl w-full flex items-center justify-center">
-            {showFront && (
-              <CustomizableFrame
-                imageSrc={selectedFrame.image}
-                alt={selectedFrame.name}
-                vlt={vlt}
-                baseColor={baseColor}
-                tintColor={tintColor}
-                gradientMode={gradientMode}
-                secondaryColor={secondaryColor}
-                maxWidth="800px"
-              />
-            )}
-
-            {showSide && (
-              <CustomizableFrame
-                imageSrc={selectedFrame.image}
-                alt={`${selectedFrame.name} - Side View`}
-                vlt={vlt}
-                baseColor={baseColor}
-                tintColor={tintColor}
-                gradientMode={gradientMode}
-                secondaryColor={secondaryColor}
-                maxWidth="800px"
-                transform="perspective(1200px) rotateY(45deg) scale(0.95)"
-              />
-            )}
-          </div>
-        )}
-
-        {povPreview && !tryOnMode && (
-          <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: getPovFilter() }} />
-        )}
-
-        <div className="absolute top-4 right-4 flex gap-2">
-          <Button
-            variant={tryOnMode ? "default" : "luxe-outline"}
-            size="sm"
-            onClick={() => {
-              setTryOnMode(!tryOnMode);
-              if (!tryOnMode) {
-                setRotation(0);
-                setView("front");
-              }
-            }}
-          >
-            <User className="w-3.5 h-3.5" />
-            Try On
-          </Button>
-          <Button
-            variant={povPreview ? "default" : "luxe-outline"}
-            size="sm"
-            onClick={() => setPovPreview(!povPreview)}
-            disabled={tryOnMode}
-          >
-            {povPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-            POV
-          </Button>
+          {showSide && (
+            <CustomizableFrame
+              imageSrc={selectedFrame.image}
+              alt={`${selectedFrame.name} - Side View`}
+              vlt={vlt}
+              baseColor={baseColor}
+              tintColor={tintColor}
+              gradientMode={gradientMode}
+              secondaryColor={secondaryColor}
+              maxWidth="800px"
+              transform="perspective(1200px) rotateY(45deg) scale(0.95)"
+            />
+          )}
         </div>
 
-        {!tryOnMode && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-background/80 backdrop-blur px-4 py-2 rounded-full border border-border shadow-lg">
-            <Rotate3d className="w-4 h-4 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground font-body">Drag to rotate 360°</span>
-            <MousePointer2 className="w-3.5 h-3.5 text-muted-foreground animate-pulse" />
-          </div>
-        )}
-
-        {tryOnMode && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur px-4 py-2 rounded-full border border-border shadow-lg">
-            <span className="text-xs text-muted-foreground font-body">Virtual Try-On Mode Active</span>
-          </div>
-        )}
       </div>
 
       <div className="h-80 border-t bg-card/50 backdrop-blur-sm p-6 overflow-y-auto">

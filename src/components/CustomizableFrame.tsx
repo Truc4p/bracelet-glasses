@@ -46,10 +46,9 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
       if (!ctx || !maskCtx) return;
 
       ctx.drawImage(img, 0, 0);
-      maskCtx.drawImage(img, 0, 0);
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height);
+      const maskData = maskCtx.createImageData(canvas.width, canvas.height);
       const data = imageData.data;
       const mask = maskData.data;
 
@@ -58,19 +57,17 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         const g = data[i + 1];
         const b = data[i + 2];
         const brightness = (r + g + b) / 3;
-        const saturation = Math.max(r, g, b) - Math.min(r, g, b);
 
-        if (brightness > 200 && saturation < 30) {
+        if (brightness > 180) {
           mask[i] = 255;
           mask[i + 1] = 255;
           mask[i + 2] = 255;
           mask[i + 3] = 255;
         } else {
+          mask[i] = 0;
+          mask[i + 1] = 0;
+          mask[i + 2] = 0;
           mask[i + 3] = 0;
-        }
-
-        if (brightness < 80) {
-          data[i + 3] = 0;
         }
       }
 
