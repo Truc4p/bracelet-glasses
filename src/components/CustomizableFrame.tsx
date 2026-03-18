@@ -47,14 +47,24 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         maxWidth,
       }}
     >
-      <div className="relative overflow-hidden" style={{ paddingBottom: '35%' }}>
+      <div
+        className="relative overflow-hidden w-full"
+        style={{
+          height: '0',
+          paddingBottom: '35%',
+        }}
+      >
         <img
           src={imageSrc}
           alt={alt}
-          className="absolute top-0 left-0 w-full drop-shadow-2xl"
+          className="absolute w-full h-auto drop-shadow-2xl"
           style={{
             transform,
-            clipPath: 'inset(0 0 50% 0)',
+            top: '0',
+            left: '0',
+            objectFit: 'cover',
+            objectPosition: 'top',
+            height: '70%',
           }}
         />
       </div>
