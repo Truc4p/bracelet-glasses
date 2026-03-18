@@ -58,8 +58,8 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 flex items-center justify-center p-8 relative bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+    <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-background to-muted/20">
         <div className="relative max-w-4xl w-full flex items-center justify-center">
           <CustomizableFrame
             imageSrc={selectedFrame.image}
