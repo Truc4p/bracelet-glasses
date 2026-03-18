@@ -9,31 +9,32 @@ interface AdvancedSunglassesBuilderProps {
   onPriceChange: (price: number) => void;
 }
 
-type BaseMaterial = "grey" | "brown" | "green" | "g15";
-type FashionTint = "rose-gold" | "midnight-blue" | "amber" | "violet" | "clear";
+type LensColor =
+  | "PK-Y-001" | "PK-Y-002" | "PK-Y-003" | "PK-Y-004"
+  | "PK-Y-005" | "PK-Y-006" | "PK-Y-007" | "PK-Y-008"
+  | "PK-Y-009" | "PK-Y-010" | "PK-Y-011" | "PK-Y-012";
 
-const BASE_MATERIALS = [
-  { id: "grey" as BaseMaterial, name: "Grey", color: "#808080" },
-  { id: "brown" as BaseMaterial, name: "Brown", color: "#8B4513" },
-  { id: "green" as BaseMaterial, name: "Green", color: "#2E8B57" },
-  { id: "g15" as BaseMaterial, name: "G-15", color: "#3D5C43" },
-];
-
-const FASHION_TINTS = [
-  { id: "clear" as FashionTint, name: "Clear", color: "transparent" },
-  { id: "rose-gold" as FashionTint, name: "Rose Gold", color: "#B76E79" },
-  { id: "midnight-blue" as FashionTint, name: "Midnight Blue", color: "#191970" },
-  { id: "amber" as FashionTint, name: "Amber", color: "#FFBF00" },
-  { id: "violet" as FashionTint, name: "Violet", color: "#8B00FF" },
+const LENS_COLORS = [
+  { id: "PK-Y-001" as LensColor, name: "PK-Y-001", color: "#3A3A3A", gradient: "linear-gradient(180deg, #3A3A3A, #3A3A3A)" },
+  { id: "PK-Y-002" as LensColor, name: "PK-Y-002", color: "#6B6B6B", gradient: "linear-gradient(180deg, #6B6B6B, #B8B8B8)" },
+  { id: "PK-Y-003" as LensColor, name: "PK-Y-003", color: "#4A1515", gradient: "linear-gradient(180deg, #4A1515, #4A1515)" },
+  { id: "PK-Y-004" as LensColor, name: "PK-Y-004", color: "#5C2E1A", gradient: "linear-gradient(180deg, #5C2E1A, #D4A574)" },
+  { id: "PK-Y-005" as LensColor, name: "PK-Y-005", color: "#8B2942", gradient: "linear-gradient(180deg, #8B2942, #8B2942)" },
+  { id: "PK-Y-006" as LensColor, name: "PK-Y-006", color: "#7A3B5D", gradient: "linear-gradient(180deg, #7A3B5D, #D4A5C4)" },
+  { id: "PK-Y-007" as LensColor, name: "PK-Y-007", color: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F, #1E3A5F)" },
+  { id: "PK-Y-008" as LensColor, name: "PK-Y-008", color: "#2E3A6B", gradient: "linear-gradient(180deg, #2E3A6B, #B8B8D4)" },
+  { id: "PK-Y-009" as LensColor, name: "PK-Y-009", color: "#90C878", gradient: "linear-gradient(180deg, #90C878, #90C878)" },
+  { id: "PK-Y-010" as LensColor, name: "PK-Y-010", color: "#E8B88B", gradient: "linear-gradient(180deg, #E8B88B, #E8B88B)" },
+  { id: "PK-Y-011" as LensColor, name: "PK-Y-011", color: "#E8D639", gradient: "linear-gradient(180deg, #E8D639, #E8D639)" },
+  { id: "PK-Y-012" as LensColor, name: "PK-Y-012", color: "#7BB8D4", gradient: "linear-gradient(180deg, #7BB8D4, #7BB8D4)" },
 ];
 
 const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderProps) => {
   const [frame, setFrame] = useState("PK002");
-  const [baseMaterial, setBaseMaterial] = useState<BaseMaterial>("grey");
-  const [fashionTint, setFashionTint] = useState<FashionTint>("clear");
+  const [lensColor, setLensColor] = useState<LensColor>("PK-Y-001");
   const [vlt, setVlt] = useState(15);
   const [gradientMode, setGradientMode] = useState(false);
-  const [gradientSecondary, setGradientSecondary] = useState<FashionTint>("clear");
+  const [gradientSecondary, setGradientSecondary] = useState<LensColor>("PK-Y-002");
   const [view, setView] = useState<"front" | "side">("front");
   const [povPreview, setPovPreview] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -43,9 +44,10 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const lastRotation = useRef(0);
 
   const selectedFrame = FRAME_OPTIONS.find((f) => f.id === frame)!;
-  const baseColor = BASE_MATERIALS.find((m) => m.id === baseMaterial)!.color;
-  const tintColor = FASHION_TINTS.find((t) => t.id === fashionTint)!.color;
-  const secondaryColor = FASHION_TINTS.find((t) => t.id === gradientSecondary)!.color;
+  const selectedLensColor = LENS_COLORS.find((c) => c.id === lensColor)!;
+  const baseColor = selectedLensColor.color;
+  const tintColor = selectedLensColor.color;
+  const secondaryColor = LENS_COLORS.find((c) => c.id === gradientSecondary)!.color;
 
   const price = FRAME_BASE_PRICE + (vlt < 20 ? 25 : vlt < 50 ? 15 : 10) + (gradientMode ? 20 : 0);
 
@@ -66,7 +68,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
 
   const getPovFilter = () => {
     const opacity = 1 - vlt / 100;
-    const filterColor = tintColor === "transparent" ? baseColor : tintColor;
+    const filterColor = tintColor;
     return `${filterColor}${Math.round(opacity * 180).toString(16).padStart(2, '0')}`;
   };
 
@@ -255,48 +257,29 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium mb-3 block font-heading">Base Material</label>
-              <div className="grid grid-cols-2 gap-2">
-                {BASE_MATERIALS.map((mat) => (
-                  <button
-                    key={mat.id}
-                    onClick={() => setBaseMaterial(mat.id)}
-                    className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
-                      baseMaterial === mat.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="w-5 h-5 rounded-full border" style={{ backgroundColor: mat.color }} />
-                    <span className="text-sm font-body">{mat.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-3 block font-heading">Fashion Tint</label>
-              <div className="grid grid-cols-2 gap-2">
-                {FASHION_TINTS.slice(0, 4).map((tint) => (
-                  <button
-                    key={tint.id}
-                    onClick={() => setFashionTint(tint.id)}
-                    className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
-                      fashionTint === tint.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div
-                      className="w-5 h-5 rounded-full border"
-                      style={{ backgroundColor: tint.color === "transparent" ? "#fff" : tint.color }}
-                    />
-                    <span className="text-sm font-body">{tint.name}</span>
-                  </button>
-                ))}
-              </div>
+          <div>
+            <label className="text-sm font-medium mb-3 block font-heading">Lens Color</label>
+            <div className="grid grid-cols-6 gap-2">
+              {LENS_COLORS.map((color) => (
+                <button
+                  key={color.id}
+                  onClick={() => setLensColor(color.id)}
+                  className={`p-2 rounded-lg border-2 transition-all hover:scale-110 ${
+                    lensColor === color.id
+                      ? "border-primary bg-primary/5 shadow-lg"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                  title={color.name}
+                >
+                  <div
+                    className="w-8 h-8 rounded-full border mx-auto"
+                    style={{
+                      background: color.gradient,
+                    }}
+                  />
+                  <div className="text-xs font-medium font-heading mt-1 text-center">{color.name}</div>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -328,12 +311,12 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             {gradientMode && (
               <select
                 value={gradientSecondary}
-                onChange={(e) => setGradientSecondary(e.target.value as FashionTint)}
+                onChange={(e) => setGradientSecondary(e.target.value as LensColor)}
                 className="px-3 py-1.5 rounded-md border bg-background text-sm font-body"
               >
-                {FASHION_TINTS.map((tint) => (
-                  <option key={tint.id} value={tint.id}>
-                    {tint.name}
+                {LENS_COLORS.map((color) => (
+                  <option key={color.id} value={color.id}>
+                    {color.name}
                   </option>
                 ))}
               </select>
