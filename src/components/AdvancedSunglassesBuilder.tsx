@@ -155,7 +155,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         </div>
       </div>
 
-      <div className="flex-1 relative overflow-y-auto">
+      <div className="flex-1 relative overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-slate-50">
         <div className="min-h-full flex items-center justify-center p-6">
           <FrameLibrary
             open={frameLibraryOpen}
@@ -178,16 +178,43 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             onDragEnter={(e) => e.preventDefault()}
           >
             <div
-              className="relative overflow-visible w-full"
+              className="relative w-full"
               style={{
                 paddingBottom: '56%',
               }}
             >
+              <svg
+                className="absolute inset-0 w-full h-full"
+                viewBox="0 0 800 450"
+                style={{ zIndex: 1 }}
+              >
+                <defs>
+                  <clipPath id="lensClip">
+                    <ellipse cx="250" cy="225" rx="120" ry="100" />
+                    <ellipse cx="550" cy="225" rx="120" ry="100" />
+                  </clipPath>
+                  <linearGradient id="lensGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={lensColor.color} />
+                    <stop offset="100%" stopColor={gradientMode ? gradientSecondary.color : lensColor.color} />
+                  </linearGradient>
+                </defs>
+                <rect
+                  x="0"
+                  y="0"
+                  width="800"
+                  height="450"
+                  clipPath="url(#lensClip)"
+                  fill="url(#lensGradient)"
+                  opacity={getLensOpacity()}
+                  style={{ mixBlendMode: 'multiply' }}
+                />
+              </svg>
+
               <img
                 src={selectedFrame.image}
                 alt={selectedFrame.name}
-                className="absolute w-full h-full object-contain drop-shadow-xl"
-                style={{ zIndex: 3 }}
+                className="absolute w-full h-full object-contain drop-shadow-2xl"
+                style={{ zIndex: 2 }}
               />
 
               {placedAccessories.map((placed) => (
@@ -199,6 +226,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                     left: `${placed.x}%`,
                     top: `${placed.y}%`,
                     transform: `translate(-50%, -50%) scale(${placed.scale}) rotate(${placed.rotation}deg)`,
+                    zIndex: 3,
                   }}
                   title={`${placed.accessory.name} - Click to remove`}
                 >
