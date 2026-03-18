@@ -24,6 +24,8 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
   transform,
   className = "",
 }) => {
+  console.log('CustomizableFrame render:', { imageSrc, alt, vlt, tintColor, gradientMode, secondaryColor });
+
   const getLensOpacity = () => {
     return Math.max(0.3, Math.min(0.8, 1 - vlt / 100));
   };
@@ -45,13 +47,16 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
       className={`relative ${className}`}
       style={{
         maxWidth,
+        border: '2px solid red',
       }}
     >
+      <div className="text-black mb-2">Image: {imageSrc}</div>
       <div
         className="relative overflow-hidden w-full"
         style={{
           height: '0',
           paddingBottom: '56%',
+          border: '2px solid blue',
         }}
       >
         <img
@@ -63,6 +68,8 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
             top: '0',
             left: '0',
           }}
+          onLoad={() => console.log('Image loaded:', imageSrc)}
+          onError={(e) => console.error('Image failed to load:', imageSrc, e)}
         />
 
         {/* Tint overlay */}
