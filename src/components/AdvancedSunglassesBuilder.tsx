@@ -58,9 +58,9 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   };
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="relative max-w-4xl w-full flex items-center justify-center">
+    <div className="flex flex-col w-full h-screen">
+      <div className="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden min-h-0">
+        <div className="relative max-w-3xl w-full flex items-center justify-center">
           <CustomizableFrame
             imageSrc={selectedFrame.image}
             alt={selectedFrame.name}
@@ -69,12 +69,12 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             tintColor={tintColor}
             gradientMode={gradientMode}
             secondaryColor={secondaryColor}
-            maxWidth="800px"
+            maxWidth="600px"
           />
         </div>
       </div>
 
-      <div className="h-80 border-t bg-white p-6 overflow-y-auto shadow-lg">
+      <div className="flex-shrink-0 h-[400px] border-t bg-white p-6 overflow-y-scroll shadow-lg">
         <div className="max-w-4xl mx-auto space-y-6">
           <div>
             <label className="text-sm font-medium mb-3 block font-heading">Select Frame</label>
