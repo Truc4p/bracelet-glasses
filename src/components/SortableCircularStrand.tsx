@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   DndContext,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
@@ -16,8 +17,7 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { type PlacedBead, type BeadSize, type CrystalBead } from "@/lib/luxe-data";
+import { type PlacedBead, type BeadSize } from "@/lib/luxe-data";
 
 interface SortableCircularStrandProps {
   beadCount: number;
@@ -36,46 +36,62 @@ interface SortableBeadProps {
   y: number;
   beadPixelSize: number;
   onSlotClick: (position: number) => void;
-  onBeadDrop?: (position: number, data: any) => void;
+  isDragActive: boolean; // is ANY bead currently being dnd-kit-dragged
 }
 
-function SortableBead({ bead, position, x, y, beadPixelSize, onSlotClick, onBeadDrop }: SortableBeadProps) {
+function getBeadBackground(bead: PlacedBead | null): string {
+  if (!bead) return "hsl(var(--muted))";
+  if (bead.type === "crystal" && bead.crystal) return bead.crystal.gradient || bead.crystal.color;
+  if (bead.type === "spacer" && bead.spacer) return bead.spacer.metallic;
+  if (bead.type === "charm") return "#F5F5DC";
+  return "hsl(var(--muted))";
+}
+
+function SortableBead({
+  bead,
+  position,
+  x,
+  y,
+  beadPixelSize,
+  onSlotClick,
+  isDragActive,
+}: SortableBeadProps) {
   const {
     attributes,
     listeners,
     setNodeRef,
-    transform,
-    transition,
     isDragging,
   } = useSortable({
     id: `bead-${position}`,
     disabled: !bead,
   });
 
-  const getBeadBackground = () => {
-    if (!bead) return "hsl(var(--muted))";
-    if (bead.type === 'crystal' && bead.crystal) {
-      return bead.crystal.gradient || bead.crystal.color;
-    } else if (bead.type === 'spacer' && bead.spacer) {
-      return bead.spacer.metallic;
-    } else if (bead.type === 'charm' && bead.charm) {
-      return "#F5F5DC";
-    }
-    return "hsl(var(--muted))";
-  };
-
-  const style = {
+  const style: React.CSSProperties = {
     width: beadPixelSize,
     height: beadPixelSize,
     left: x - beadPixelSize / 2,
     top: y - beadPixelSize / 2,
-    transform: CSS.Transform.toString(transform),
-    transition,
-    background: getBeadBackground(),
+    // No CSS.Transform — absolute position is driven by left/top only.
+    // Applying dnd-kit's transform to abs-positioned items breaks layout.
+    background: getBeadBackground(bead),
     borderColor: bead ? "transparent" : "hsl(var(--border))",
     boxShadow: bead ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0 : 1, // hide original while overlay ghost is shown
+    transition: isDragActive ? undefined : "opacity 0.15s, background 0.2s",
+    // z-index 20 ensures bead buttons sit above the z-10 HTML5 drop zone overlay
+    // so click-to-place works on empty slots even when the drop zone is active.
+    zIndex: 20,
   };
+
+  const title = bead
+    ? bead.type === "crystal" && bead.crystal
+      ? `${bead.crystal.name} (${bead.beadSize}mm) — Drag to reorder`
+      : bead.type === "spacer" && bead.spacer
+      ? `${bead.spacer.name} Spacer — Drag to reorder`
+      : bead.type === "charm" && bead.charm
+      ? `${bead.charm.animal} Charm (${bead.charm.design}) — Drag to reorder`
+      : `Slot ${position + 1}`
+    : `Empty slot ${position + 1} — Click to place`;
 
   return (
     <button
@@ -84,43 +100,18 @@ function SortableBead({ bead, position, x, y, beadPixelSize, onSlotClick, onBead
       {...attributes}
       {...(bead ? listeners : {})}
       onClick={() => !bead && onSlotClick(position)}
-      onDragOver={(e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "copy";
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        if (onBeadDrop) {
-          try {
-            const beadData = JSON.parse(e.dataTransfer.getData("application/json"));
-            onBeadDrop(position, beadData);
-          } catch (err) {
-            console.error("Failed to parse bead data:", err);
-          }
-        }
-      }}
       className={`absolute border transition-all duration-200 hover:scale-110 active:scale-95 group ${
-        bead ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
-      } ${bead?.type === 'charm' ? 'rounded' : 'rounded-full'}`}
-      title={
-        bead
-          ? bead.type === 'crystal' && bead.crystal
-            ? `${bead.crystal.name} (${bead.beadSize}mm) - Drag to reorder`
-            : bead.type === 'spacer' && bead.spacer
-            ? `${bead.spacer.name} Spacer - Drag to reorder`
-            : bead.type === 'charm' && bead.charm
-            ? `${bead.charm.animal} Charm (${bead.charm.design}) - Drag to reorder`
-            : `Slot ${position + 1}`
-          : `Slot ${position + 1}`
-      }
+        bead ? "cursor-grab active:cursor-grabbing" : "cursor-pointer hover:border-primary/60"
+      } ${bead?.type === "charm" ? "rounded" : "rounded-full"}`}
+      title={title}
     >
-      {bead && bead.type === 'charm' && bead.charm && (
+      {bead && bead.type === "charm" && bead.charm && (
         <span className="text-xs flex items-center justify-center h-full">
           {bead.charm.emoji}
         </span>
       )}
-      {bead && bead.type === 'crystal' && (
-        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+      {bead && bead.type === "crystal" && (
+        <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
           {bead.beadSize}mm
         </span>
       )}
@@ -138,15 +129,18 @@ const SortableCircularStrand = ({
   wristSize,
 }: SortableCircularStrandProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const canvasSize = 320;
   const center = canvasSize / 2;
   const radius = canvasSize / 2 - 36;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: { distance: 6 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 6 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -158,9 +152,13 @@ const SortableCircularStrand = ({
     const x = center + radius * Math.cos(angle);
     const y = center + radius * Math.sin(angle);
     const placed = placedBeads.find((b) => b.position === i);
-    const beadPixelSize = placed ? (placed.beadSize === 6 ? 18 : placed.beadSize === 8 ? 22 : 26) : 20;
+    const beadPixelSize = placed
+      ? placed.beadSize === 6 ? 18 : placed.beadSize === 8 ? 22 : 26
+      : 20;
     return { index: i, x, y, placed, beadPixelSize };
   });
+
+  // ── dnd-kit handlers ─────────────────────────────────────────────────────
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -168,39 +166,73 @@ const SortableCircularStrand = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (over && active.id !== over.id) {
       const oldIndex = placedBeads.findIndex((b) => `bead-${b.position}` === active.id);
       const newIndex = placedBeads.findIndex((b) => `bead-${b.position}` === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
+        // Collect the position values in order BEFORE the move, then reassign
+        // them to the reordered array so the two beads truly swap slot positions.
+        const sortedPositions = placedBeads.map((b) => b.position);
         const reordered = arrayMove(placedBeads, oldIndex, newIndex);
         const updatedBeads = reordered.map((bead, idx) => ({
           ...bead,
-          position: placedBeads[idx].position,
+          position: sortedPositions[idx],
         }));
         onBeadsReorder(updatedBeads);
       }
     }
-
     setActiveId(null);
+  };
+
+  // ── HTML5 drop-zone (from library panels) ────────────────────────────────
+  // A single transparent overlay handles drops so we avoid conflicts with
+  // dnd-kit's pointer capture on individual bead buttons.
+
+  const findNearestSlot = (clientX: number, clientY: number): number => {
+    if (!canvasRef.current) return 0;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const localX = clientX - rect.left;
+    const localY = clientY - rect.top;
+    let nearestIndex = 0;
+    let minDist = Infinity;
+    slots.forEach((slot) => {
+      const dist = Math.hypot(slot.x - localX, slot.y - localY);
+      if (dist < minDist) {
+        minDist = dist;
+        nearestIndex = slot.index;
+      }
+    });
+    return nearestIndex;
+  };
+
+  const handleDropZoneDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    // Only accept drops from the library panels (not dnd-kit drags)
+    if (e.dataTransfer.types.includes("application/json")) {
+      e.dataTransfer.dropEffect = "copy";
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDropZoneDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (!onBeadDrop) return;
+    const raw = e.dataTransfer.getData("application/json");
+    if (!raw) return; // not a library drop – ignore silently
+    try {
+      const data = JSON.parse(raw);
+      const slotIndex = findNearestSlot(e.clientX, e.clientY);
+      onBeadDrop(slotIndex, data);
+    } catch (err) {
+      console.error("Failed to parse dropped bead data:", err);
+    }
   };
 
   const activeBead = activeId
     ? placedBeads.find((b) => `bead-${b.position}` === activeId)
     : null;
-
-  const getActiveBeadBackground = () => {
-    if (!activeBead) return "";
-    if (activeBead.type === 'crystal' && activeBead.crystal) {
-      return activeBead.crystal.gradient || activeBead.crystal.color;
-    } else if (activeBead.type === 'spacer' && activeBead.spacer) {
-      return activeBead.spacer.metallic;
-    } else if (activeBead.type === 'charm' && activeBead.charm) {
-      return "#F5F5DC";
-    }
-    return "";
-  };
 
   return (
     <DndContext
@@ -210,20 +242,32 @@ const SortableCircularStrand = ({
       onDragEnd={handleDragEnd}
     >
       <div className="flex flex-col items-center gap-3">
-        {label && <span className="text-xs font-body text-muted-foreground uppercase tracking-widest">{label}</span>}
-        <div className="relative" style={{ width: canvasSize, height: canvasSize }}>
+        {label && (
+          <span className="text-xs font-body text-muted-foreground uppercase tracking-widest">
+            {label}
+          </span>
+        )}
+
+        <div
+          ref={canvasRef}
+          className="relative"
+          style={{ width: canvasSize, height: canvasSize }}
+        >
+          {/* Guide circle */}
           <svg className="absolute inset-0" width={canvasSize} height={canvasSize}>
             <circle
               cx={center}
               cy={center}
               r={radius}
               fill="none"
-              stroke="hsl(var(--border))"
-              strokeWidth="1.5"
+              stroke={isDragOver ? "hsl(var(--primary))" : "hsl(var(--border))"}
+              strokeWidth={isDragOver ? 2 : 1.5}
               strokeDasharray="4 3"
+              style={{ transition: "stroke 0.2s" }}
             />
           </svg>
 
+          {/* Bead slots (dnd-kit sortable) */}
           <SortableContext items={placedBeads.map((b) => `bead-${b.position}`)}>
             {slots.map((slot) => (
               <SortableBead
@@ -234,34 +278,50 @@ const SortableCircularStrand = ({
                 y={slot.y}
                 beadPixelSize={slot.beadPixelSize}
                 onSlotClick={() => onSlotClick(slot.index, slot.placed?.beadSize || 8)}
-                onBeadDrop={onBeadDrop}
+                isDragActive={activeId !== null}
               />
             ))}
           </SortableContext>
 
-          <DragOverlay>
+          {/* Single HTML5 drop zone covering the canvas (below beads in z-order) */}
+          <div
+            className="absolute inset-0 z-10"
+            style={{ pointerEvents: activeId ? "none" : "auto" }}
+            onDragOver={handleDropZoneDragOver}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={handleDropZoneDrop}
+          />
+
+          {/* dnd-kit drag overlay ghost */}
+          <DragOverlay dropAnimation={null}>
             {activeBead ? (
               <div
                 className={`border-2 border-primary shadow-xl flex items-center justify-center ${
-                  activeBead.type === 'charm' ? 'rounded' : 'rounded-full'
+                  activeBead.type === "charm" ? "rounded" : "rounded-full"
                 }`}
                 style={{
                   width: activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26,
                   height: activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26,
-                  background: getActiveBeadBackground(),
+                  background: getBeadBackground(activeBead),
+                  opacity: 0.9,
                 }}
               >
-                {activeBead.type === 'charm' && activeBead.charm && (
+                {activeBead.type === "charm" && activeBead.charm && (
                   <span className="text-xs">{activeBead.charm.emoji}</span>
                 )}
               </div>
             ) : null}
           </DragOverlay>
 
+          {/* Center counter */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center">
-              <p className="text-2xl font-display font-semibold text-foreground">{placedBeads.length}</p>
-              <p className="text-[10px] text-muted-foreground font-body uppercase tracking-wider">of {beadCount}</p>
+              <p className="text-2xl font-display font-semibold text-foreground">
+                {placedBeads.length}
+              </p>
+              <p className="text-[10px] text-muted-foreground font-body uppercase tracking-wider">
+                of {beadCount}
+              </p>
             </div>
           </div>
         </div>

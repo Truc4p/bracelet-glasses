@@ -14,6 +14,12 @@ import {
   type ZodiacCharm,
 } from "@/lib/luxe-data";
 
+type SelectedItem =
+  | { kind: "crystal"; crystal: CrystalBead }
+  | { kind: "spacer"; spacer: Spacer }
+  | { kind: "charm"; charm: ZodiacCharm }
+  | null;
+
 interface BraceletBuilderProps {
   onPriceChange: (price: number) => void;
 }
@@ -42,7 +48,10 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   const [twinning, setTwinning] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [accessoriesOpen, setAccessoriesOpen] = useState(false);
-  const [selectedCrystal, setSelectedCrystal] = useState<CrystalBead | null>(null);
+  const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
+
+  // Convenience accessors kept for display/backwards-compat
+  const selectedCrystal = selectedItem?.kind === "crystal" ? selectedItem.crystal : null;
 
   const beadCountA = calculateBeadCount(wristSizeA, defaultBeadSize);
   const beadCountB = calculateBeadCount(wristSizeB, defaultBeadSize);
@@ -74,11 +83,25 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
     const existing = placedBeads.find((b) => b.position === position);
     let updated: PlacedBead[];
 
-    if (existing) {
+    if (existing && !selectedItem) {
+      // No item selected → clicking an occupied slot removes it
       updated = placedBeads.filter((b) => b.position !== position);
-    } else if (selectedCrystal) {
-      updated = [...placedBeads, { position, type: 'crystal', crystal: selectedCrystal, beadSize: defaultBeadSize }];
+    } else if (selectedItem) {
+      // Build the new placed bead from whichever item is selected
+      let newBead: PlacedBead;
+      if (selectedItem.kind === "crystal") {
+        newBead = { position, type: "crystal", crystal: selectedItem.crystal, beadSize: defaultBeadSize };
+      } else if (selectedItem.kind === "spacer") {
+        newBead = { position, type: "spacer", spacer: selectedItem.spacer, beadSize: defaultBeadSize };
+      } else {
+        newBead = { position, type: "charm", charm: selectedItem.charm, beadSize: defaultBeadSize };
+      }
+      // Replace if occupied, append if empty
+      updated = existing
+        ? placedBeads.map((b) => (b.position === position ? newBead : b))
+        : [...placedBeads, newBead];
     } else {
+      // Nothing selected and slot is empty → open crystal library
       setLibraryOpen(true);
       return;
     }
@@ -99,18 +122,19 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
     const existing = placedBeads.find((b) => b.position === position);
 
     let newItem: PlacedBead;
-    if (data.type === 'crystal') {
-      newItem = { position, type: 'crystal', crystal: data.item, beadSize: defaultBeadSize };
-    } else if (data.type === 'spacer') {
-      newItem = { position, type: 'spacer', spacer: data.item, beadSize: defaultBeadSize };
-    } else if (data.type === 'charm') {
-      newItem = { position, type: 'charm', charm: data.item, beadSize: defaultBeadSize };
+    if (data.type === "crystal") {
+      newItem = { position, type: "crystal", crystal: data.item, beadSize: defaultBeadSize };
+    } else if (data.type === "spacer") {
+      newItem = { position, type: "spacer", spacer: data.item, beadSize: defaultBeadSize };
+    } else if (data.type === "charm") {
+      newItem = { position, type: "charm", charm: data.item, beadSize: defaultBeadSize };
     } else {
       return;
     }
 
+    // Replace occupied slot instead of removing it (bug fix)
     const updated = existing
-      ? placedBeads.filter((b) => b.position !== position)
+      ? placedBeads.map((b) => (b.position === position ? newItem : b))
       : [...placedBeads, newItem];
 
     setPlacedBeads(updated);
@@ -138,21 +162,24 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   };
 
   const handleSelectBead = (bead: CrystalBead) => {
-    setSelectedCrystal(bead);
+    setSelectedItem({ kind: "crystal", crystal: bead });
+    setLibraryOpen(false);
   };
 
   const handleSelectSpacer = (spacer: Spacer) => {
-    console.log("Spacer selected", spacer);
+    setSelectedItem({ kind: "spacer", spacer });
+    setAccessoriesOpen(false);
   };
 
   const handleSelectCharm = (charm: ZodiacCharm) => {
-    console.log("Charm selected", charm);
+    setSelectedItem({ kind: "charm", charm });
+    setAccessoriesOpen(false);
   };
 
   const handleReset = () => {
     setPlacedBeadsA([]);
     setPlacedBeadsB([]);
-    setSelectedCrystal(null);
+    setSelectedItem(null);
     updatePrice([], [], twinning);
   };
 
@@ -224,10 +251,27 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
-          {selectedCrystal && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-body">
-              <div className="w-4 h-4 rounded-full" style={{ background: selectedCrystal.gradient || selectedCrystal.color }} />
-              {selectedCrystal.name}
+          {selectedItem && (
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-body cursor-pointer hover:bg-muted/60 transition-colors"
+              title="Click to deselect"
+              onClick={() => setSelectedItem(null)}
+            >
+              {selectedItem.kind === "crystal" && (
+                <div className="w-4 h-4 rounded-full" style={{ background: selectedItem.crystal.gradient || selectedItem.crystal.color }} />
+              )}
+              {selectedItem.kind === "spacer" && (
+                <div className="w-4 h-4 rounded-full" style={{ background: selectedItem.spacer.metallic }} />
+              )}
+              {selectedItem.kind === "charm" && (
+                <span className="text-sm">{selectedItem.charm.emoji}</span>
+              )}
+              <span>
+                {selectedItem.kind === "crystal" ? selectedItem.crystal.name
+                  : selectedItem.kind === "spacer" ? `${selectedItem.spacer.name} Spacer`
+                  : `${selectedItem.charm.animal} Charm`}
+              </span>
+              <span className="text-xs text-muted-foreground">✕</span>
             </div>
           )}
           <Button variant="luxe-outline" size="sm" onClick={() => {
