@@ -1,6 +1,12 @@
 import { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
-import { CRYSTAL_LIBRARY, type CrystalBead } from "@/lib/luxe-data";
+import { useCatalogue } from "@/data/index";
+import type { CrystalEntry } from "@/data/crystals";
+import StockBadge from "@/components/admin/StockBadge";
+
+// ── Types that the rest of the app still uses via the legacy name ──────────
+// BeadLibrary is passed a CrystalEntry (same shape as the old CrystalBead)
+type CrystalBead = CrystalEntry;
 
 interface BeadLibraryProps {
   onSelectBead: (bead: CrystalBead) => void;
@@ -8,12 +14,23 @@ interface BeadLibraryProps {
   onClose: () => void;
 }
 
+const TAG_FILTERS = ["all", "popular", "bestseller", "new"] as const;
+type TagFilter = typeof TAG_FILTERS[number];
+
 const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
+  const { crystals } = useCatalogue();
   const [search, setSearch] = useState("");
+  const [tagFilter, setTagFilter] = useState<TagFilter>("all");
 
   const filteredCrystals = useMemo(
-    () => CRYSTAL_LIBRARY.filter((b) => b.name.toLowerCase().includes(search.toLowerCase())),
-    [search]
+    () =>
+      crystals.filter((b) => {
+        const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase());
+        const matchesTag =
+          tagFilter === "all" || (b.tags ?? []).includes(tagFilter);
+        return matchesSearch && matchesTag;
+      }),
+    [crystals, search, tagFilter]
   );
 
   if (!open) return null;
@@ -27,7 +44,8 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
         </button>
       </div>
 
-      <div className="p-3">
+      {/* Search */}
+      <div className="p-3 pb-1">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
@@ -40,39 +58,85 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-1">
-        {filteredCrystals.map((bead) => (
+      {/* Tag filter */}
+      <div className="flex gap-1 px-3 pb-2 flex-wrap">
+        {TAG_FILTERS.map((t) => (
           <button
-            key={bead.id}
-            onClick={() => onSelectBead(bead)}
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.effectAllowed = "copy";
-              e.dataTransfer.setData("application/json", JSON.stringify({ type: 'crystal', item: bead }));
-            }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group cursor-grab active:cursor-grabbing"
+            key={t}
+            onClick={() => setTagFilter(t)}
+            className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors capitalize ${
+              tagFilter === t
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted/60 text-muted-foreground hover:text-foreground"
+            }`}
           >
-            {bead.image ? (
-              <img
-                src={bead.image}
-                alt={bead.name}
-                className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm object-cover"
-              />
-            ) : (
-              <div
-                className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm"
-                style={{ background: bead.gradient || bead.color }}
-              />
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{bead.name}</p>
-              <p className="text-xs text-muted-foreground">${bead.price.toFixed(2)} / bead</p>
-            </div>
-            <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-              Drag or Click
-            </span>
+            {t}
           </button>
         ))}
+      </div>
+
+      {/* Crystal list */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-1">
+        {filteredCrystals.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-6">No crystals match your search.</p>
+        )}
+
+        {filteredCrystals.map((bead) => {
+          const outOfStock = bead.stock === 0;
+          return (
+            <button
+              key={bead.id}
+              onClick={() => !outOfStock && onSelectBead(bead)}
+              disabled={outOfStock}
+              draggable={!outOfStock}
+              onDragStart={(e) => {
+                e.dataTransfer.effectAllowed = "copy";
+                e.dataTransfer.setData(
+                  "application/json",
+                  JSON.stringify({ type: "crystal", item: bead })
+                );
+              }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-left group ${
+                outOfStock
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:bg-muted/60 cursor-grab active:cursor-grabbing"
+              }`}
+            >
+              {/* Swatch / image */}
+              {bead.image ? (
+                <img
+                  src={bead.image}
+                  alt={bead.name}
+                  className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm object-cover"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    img.style.display = "none";
+                    const next = img.nextElementSibling as HTMLElement | null;
+                    if (next) next.style.display = "block";
+                  }}
+                />
+              ) : null}
+              <div
+                className={`w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm ${bead.image ? "hidden" : ""}`}
+                style={{ background: bead.gradient || bead.color }}
+              />
+
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{bead.name}</p>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="text-xs text-muted-foreground">${bead.price.toFixed(2)} / bead</p>
+                  <StockBadge stock={bead.stock} />
+                </div>
+              </div>
+
+              {!outOfStock && (
+                <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                  Drag or Click
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

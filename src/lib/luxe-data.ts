@@ -1,105 +1,87 @@
-export interface CrystalBead {
-  id: string;
-  name: string;
-  color: string;
-  gradient?: string;
-  price: number;
-  emoji: string;
-  image?: string;
+/**
+ * luxe-data.ts
+ *
+ * This file re-exports everything that the rest of the app uses, but now
+ * sources its data from the `src/data/` registry layer so that crystals,
+ * spacers, and charms are managed in one place (with localStorage persistence
+ * via `useCatalogue()`).
+ *
+ * The type names and all function signatures remain exactly the same so no
+ * other component needs to change.
+ */
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+import { DEFAULT_CRYSTALS } from "@/data/crystals";
+import { DEFAULT_SPACERS } from "@/data/spacers";
+import { DEFAULT_CHARMS } from "@/data/charms";
+import { getCatalogueSnapshot } from "@/data/index";
+
+// Re-export entry types under the legacy names used across the app
+export type { CrystalEntry as CrystalBead } from "@/data/crystals";
+export type { SpacerEntry as Spacer } from "@/data/spacers";
+export type { CharmEntry as ZodiacCharm } from "@/data/charms";
+
+// Provide CrystalBead / Spacer / ZodiacCharm as inline aliases too
+// (some files import them individually)
+import type { CrystalEntry } from "@/data/crystals";
+import type { SpacerEntry } from "@/data/spacers";
+import type { CharmEntry } from "@/data/charms";
+
+export type CrystalBeadAlias = CrystalEntry;
+export type SpacerAlias = SpacerEntry;
+export type ZodiacCharmAlias = CharmEntry;
+
+// ── Static catalogue snapshots (read at module load time) ────────────────────
+// Used by components that don't use the hook (legacy consumers).
+// After any admin edit they should re-render via the hook, but these keep
+// backward-compat for any static/non-hook imports.
+
+/**
+ * Returns the current catalogue snapshot (defaults merged with localStorage).
+ * Falls back to the compile-time defaults if localStorage is unavailable.
+ */
+function snapshot() {
+  if (typeof window === "undefined") {
+    return { crystals: DEFAULT_CRYSTALS, spacers: DEFAULT_SPACERS, charms: DEFAULT_CHARMS };
+  }
+  return getCatalogueSnapshot();
 }
 
-export interface Spacer {
-  id: string;
-  name: string;
-  color: string;
-  metallic: string;
-  price: number;
-  emoji: string;
-}
+export const CRYSTAL_LIBRARY: CrystalEntry[] = snapshot().crystals;
+export const SPACERS: SpacerEntry[] = snapshot().spacers;
+export const ZODIAC_CHARMS: CharmEntry[] = snapshot().charms;
 
-export interface ZodiacCharm {
-  id: string;
-  name: string;
-  animal: string;
-  design: 'classic' | 'modern';
-  price: number;
-  emoji: string;
-}
-
-export function calculateBeadPrice(basePrice: number, beadSize: BeadSize): number {
-  const sizeMultiplier = beadSize === 6 ? 0.8 : beadSize === 8 ? 1.0 : 1.3;
-  return basePrice * sizeMultiplier;
-}
-
-export const CRYSTAL_LIBRARY: CrystalBead[] = [
-  { id: "amethyst", name: "Amethyst", color: "#9B59B6", gradient: "linear-gradient(135deg, #9B59B6, #8E44AD)", price: 3.50, emoji: "💜", image: "/crystals/amethyst.jpg" },
-  { id: "rose-quartz", name: "Rose Quartz", color: "#F5B7C5", gradient: "linear-gradient(135deg, #F5B7C5, #E8A0B5)", price: 2.80, emoji: "🩷", image: "/crystals/rose-quartz.jpg" },
-  { id: "clear-quartz", name: "Clear Quartz", color: "#E8E8E8", gradient: "linear-gradient(135deg, #F0F0F0, #D8D8D8)", price: 2.00, emoji: "🤍", image: "/crystals/clear-quartz.jpg" },
-  { id: "tigers-eye", name: "Tiger's Eye", color: "#B8860B", gradient: "linear-gradient(135deg, #DAA520, #B8860B)", price: 4.00, emoji: "🧡", image: "/crystals/tigers-eye.jpg" },
-  { id: "lapis-lazuli", name: "Lapis Lazuli", color: "#1E3A5F", gradient: "linear-gradient(135deg, #26508E, #1E3A5F)", price: 5.00, emoji: "💙", image: "/crystals/lapis-lazuli.jpg" },
-  { id: "jade", name: "Jade", color: "#00A86B", gradient: "linear-gradient(135deg, #00C878, #00A86B)", price: 4.50, emoji: "💚", image: "/crystals/jade.jpg" },
-  { id: "citrine", name: "Citrine", color: "#F4C430", gradient: "linear-gradient(135deg, #FFD700, #F4C430)", price: 3.00, emoji: "💛", image: "/crystals/citrine.jpg" },
-  { id: "obsidian", name: "Obsidian", color: "#2C2C2C", gradient: "linear-gradient(135deg, #3C3C3C, #1C1C1C)", price: 2.50, emoji: "🖤", image: "/crystals/obsidian.jpg" },
-  { id: "moonstone", name: "Moonstone", color: "#C4C4DE", gradient: "linear-gradient(135deg, #D4D4EE, #B4B4CE)", price: 4.20, emoji: "🩶", image: "/crystals/moonstone.jpg" },
-  { id: "carnelian", name: "Carnelian", color: "#CC5500", gradient: "linear-gradient(135deg, #E06020, #CC5500)", price: 3.20, emoji: "❤️‍🔥", image: "/crystals/carnelian.jpg" },
-];
-
-export const SPACERS: Spacer[] = [
-  { id: "silver", name: "Silver", color: "#C0C0C0", metallic: "linear-gradient(135deg, #E8E8E8, #A0A0A0)", price: 1.50, emoji: "⚪" },
-  { id: "gold", name: "Gold", color: "#FFD700", metallic: "linear-gradient(135deg, #FFED4E, #D4AF37)", price: 2.00, emoji: "🟡" },
-  { id: "rose-gold", name: "Rose Gold", color: "#E0BFB8", metallic: "linear-gradient(135deg, #F5D5CB, #C9A99E)", price: 2.50, emoji: "🌸" },
-];
-
-export const ZODIAC_ANIMALS = [
+export const ZODIAC_ANIMALS: string[] = [
   "Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
-  "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"
+  "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig",
 ];
 
-export const ZODIAC_CHARMS: ZodiacCharm[] = [
-  { id: "rat-classic", name: "Rat", animal: "Rat", design: 'classic', price: 8.00, emoji: "🐀" },
-  { id: "rat-modern", name: "Rat", animal: "Rat", design: 'modern', price: 8.00, emoji: "🐀" },
-  { id: "ox-classic", name: "Ox", animal: "Ox", design: 'classic', price: 8.00, emoji: "🐂" },
-  { id: "ox-modern", name: "Ox", animal: "Ox", design: 'modern', price: 8.00, emoji: "🐂" },
-  { id: "tiger-classic", name: "Tiger", animal: "Tiger", design: 'classic', price: 8.00, emoji: "🐅" },
-  { id: "tiger-modern", name: "Tiger", animal: "Tiger", design: 'modern', price: 8.00, emoji: "🐅" },
-  { id: "rabbit-classic", name: "Rabbit", animal: "Rabbit", design: 'classic', price: 8.00, emoji: "🐇" },
-  { id: "rabbit-modern", name: "Rabbit", animal: "Rabbit", design: 'modern', price: 8.00, emoji: "🐇" },
-  { id: "dragon-classic", name: "Dragon", animal: "Dragon", design: 'classic', price: 8.00, emoji: "🐉" },
-  { id: "dragon-modern", name: "Dragon", animal: "Dragon", design: 'modern', price: 8.00, emoji: "🐉" },
-  { id: "snake-classic", name: "Snake", animal: "Snake", design: 'classic', price: 8.00, emoji: "🐍" },
-  { id: "snake-modern", name: "Snake", animal: "Snake", design: 'modern', price: 8.00, emoji: "🐍" },
-  { id: "horse-classic", name: "Horse", animal: "Horse", design: 'classic', price: 8.00, emoji: "🐴" },
-  { id: "horse-modern", name: "Horse", animal: "Horse", design: 'modern', price: 8.00, emoji: "🐴" },
-  { id: "goat-classic", name: "Goat", animal: "Goat", design: 'classic', price: 8.00, emoji: "🐐" },
-  { id: "goat-modern", name: "Goat", animal: "Goat", design: 'modern', price: 8.00, emoji: "🐐" },
-  { id: "monkey-classic", name: "Monkey", animal: "Monkey", design: 'classic', price: 8.00, emoji: "🐵" },
-  { id: "monkey-modern", name: "Monkey", animal: "Monkey", design: 'modern', price: 8.00, emoji: "🐵" },
-  { id: "rooster-classic", name: "Rooster", animal: "Rooster", design: 'classic', price: 8.00, emoji: "🐓" },
-  { id: "rooster-modern", name: "Rooster", animal: "Rooster", design: 'modern', price: 8.00, emoji: "🐓" },
-  { id: "dog-classic", name: "Dog", animal: "Dog", design: 'classic', price: 8.00, emoji: "🐕" },
-  { id: "dog-modern", name: "Dog", animal: "Dog", design: 'modern', price: 8.00, emoji: "🐕" },
-  { id: "pig-classic", name: "Pig", animal: "Pig", design: 'classic', price: 8.00, emoji: "🐖" },
-  { id: "pig-modern", name: "Pig", animal: "Pig", design: 'modern', price: 8.00, emoji: "🐖" },
-];
-
-export function calculateBeadCount(wristSizeCm: number, beadSizeMm: number): number {
-  const wristCircumferenceMm = wristSizeCm * 10;
-  const beadCount = Math.round(wristCircumferenceMm / beadSizeMm);
-  return Math.max(beadCount, 8);
-}
+// ── Business-logic helpers (unchanged) ───────────────────────────────────────
 
 export type BeadSize = 6 | 8 | 10;
-
-export type ItemType = 'crystal' | 'spacer' | 'charm';
+export type ItemType = "crystal" | "spacer" | "charm";
 
 export interface PlacedBead {
   position: number;
   type: ItemType;
-  crystal?: CrystalBead;
-  spacer?: Spacer;
-  charm?: ZodiacCharm;
+  crystal?: CrystalEntry;
+  spacer?: SpacerEntry;
+  charm?: CharmEntry;
   beadSize: BeadSize;
 }
+
+export function calculateBeadPrice(basePrice: number, beadSize: BeadSize): number {
+  const multiplier = beadSize === 6 ? 0.8 : beadSize === 8 ? 1.0 : 1.3;
+  return basePrice * multiplier;
+}
+
+export function calculateBeadCount(wristSizeCm: number, beadSizeMm: number): number {
+  const beadCount = Math.round((wristSizeCm * 10) / beadSizeMm);
+  return Math.max(beadCount, 8);
+}
+
+// ── Sunglasses types & data (unchanged) ─────────────────────────────────────
 
 export interface SunglassesConfig {
   frame: string;
@@ -151,7 +133,7 @@ export const COATING_PRICE_PER_10 = 2;
 export interface SunglassesAccessory {
   id: string;
   name: string;
-  type: 'chain' | 'nosePad' | 'decal' | 'charm';
+  type: "chain" | "nosePad" | "decal" | "charm";
   emoji: string;
   price: number;
   color?: string;

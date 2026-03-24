@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Gem, Glasses } from "lucide-react";
+import { Gem, Glasses, Settings } from "lucide-react";
 import LivePrice from "@/components/LivePrice";
 import BraceletBuilder from "@/components/BraceletBuilder";
 import AdvancedSunglassesBuilder from "@/components/AdvancedSunglassesBuilder";
+import CatalogueAdmin from "@/components/admin/CatalogueAdmin";
 
-type Module = "bracelet" | "sunglasses";
+type Module = "bracelet" | "sunglasses" | "admin";
 
 const Index = () => {
   const [activeModule, setActiveModule] = useState<Module>("bracelet");
@@ -23,6 +24,7 @@ const Index = () => {
           {([
             { id: "bracelet" as Module, label: "Crystal Bracelet", icon: Gem },
             { id: "sunglasses" as Module, label: "Sunglasses", icon: Glasses },
+            { id: "admin" as Module, label: "Admin", icon: Settings },
           ]).map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -44,8 +46,10 @@ const Index = () => {
       <main className="flex-1 flex overflow-hidden">
         {activeModule === "bracelet" ? (
           <BraceletBuilder onPriceChange={setPrice} />
-        ) : (
+        ) : activeModule === "sunglasses" ? (
           <AdvancedSunglassesBuilder onPriceChange={setPrice} />
+        ) : (
+          <CatalogueAdmin />
         )}
       </main>
     </div>

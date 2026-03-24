@@ -258,7 +258,12 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
               onClick={() => setSelectedItem(null)}
             >
               {selectedItem.kind === "crystal" && (
-                <div className="w-4 h-4 rounded-full" style={{ background: selectedItem.crystal.gradient || selectedItem.crystal.color }} />
+                <div 
+                  className="w-4 h-4 rounded-full" 
+                  style={{ 
+                    background: selectedItem.crystal.image ? `url(${selectedItem.crystal.image}?v=2) center / cover no-repeat` : (selectedItem.crystal.gradient || selectedItem.crystal.color)
+                  }} 
+                />
               )}
               {selectedItem.kind === "spacer" && (
                 <div className="w-4 h-4 rounded-full" style={{ background: selectedItem.spacer.metallic }} />
