@@ -266,7 +266,12 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
                 />
               )}
               {selectedItem.kind === "spacer" && (
-                <div className="w-4 h-4 rounded-full" style={{ background: selectedItem.spacer.metallic }} />
+                <div 
+                  className="w-4 h-4 rounded-full" 
+                  style={{ 
+                    background: selectedItem.spacer.image ? `url(${selectedItem.spacer.image}?v=2) center / cover no-repeat` : selectedItem.spacer.metallic 
+                  }} 
+                />
               )}
               {selectedItem.kind === "charm" && (
                 <span className="text-sm">{selectedItem.charm.emoji}</span>

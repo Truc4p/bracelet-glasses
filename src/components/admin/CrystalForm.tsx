@@ -172,7 +172,7 @@ export const SpacerForm = ({ initial, onSave, onCancel }: SpacerFormProps) => {
   const blank: SpacerEntry = {
     id: "", name: "", color: "#C0C0C0",
     metallic: "linear-gradient(135deg, #E8E8E8, #A0A0A0)",
-    price: 1.50, emoji: "⚪", stock: 999, tags: [], description: "",
+    price: 1.50, emoji: "⚪", image: "", stock: 999, tags: [], description: "",
   };
   const [form, setForm] = useState<SpacerEntry>(initial ?? blank);
   const set = (k: keyof SpacerEntry, v: string | number | string[]) =>
@@ -218,6 +218,15 @@ export const SpacerForm = ({ initial, onSave, onCancel }: SpacerFormProps) => {
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Emoji</label>
           <input value={form.emoji} onChange={(e) => set("emoji", e.target.value)} maxLength={4}
             className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body text-center text-lg" />
+        </div>
+        <div className="col-span-2">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Image Path</label>
+          <input
+            value={form.image ?? ""}
+            onChange={(e) => set("image", e.target.value)}
+            placeholder="/spacers/your-image.svg"
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body font-mono"
+          />
         </div>
       </div>
       <div className="flex gap-2 pt-1">

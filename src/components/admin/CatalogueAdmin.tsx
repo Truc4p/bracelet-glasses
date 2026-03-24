@@ -222,7 +222,22 @@ const CatalogueAdmin = () => {
                 )}
                 {filteredSpacers.map((s) => (
                   <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/40 transition-colors group">
-                    <div className="w-8 h-8 rounded-full border border-border/50 shadow-sm flex-shrink-0" style={{ background: s.metallic }} />
+                    {s.image ? (
+                      <img
+                        src={s.image}
+                        alt={s.name}
+                        className="w-8 h-8 rounded-full object-cover border border-border/50 shadow-sm flex-shrink-0"
+                        onError={(e) => {
+                          const el = e.target as HTMLImageElement;
+                          el.style.display = "none";
+                          el.nextElementSibling?.classList.remove("hidden");
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className={`w-8 h-8 rounded-full border border-border/50 shadow-sm flex-shrink-0 ${s.image ? "hidden" : ""}`}
+                      style={{ background: s.metallic }}
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-foreground">{s.name}</span>

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
-import { SPACERS, ZODIAC_CHARMS, ZODIAC_ANIMALS, type Spacer, type ZodiacCharm } from "@/lib/luxe-data";
+import { ZODIAC_ANIMALS, type Spacer, type ZodiacCharm } from "@/lib/luxe-data";
+import { useCatalogue } from "@/data/index";
 
 type TabType = 'spacers' | 'charms';
 
@@ -12,21 +13,22 @@ interface AccessoriesLibraryProps {
 }
 
 const AccessoriesLibrary = ({ onSelectSpacer, onSelectCharm, open, onClose }: AccessoriesLibraryProps) => {
+  const { spacers, charms } = useCatalogue();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>('spacers');
   const [selectedAnimal, setSelectedAnimal] = useState("Rat");
   const [charmDesign, setCharmDesign] = useState<'classic' | 'modern'>('classic');
 
   const filteredSpacers = useMemo(
-    () => SPACERS.filter((s) => s.name.toLowerCase().includes(search.toLowerCase())),
-    [search]
+    () => spacers.filter((s) => s.name.toLowerCase().includes(search.toLowerCase())),
+    [spacers, search]
   );
 
   const filteredCharms = useMemo(
-    () => ZODIAC_CHARMS.filter((c) =>
+    () => charms.filter((c) =>
       c.animal === selectedAnimal && c.design === charmDesign
     ),
-    [selectedAnimal, charmDesign]
+    [charms, selectedAnimal, charmDesign]
   );
 
   if (!open) return null;
@@ -118,8 +120,20 @@ const AccessoriesLibrary = ({ onSelectSpacer, onSelectCharm, open, onClose }: Ac
             }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group cursor-grab active:cursor-grabbing"
           >
+            {spacer.image ? (
+              <img
+                src={spacer.image}
+                alt={spacer.name}
+                className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm object-cover"
+                onError={(e) => {
+                  const el = e.target as HTMLImageElement;
+                  el.style.display = "none";
+                  el.nextElementSibling?.classList.remove("hidden");
+                }}
+              />
+            ) : null}
             <div
-              className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm"
+              className={`w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm ${spacer.image ? "hidden" : ""}`}
               style={{ background: spacer.metallic }}
             />
             <div className="flex-1 min-w-0">

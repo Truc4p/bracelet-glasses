@@ -6,7 +6,7 @@ import { DEFAULT_CHARMS, type CharmEntry } from "./charms";
 export type { CrystalEntry, SpacerEntry, CharmEntry };
 
 // ── Storage key ──────────────────────────────────────────────────────────────
-const STORAGE_KEY = "bino_catalogue_v1";
+const STORAGE_KEY = "bino_catalogue_v2";
 
 interface CatalogueStore {
   crystals: CrystalEntry[];
@@ -35,7 +35,15 @@ function saveToStorage(data: CatalogueStore) {
 function merge<T extends { id: string }>(defaults: T[], stored: T[]): T[] {
   const map = new Map(defaults.map((d) => [d.id, d]));
   // Apply stored overrides (update existing + add new)
-  stored.forEach((s) => map.set(s.id, s));
+  stored.forEach((s) => {
+    const defaultItem = map.get(s.id);
+    if (defaultItem) {
+      // keep stored data, but if a property (like 'image') is missing in stored, use default
+      map.set(s.id, { ...defaultItem, ...s });
+    } else {
+      map.set(s.id, s);
+    }
+  });
   return Array.from(map.values());
 }
 

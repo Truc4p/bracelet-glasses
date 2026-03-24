@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
 import SunglassesAccessoriesLibrary from "@/components/SunglassesAccessoriesLibrary";
-import LensRenderer from "@/components/LensRenderer";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
 
 interface AdvancedSunglassesBuilderProps {
@@ -200,13 +199,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 paddingBottom: '56%',
               }}
             >
-              <LensRenderer
-                primaryColor={lensColor.color}
-                secondaryColor={gradientSecondary.color}
-                vlt={vlt}
-                gradientMode={gradientMode}
-              />
-
               <img
                 src={selectedFrame.image}
                 alt={selectedFrame.name}

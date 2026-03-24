@@ -5,6 +5,7 @@ export interface SpacerEntry {
   metallic: string;
   price: number;
   emoji: string;
+  image?: string;
   stock: number;
   tags?: string[];
   description?: string;
@@ -18,6 +19,7 @@ export const DEFAULT_SPACERS: SpacerEntry[] = [
     metallic: "linear-gradient(135deg, #E8E8E8, #A0A0A0)",
     price: 1.50,
     emoji: "⚪",
+    image: "/spacers/silver.svg",
     stock: 999,
     description: "Classic silver metal spacer bead.",
   },
@@ -28,6 +30,7 @@ export const DEFAULT_SPACERS: SpacerEntry[] = [
     metallic: "linear-gradient(135deg, #FFED4E, #D4AF37)",
     price: 2.00,
     emoji: "🟡",
+    image: "/spacers/gold.svg",
     stock: 999,
     tags: ["popular"],
     description: "Luxurious gold-tone metal spacer bead.",
@@ -39,6 +42,7 @@ export const DEFAULT_SPACERS: SpacerEntry[] = [
     metallic: "linear-gradient(135deg, #F5D5CB, #C9A99E)",
     price: 2.50,
     emoji: "🌸",
+    image: "/spacers/rose-gold.svg",
     stock: 999,
     tags: ["popular", "bestseller"],
     description: "Trendy rose gold tone spacer bead.",
