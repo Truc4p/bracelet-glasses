@@ -167,14 +167,20 @@ const SortableCircularStrand = ({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      const oldIndex = placedBeads.findIndex((b) => `bead-${b.position}` === active.id);
-      const newIndex = placedBeads.findIndex((b) => `bead-${b.position}` === over.id);
+      const draggedBead = placedBeads.find((b) => `bead-${b.position}` === active.id);
+      const targetBead = placedBeads.find((b) => `bead-${b.position}` === over.id);
 
-      if (oldIndex !== -1 && newIndex !== -1) {
-        // Collect the position values in order BEFORE the move, then reassign
-        // them to the reordered array so the two beads truly swap slot positions.
-        const sortedPositions = placedBeads.map((b) => b.position);
-        const reordered = arrayMove(placedBeads, oldIndex, newIndex);
+      if (draggedBead && targetBead) {
+        // Sort by position so arrayMove shifts beads in spatial order
+        const sorted = [...placedBeads].sort((a, b) => a.position - b.position);
+        const sortedPositions = sorted.map((b) => b.position);
+
+        const oldIndex = sorted.findIndex((b) => b.position === draggedBead.position);
+        const newIndex = sorted.findIndex((b) => b.position === targetBead.position);
+
+        // arrayMove inserts the dragged bead at target's position and shifts
+        // all beads in between one slot over to fill the gap.
+        const reordered = arrayMove(sorted, oldIndex, newIndex);
         const updatedBeads = reordered.map((bead, idx) => ({
           ...bead,
           position: sortedPositions[idx],
