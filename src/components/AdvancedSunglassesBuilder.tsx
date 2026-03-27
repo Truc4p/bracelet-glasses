@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Glasses, Sparkles, RotateCcw, Waves, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
 import SunglassesAccessoriesLibrary from "@/components/SunglassesAccessoriesLibrary";
+import LensRenderer from "@/components/LensRenderer";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
 
 interface AdvancedSunglassesBuilderProps {
@@ -39,7 +40,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const [gradientMode, setGradientMode] = useState(false);
   const [gradientSecondary, setGradientSecondary] = useState<LensColor>(LENS_COLORS[1]);
   const [placedAccessories, setPlacedAccessories] = useState<PlacedAccessory[]>([]);
-  const [frameLibraryOpen, setFrameLibraryOpen] = useState(false);
+  const [frameLibraryOpen, setFrameLibraryOpen] = useState(true);
   const [accessoriesOpen, setAccessoriesOpen] = useState(false);
   const [draggedAccessory, setDraggedAccessory] = useState<SunglassesAccessory | null>(null);
   const [povMode, setPovMode] = useState(false);
@@ -56,9 +57,9 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     [onPriceChange]
   );
 
-  useState(() => {
+  useEffect(() => {
     updatePrice(placedAccessories, vlt, gradientMode);
-  });
+  }, [updatePrice, placedAccessories, vlt, gradientMode]);
 
   const handleFrameSelect = (frame: FrameOption) => {
     setSelectedFrame(frame);
@@ -114,7 +115,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   };
 
   return (
-    <div className="relative flex-1 flex flex-col animate-fade-in h-full overflow-hidden">
+    <div className="relative flex-1 w-full h-full flex flex-col animate-fade-in overflow-hidden">
       <div className="flex-shrink-0 flex flex-wrap items-center gap-4 px-6 py-4 border-b border-border bg-white">
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Frame</span>
@@ -199,6 +200,12 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 paddingBottom: '56%',
               }}
             >
+              <LensRenderer 
+                primaryColor={lensColor.color}
+                secondaryColor={gradientSecondary.color}
+                vlt={vlt}
+                gradientMode={gradientMode}
+              />
               <img
                 src={selectedFrame.image}
                 alt={selectedFrame.name}

@@ -9,7 +9,7 @@ type Module = "bracelet" | "sunglasses" | "admin";
 
 const Index = () => {
   const [activeModule, setActiveModule] = useState<Module>("bracelet");
-  const [price, setPrice] = useState(0);
+  const [prices, setPrices] = useState({ bracelet: 0, sunglasses: 0 });
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
@@ -39,19 +39,21 @@ const Index = () => {
               </button>
             ))}
           </nav>
-          <LivePrice price={price} />
+          <LivePrice price={activeModule === "sunglasses" ? prices.sunglasses : prices.bracelet} />
         </div>
       </header>
 
       {/* Module content */}
-      <main className="flex-1 flex overflow-hidden">
-        {activeModule === "bracelet" ? (
-          <BraceletBuilder onPriceChange={setPrice} />
-        ) : activeModule === "sunglasses" ? (
-          <AdvancedSunglassesBuilder onPriceChange={setPrice} />
-        ) : (
+      <main className="flex-1 relative overflow-hidden">
+        <div className={`absolute inset-0 ${activeModule === "bracelet" ? "flex flex-col" : "hidden"}`}>
+          <BraceletBuilder onPriceChange={(p) => setPrices(prev => ({ ...prev, bracelet: p }))} />
+        </div>
+        <div className={`absolute inset-0 ${activeModule === "sunglasses" ? "flex flex-col" : "hidden"}`}>
+          <AdvancedSunglassesBuilder onPriceChange={(p) => setPrices(prev => ({ ...prev, sunglasses: p }))} />
+        </div>
+        <div className={`absolute inset-0 ${activeModule === "admin" ? "flex flex-col" : "hidden"}`}>
           <CatalogueAdmin />
-        )}
+        </div>
       </main>
     </div>
   );

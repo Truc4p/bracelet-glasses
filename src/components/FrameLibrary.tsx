@@ -49,7 +49,6 @@ const FrameLibrary = ({ onSelectFrame, open, onClose }: FrameLibraryProps) => {
             key={frame.id}
             onClick={() => {
               onSelectFrame(frame);
-              onClose();
             }}
             className="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-border hover:border-primary transition-all group bg-background"
           >

@@ -57,7 +57,7 @@ const CatalogueAdmin = () => {
   const closeModal = () => setModal(null);
 
   return (
-    <div className="flex-1 flex flex-col animate-fade-in overflow-hidden">
+    <div className="relative flex-1 w-full h-full flex flex-col animate-fade-in overflow-hidden">
       {/* Page header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border">
         <div>

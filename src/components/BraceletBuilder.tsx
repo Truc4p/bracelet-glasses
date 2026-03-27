@@ -46,7 +46,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   const [placedBeadsA, setPlacedBeadsA] = useState<PlacedBead[]>([]);
   const [placedBeadsB, setPlacedBeadsB] = useState<PlacedBead[]>([]);
   const [twinning, setTwinning] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(true);
   const [accessoriesOpen, setAccessoriesOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
 
@@ -238,7 +238,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   };
 
   return (
-    <div className="relative flex-1 flex flex-col animate-fade-in">
+    <div className="relative flex-1 w-full h-full flex flex-col animate-fade-in">
       {/* Controls bar */}
       <div className="flex flex-wrap items-center gap-4 px-6 py-4 border-b border-border">
         {/* Wrist size I */}
