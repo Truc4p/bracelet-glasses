@@ -161,18 +161,64 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
     setDefaultBeadSize(newSize);
   };
 
+  const autoPlaceItem = (type: "crystal" | "spacer" | "charm", item: any) => {
+    let targetBracelet: "A" | "B" = "A";
+    let nextPos = -1;
+
+    for (let i = 0; i < beadCountA; i++) {
+      if (!placedBeadsA.find(b => b.position === i)) {
+        nextPos = i;
+        break;
+      }
+    }
+
+    if (nextPos === -1 && twinning) {
+      targetBracelet = "B";
+      for (let i = 0; i < beadCountB; i++) {
+        if (!placedBeadsB.find(b => b.position === i)) {
+          nextPos = i;
+          break;
+        }
+      }
+    }
+
+    if (nextPos !== -1) {
+      let newBead: PlacedBead;
+      if (type === "crystal") {
+        newBead = { position: nextPos, type: "crystal", crystal: item, beadSize: defaultBeadSize };
+      } else if (type === "spacer") {
+        newBead = { position: nextPos, type: "spacer", spacer: item, beadSize: defaultBeadSize };
+      } else {
+        newBead = { position: nextPos, type: "charm", charm: item, beadSize: defaultBeadSize };
+      }
+      
+      if (targetBracelet === "A") {
+        const updated = [...placedBeadsA, newBead];
+        setPlacedBeadsA(updated);
+        updatePrice(updated, placedBeadsB, twinning);
+      } else {
+        const updated = [...placedBeadsB, newBead];
+        setPlacedBeadsB(updated);
+        updatePrice(placedBeadsA, updated, twinning);
+      }
+    }
+  };
+
   const handleSelectBead = (bead: CrystalBead) => {
     setSelectedItem({ kind: "crystal", crystal: bead });
+    autoPlaceItem("crystal", bead);
     setLibraryOpen(false);
   };
 
   const handleSelectSpacer = (spacer: Spacer) => {
     setSelectedItem({ kind: "spacer", spacer });
+    autoPlaceItem("spacer", spacer);
     setAccessoriesOpen(false);
   };
 
   const handleSelectCharm = (charm: ZodiacCharm) => {
     setSelectedItem({ kind: "charm", charm });
+    autoPlaceItem("charm", charm);
     setAccessoriesOpen(false);
   };
 
