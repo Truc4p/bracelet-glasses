@@ -69,7 +69,6 @@ function SortableBead({
     isDragging,
   } = useSortable({
     id: `bead-${position}`,
-    disabled: !bead,
   });
 
   const style: React.CSSProperties = {
@@ -192,6 +191,16 @@ const SortableCircularStrand = ({
           position: sortedPositions[idx],
         }));
         onBeadsReorder(updatedBeads);
+      } else if (draggedBead && !targetBead) {
+        // Moving to an empty slot
+        const match = String(over.id).match(/^bead-(\d+)$/);
+        if (match) {
+          const targetPosition = parseInt(match[1], 10);
+          const updatedBeads = placedBeads.map((b) =>
+            b.position === draggedBead.position ? { ...b, position: targetPosition } : b
+          );
+          onBeadsReorder(updatedBeads);
+        }
       }
     }
     setActiveId(null);
@@ -280,7 +289,7 @@ const SortableCircularStrand = ({
           </svg>
 
           {/* Bead slots (dnd-kit sortable) */}
-          <SortableContext items={placedBeads.map((b) => `bead-${b.position}`)}>
+          <SortableContext items={slots.map((slot) => `bead-${slot.index}`)}>
             {slots.map((slot) => (
               <SortableBead
                 key={slot.index}
