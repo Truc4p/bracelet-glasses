@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, Info } from "lucide-react";
 import { useCatalogue } from "@/data/index";
 import type { CrystalEntry } from "@/data/crystals";
 import StockBadge from "@/components/admin/StockBadge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ── Types that the rest of the app still uses via the legacy name ──────────
 // BeadLibrary is passed a CrystalEntry (same shape as the old CrystalBead)
@@ -122,7 +123,21 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
               />
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{bead.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-foreground truncate">{bead.name}</p>
+                  {bead.description && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div onClick={(e) => e.stopPropagation()} className="cursor-help flex items-center justify-center">
+                          <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-primary transition-colors" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-[200px] whitespace-normal z-[60]">
+                        <p className="text-xs">{bead.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <p className="text-xs text-muted-foreground">${bead.price.toFixed(2)} / bead</p>
                   <StockBadge stock={bead.stock} />
