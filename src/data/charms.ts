@@ -5,6 +5,7 @@ export interface CharmEntry {
   design: 'classic' | 'modern';
   price: number;
   emoji: string;
+  image?: string;
   stock: number;
   tags?: string[];
   description?: string;

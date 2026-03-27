@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Plus, Pencil, Trash2, RotateCcw, Search, ChevronDown, ChevronUp, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCatalogue } from "@/data/index";
@@ -24,6 +24,14 @@ const CatalogueAdmin = () => {
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<ModalState>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when opening an edit/add modal
+  useEffect(() => {
+    if (modal && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [modal]);
 
   const tabLabel = (t: AdminTab) =>
     ({ crystals: "Crystals", spacers: "Spacers", charms: "Charms" })[t];
@@ -102,7 +110,7 @@ const CatalogueAdmin = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={`Search ${tabLabel(tab).toLowerCase()}...`}
-                className="w-full pl-9 pr-3 py-1.5 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body"
+                className="w-full pl-9 pr-3 py-1.5 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
               />
             </div>
             <Button
@@ -121,40 +129,7 @@ const CatalogueAdmin = () => {
           </div>
 
           {/* List */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {/* Inline add/edit modal */}
-            {modal && (
-              <div className="mb-4 p-4 glass-panel rounded-lg border border-border">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold font-display">
-                    {modal.type.startsWith("add") ? "New" : "Edit"}{" "}
-                    {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : "Charm"}
-                  </h3>
-                  <button onClick={closeModal} className="text-muted-foreground hover:text-foreground">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                {modal.type === "add-crystal" && (
-                  <CrystalForm onSave={(e) => { cat.addCrystal(e); closeModal(); }} onCancel={closeModal} />
-                )}
-                {modal.type === "edit-crystal" && (
-                  <CrystalForm initial={modal.entry} onSave={(e) => { cat.updateCrystal(e); closeModal(); }} onCancel={closeModal} />
-                )}
-                {modal.type === "add-spacer" && (
-                  <SpacerForm onSave={(e) => { cat.addSpacer(e); closeModal(); }} onCancel={closeModal} />
-                )}
-                {modal.type === "edit-spacer" && (
-                  <SpacerForm initial={modal.entry} onSave={(e) => { cat.updateSpacer(e); closeModal(); }} onCancel={closeModal} />
-                )}
-                {modal.type === "add-charm" && (
-                  <CharmForm onSave={(e) => { cat.addCharm(e); closeModal(); }} onCancel={closeModal} />
-                )}
-                {modal.type === "edit-charm" && (
-                  <CharmForm initial={modal.entry} onSave={(e) => { cat.updateCharm(e); closeModal(); }} onCancel={closeModal} />
-                )}
-              </div>
-            )}
-
+          <div className="flex-1 overflow-y-auto p-4" ref={scrollRef}>
             {/* Crystals table */}
             {tab === "crystals" && (
               <div className="space-y-1">
@@ -162,7 +137,11 @@ const CatalogueAdmin = () => {
                   <p className="text-sm text-muted-foreground text-center py-8">No crystals found.</p>
                 )}
                 {filteredCrystals.map((c) => (
-                  <div key={c.id} className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/40 transition-colors group">
+                  <div key={c.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
+                    modal?.type === "edit-crystal" && modal.entry.id === c.id
+                      ? "bg-primary/15 ring-2 ring-primary border-transparent"
+                      : "hover:bg-muted/80 focus-within:bg-muted/80"
+                  }`}>
                     {/* Swatch / image */}
                     {c.image ? (
                       <img
@@ -184,7 +163,7 @@ const CatalogueAdmin = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-foreground">{c.name}</span>
                         {(c.tags ?? []).map((tag) => (
-                          <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+                          <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
                             {tag}
                           </span>
                         ))}
@@ -221,7 +200,11 @@ const CatalogueAdmin = () => {
                   <p className="text-sm text-muted-foreground text-center py-8">No spacers found.</p>
                 )}
                 {filteredSpacers.map((s) => (
-                  <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/40 transition-colors group">
+                  <div key={s.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
+                    modal?.type === "edit-spacer" && modal.entry.id === s.id
+                      ? "bg-primary/15 ring-2 ring-primary border-transparent"
+                      : "hover:bg-muted/80 focus-within:bg-muted/80"
+                  }`}>
                     {s.image ? (
                       <img
                         src={s.image}
@@ -274,8 +257,26 @@ const CatalogueAdmin = () => {
                   <p className="text-sm text-muted-foreground text-center py-8">No charms found.</p>
                 )}
                 {filteredCharms.map((c) => (
-                  <div key={c.id} className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/40 transition-colors group">
-                    <div className="w-8 h-8 flex items-center justify-center text-xl">{c.emoji}</div>
+                  <div key={c.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
+                    modal?.type === "edit-charm" && modal.entry.id === c.id
+                      ? "bg-primary/15 ring-2 ring-primary border-transparent"
+                      : "hover:bg-muted/80 focus-within:bg-muted/80"
+                  }`}>
+                    {c.image ? (
+                      <img
+                        src={c.image}
+                        alt={c.name}
+                        className="w-8 h-8 rounded-full object-cover border border-border/50 shadow-sm flex-shrink-0"
+                        onError={(e) => {
+                          const el = e.target as HTMLImageElement;
+                          el.style.display = "none";
+                          el.nextElementSibling?.classList.remove("hidden");
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-8 h-8 flex items-center justify-center text-xl ${c.image ? "hidden" : ""}`}>
+                      {c.emoji}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-foreground">{c.animal}</span>
@@ -322,6 +323,41 @@ const CatalogueAdmin = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Overlay */}
+      {modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200" onClick={closeModal}>
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-background rounded-lg border border-border shadow-2xl p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-semibold font-display">
+                {modal.type.startsWith("add") ? "New" : "Edit"}{" "}
+                {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : "Charm"}
+              </h3>
+              <button onClick={closeModal} className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {modal.type === "add-crystal" && (
+              <CrystalForm key="add-crystal" onSave={(e) => { cat.addCrystal(e); closeModal(); }} onCancel={closeModal} />
+            )}
+            {modal.type === "edit-crystal" && (
+              <CrystalForm key={`edit-crystal-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCrystal(e); closeModal(); }} onCancel={closeModal} />
+            )}
+            {modal.type === "add-spacer" && (
+              <SpacerForm key="add-spacer" onSave={(e) => { cat.addSpacer(e); closeModal(); }} onCancel={closeModal} />
+            )}
+            {modal.type === "edit-spacer" && (
+              <SpacerForm key={`edit-spacer-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateSpacer(e); closeModal(); }} onCancel={closeModal} />
+            )}
+            {modal.type === "add-charm" && (
+              <CharmForm key="add-charm" onSave={(e) => { cat.addCharm(e); closeModal(); }} onCancel={closeModal} />
+            )}
+            {modal.type === "edit-charm" && (
+              <CharmForm key={`edit-charm-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCharm(e); closeModal(); }} onCancel={closeModal} />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

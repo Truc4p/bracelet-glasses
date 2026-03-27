@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { X, Upload, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CrystalEntry } from "@/data/crystals";
 import type { SpacerEntry } from "@/data/spacers";
@@ -43,7 +43,7 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
             placeholder="e.g. Turquoise"
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body"
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
           />
         </div>
 
@@ -53,7 +53,7 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
             type="number" min={0} step={0.01}
             value={form.price}
             onChange={(e) => set("price", parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body"
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
           />
         </div>
 
@@ -63,7 +63,7 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
             type="number" min={0}
             value={form.stock}
             onChange={(e) => set("stock", parseInt(e.target.value) || 0)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body"
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
           />
         </div>
 
@@ -73,57 +73,59 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
             <input
               type="color" value={form.color}
               onChange={(e) => set("color", e.target.value)}
-              className="w-9 h-9 rounded border border-border cursor-pointer bg-transparent"
+              className="w-9 h-9 rounded border border-border cursor-pointer bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
             />
             <input
               value={form.color}
               onChange={(e) => set("color", e.target.value)}
-              className="flex-1 px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body font-mono"
+              className="flex-1 px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body font-mono"
             />
           </div>
-        </div>
-
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Emoji</label>
-          <input
-            value={form.emoji}
-            onChange={(e) => set("emoji", e.target.value)}
-            maxLength={4}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body text-center text-lg"
-          />
         </div>
 
         <div className="col-span-2">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Image Path</label>
-          <div className="flex gap-2">
-            <input
-              value={form.image ?? ""}
-              onChange={(e) => set("image", e.target.value)}
-              placeholder="/crystals/your-image.jpg"
-              className="flex-1 px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body font-mono"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPreview(!showPreview)}
-              className="p-2 rounded-md border border-border text-muted-foreground hover:text-foreground transition-colors"
-              title="Preview image"
-            >
-              {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-          {showPreview && form.image && (
-            <div className="mt-2 flex items-center gap-3">
-              <img
-                src={form.image}
-                alt="preview"
-                className="w-12 h-12 rounded-full object-cover border border-border shadow-sm"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Product Image</label>
+          <div className="flex items-center gap-4 p-3 border border-border rounded-md bg-muted/20">
+            <div className="relative w-16 h-16 rounded-md border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/50 hover:bg-muted focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all group cursor-pointer">
+              {form.image ? (
+                <img src={form.image} alt="preview" className="w-full h-full object-cover" />
+              ) : (
+                <Upload className="w-5 h-5 text-muted-foreground group-hover:scale-110 transition-transform" />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      set("image", ev.target?.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
                 }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <span className="text-xs text-muted-foreground">Falls back to color if image not found</span>
             </div>
-          )}
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">
+                Upload image
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
+                PNG, JPG or SVG. Falls back to color if missing.
+              </p>
+              {form.image && (
+                <button
+                  type="button"
+                  onClick={() => set("image", "")}
+                  className="text-xs text-destructive hover:underline"
+                >
+                  Remove image
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="col-span-2">
@@ -132,7 +134,7 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
             value={tagString}
             onChange={(e) => set("tags", e.target.value.split(",").map((t) => t.trim()).filter(Boolean))}
             placeholder="popular, new, bestseller"
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body"
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
           />
         </div>
 
@@ -143,7 +145,7 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
             onChange={(e) => set("description", e.target.value)}
             rows={2}
             placeholder="Brief description of this crystal..."
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body resize-none"
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body resize-none"
           />
         </div>
       </div>
@@ -191,42 +193,72 @@ export const SpacerForm = ({ initial, onSave, onCancel }: SpacerFormProps) => {
         <div className="col-span-2">
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Name *</label>
           <input required value={form.name} onChange={(e) => set("name", e.target.value)}
-            placeholder="e.g. Platinum" className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body" />
+            placeholder="e.g. Platinum" className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body" />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Price ($)</label>
           <input type="number" min={0} step={0.01} value={form.price}
             onChange={(e) => set("price", parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body" />
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body" />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Stock</label>
           <input type="number" min={0} value={form.stock}
             onChange={(e) => set("stock", parseInt(e.target.value) || 0)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body" />
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body" />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Color</label>
           <div className="flex gap-2 items-center">
             <input type="color" value={form.color} onChange={(e) => set("color", e.target.value)}
-              className="w-9 h-9 rounded border border-border cursor-pointer bg-transparent" />
+              className="w-9 h-9 rounded border border-border cursor-pointer bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors" />
             <input value={form.color} onChange={(e) => set("color", e.target.value)}
-              className="flex-1 px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body font-mono" />
+              className="flex-1 px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body font-mono" />
           </div>
         </div>
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Emoji</label>
-          <input value={form.emoji} onChange={(e) => set("emoji", e.target.value)} maxLength={4}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body text-center text-lg" />
-        </div>
         <div className="col-span-2">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Image Path</label>
-          <input
-            value={form.image ?? ""}
-            onChange={(e) => set("image", e.target.value)}
-            placeholder="/spacers/your-image.svg"
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body font-mono"
-          />
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Product Image</label>
+          <div className="flex items-center gap-4 p-3 border border-border rounded-md bg-muted/20">
+            <div className="relative w-16 h-16 rounded-md border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/50 hover:bg-muted focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all group cursor-pointer">
+              {form.image ? (
+                <img src={form.image} alt="preview" className="w-full h-full object-cover" />
+              ) : (
+                <Upload className="w-5 h-5 text-muted-foreground group-hover:scale-110 transition-transform" />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      set("image", ev.target?.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">
+                Upload image
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
+                PNG, JPG or SVG. Falls back to color if missing.
+              </p>
+              {form.image && (
+                <button
+                  type="button"
+                  onClick={() => set("image", "")}
+                  className="text-xs text-destructive hover:underline"
+                >
+                  Remove image
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       <div className="flex gap-2 pt-1">
@@ -267,37 +299,76 @@ export const CharmForm = ({ initial, onSave, onCancel }: CharmFormProps) => {
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Name *</label>
           <input required value={form.name} onChange={(e) => set("name", e.target.value)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body" />
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body" />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Animal</label>
           <input value={form.animal} onChange={(e) => set("animal", e.target.value)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body" />
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body" />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Design</label>
           <select value={form.design} onChange={(e) => set("design", e.target.value as "classic" | "modern")}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body">
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body">
             <option value="classic">Classic</option>
             <option value="modern">Modern</option>
           </select>
         </div>
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Emoji</label>
-          <input value={form.emoji} onChange={(e) => set("emoji", e.target.value)} maxLength={4}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body text-center text-lg" />
+        <div className="col-span-2">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Product Image</label>
+          <div className="flex items-center gap-4 p-3 border border-border rounded-md bg-muted/20">
+            <div className="relative w-16 h-16 rounded-md border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/50 hover:bg-muted focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all group cursor-pointer">
+              {form.image ? (
+                <img src={form.image} alt="preview" className="w-full h-full object-cover" />
+              ) : (
+                <Upload className="w-5 h-5 text-muted-foreground group-hover:scale-110 transition-transform" />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      set("image", ev.target?.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">
+                Upload image
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
+                PNG, JPG or SVG. Falls back to emoji if missing.
+              </p>
+              {form.image && (
+                <button
+                  type="button"
+                  onClick={() => set("image", "")}
+                  className="text-xs text-destructive hover:underline"
+                >
+                  Remove image
+                </button>
+              )}
+            </div>
+          </div>
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Price ($)</label>
           <input type="number" min={0} step={0.01} value={form.price}
             onChange={(e) => set("price", parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body" />
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body" />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Stock</label>
           <input type="number" min={0} value={form.stock}
             onChange={(e) => set("stock", parseInt(e.target.value) || 0)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body" />
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body" />
         </div>
       </div>
       <div className="flex gap-2 pt-1">
