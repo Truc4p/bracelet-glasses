@@ -100,25 +100,37 @@ export interface FrameOption {
 }
 
 export const FRAME_OPTIONS: FrameOption[] = [
-  { id: "black-out", name: "Black Out", icon: "👓", dimensions: "52□23-149", image: "/glasses/BLACK_OUT.jpg" },
-  { id: "blonde-clear", name: "Blonde Clear", icon: "🕶️", dimensions: "53□23-150", image: "/glasses/Blonde_Clear.jpg" },
-  { id: "light-grey", name: "Light Grey", icon: "😎", dimensions: "51□24-149", image: "/glasses/Light_Grey.jpg" },
-  { id: "tortoise-out", name: "Tortoise Out", icon: "⭕", dimensions: "53□24-149", image: "/glasses/TORTOISE_OUT.jpg" },
+  { id: "black-out", name: "Black Out", icon: "👓", dimensions: "52□23-149", image: "/glasses/frames/BLACK_OUT.jpg" },
+  { id: "blonde-clear", name: "Blonde Clear", icon: "🕶️", dimensions: "53□23-150", image: "/glasses/frames/Blonde_Clear.jpg" },
+  { id: "light-grey", name: "Light Grey", icon: "😎", dimensions: "51□24-149", image: "/glasses/frames/Light_Grey.jpg" },
+  { id: "tortoise-out", name: "Tortoise Out", icon: "⭕", dimensions: "53□24-149", image: "/glasses/frames/TORTOISE_OUT.jpg" },
 ];
 
 export const LENS_COLORS = [
-  { id: "classic-grey", name: "Classic Grey", color: "#4A4A4A", gradient: "linear-gradient(180deg, #4A4A4A, #4A4A4A)" },
-  { id: "warm-brown", name: "Warm Brown", color: "#6B4423", gradient: "linear-gradient(180deg, #6B4423, #6B4423)" },
-  { id: "forest-green", name: "Forest Green", color: "#2D5016", gradient: "linear-gradient(180deg, #2D5016, #2D5016)" },
-  { id: "rose-gold", name: "Rose Gold", color: "#E8A0B5", gradient: "linear-gradient(180deg, #D4A5C4, #E8A0B5)" },
-  { id: "midnight-blue", name: "Midnight Blue", color: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F, #2E5A8F)" },
-  { id: "amber-honey", name: "Amber Honey", color: "#D4894A", gradient: "linear-gradient(180deg, #D4894A, #F4C490)" },
-  { id: "gradient-smoke", name: "Gradient Smoke", color: "#3A3A3A", gradient: "linear-gradient(180deg, #3A3A3A 0%, rgba(58,58,58,0.2) 100%)" },
-  { id: "gradient-ocean", name: "Gradient Ocean", color: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F 0%, rgba(30,58,95,0.2) 100%)" },
-  { id: "gradient-sunset", name: "Gradient Sunset", color: "#D4894A", gradient: "linear-gradient(180deg, #D4894A 0%, rgba(212,137,74,0.2) 100%)" },
-  { id: "gradient-lavender", name: "Gradient Lavender", color: "#9B7BB8", gradient: "linear-gradient(180deg, #9B7BB8 0%, rgba(155,123,184,0.2) 100%)" },
-  { id: "solid-black", name: "Solid Black", color: "#1C1C1C", gradient: "linear-gradient(180deg, #1C1C1C, #1C1C1C)" },
-  { id: "crystal-clear", name: "Crystal Clear", color: "#FFFFFF", gradient: "linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1))" },
+  { id: "amber", name: "Amber", image: "/glasses/shade-profile/amber.jpg" },
+  { id: "american-grey-fade", name: "American Grey Fade", image: "/glasses/shade-profile/american-grey-fade.jpg" },
+  { id: "aqua-sunrise", name: "Aqua Sunrise", image: "/glasses/shade-profile/aqua-sunrise.jpg" },
+  { id: "bel-air-blue", name: "Bel Air Blue", image: "/glasses/shade-profile/bel-air-blue.jpg" },
+  { id: "big-apple-fade", name: "Big Apple Fade", image: "/glasses/shade-profile/big-apple-fade.jpg" },
+  { id: "broadway-blue-fade", name: "Broadway Blue Fade", image: "/glasses/shade-profile/broadway-blue-fade.jpg" },
+  { id: "cabernet", name: "Cabernet", image: "/glasses/shade-profile/cabernet.jpg" },
+  { id: "candy-corn", name: "Candy Corn", image: "/glasses/shade-profile/candy-corn.jpg" },
+  { id: "celebrity-blue", name: "Celebrity Blue", image: "/glasses/shade-profile/celebrity-blue.jpg" },
+  { id: "chestnut-fade", name: "Chestnut Fade", image: "/glasses/shade-profile/chestnut-fade.jpg" },
+  { id: "city-lights", name: "City Lights", image: "/glasses/shade-profile/city-lights.jpg" },
+  { id: "denim-blue", name: "Denim Blue", image: "/glasses/shade-profile/denim-blue.jpg" },
+  { id: "forest-wood", name: "Forest Wood", image: "/glasses/shade-profile/forest-wood.jpg" },
+  { id: "g-15-fade", name: "G-15 Fade", image: "/glasses/shade-profile/g-15-fade.jpg" },
+  { id: "garnet-green", name: "Garnet Green", image: "/glasses/shade-profile/garnet-green.jpg" },
+  { id: "lavender", name: "Lavender", image: "/glasses/shade-profile/lavender.jpg" },
+  { id: "limelight", name: "Limelight", image: "/glasses/shade-profile/limelight.jpg" },
+  { id: "mellow-yellow", name: "Mellow Yellow", image: "/glasses/shade-profile/mellow-yellow.jpg" },
+  { id: "new-york-rose", name: "New York Rose", image: "/glasses/shade-profile/new-york-rose.jpg" },
+  { id: "pastel-yellow", name: "Pastel Yellow", image: "/glasses/shade-profile/pastel-yellow.jpg" },
+  { id: "purple-nurple", name: "Purple Nurple", image: "/glasses/shade-profile/purple-nurple.jpg" },
+  { id: "root-beer-fade", name: "Root Beer Fade", image: "/glasses/shade-profile/root-beer-fade.jpg" },
+  { id: "turquoise", name: "Turquoise", image: "/glasses/shade-profile/turquoise.jpg" },
+  { id: "woodstock-orange", name: "Woodstock Orange", image: "/glasses/shade-profile/woodstock-orange.jpg" },
 ];
 
 export const FRAME_BASE_PRICE = 45;

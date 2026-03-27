@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
 import SunglassesAccessoriesLibrary from "@/components/SunglassesAccessoriesLibrary";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
+import { SHADE_MAP } from "@/lib/shadeMap";
 
 interface AdvancedSunglassesBuilderProps {
   onPriceChange: (price: number) => void;
@@ -13,23 +14,34 @@ interface AdvancedSunglassesBuilderProps {
 type LensColor = {
   id: string;
   name: string;
-  color: string;
-  gradient: string;
+  image: string;
 };
 
 const LENS_COLORS: LensColor[] = [
-  { id: "PK-Y-001", name: "PK-Y-001", color: "#3A3A3A", gradient: "linear-gradient(180deg, #3A3A3A, #3A3A3A)" },
-  { id: "PK-Y-002", name: "PK-Y-002", color: "#6B6B6B", gradient: "linear-gradient(180deg, #6B6B6B, #B8B8B8)" },
-  { id: "PK-Y-003", name: "PK-Y-003", color: "#4A1515", gradient: "linear-gradient(180deg, #4A1515, #4A1515)" },
-  { id: "PK-Y-004", name: "PK-Y-004", color: "#5C2E1A", gradient: "linear-gradient(180deg, #5C2E1A, #D4A574)" },
-  { id: "PK-Y-005", name: "PK-Y-005", color: "#8B2942", gradient: "linear-gradient(180deg, #8B2942, #8B2942)" },
-  { id: "PK-Y-006", name: "PK-Y-006", color: "#7A3B5D", gradient: "linear-gradient(180deg, #7A3B5D, #D4A5C4)" },
-  { id: "PK-Y-007", name: "PK-Y-007", color: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F, #1E3A5F)" },
-  { id: "PK-Y-008", name: "PK-Y-008", color: "#2E3A6B", gradient: "linear-gradient(180deg, #2E3A6B, #B8B8D4)" },
-  { id: "PK-Y-009", name: "PK-Y-009", color: "#90C878", gradient: "linear-gradient(180deg, #90C878, #90C878)" },
-  { id: "PK-Y-010", name: "PK-Y-010", color: "#E8B88B", gradient: "linear-gradient(180deg, #E8B88B, #E8B88B)" },
-  { id: "PK-Y-011", name: "PK-Y-011", color: "#C8A030", gradient: "linear-gradient(180deg, #C8A030, #C8A030)" },
-  { id: "PK-Y-012", name: "PK-Y-012", color: "#7BB8D4", gradient: "linear-gradient(180deg, #7BB8D4, #7BB8D4)" },
+  { id: "amber", name: "Amber", image: "/glasses/shade-profile/amber.jpg" },
+  { id: "american-grey-fade", name: "American Grey Fade", image: "/glasses/shade-profile/american-grey-fade.jpg" },
+  { id: "aqua-sunrise", name: "Aqua Sunrise", image: "/glasses/shade-profile/aqua-sunrise.jpg" },
+  { id: "bel-air-blue", name: "Bel Air Blue", image: "/glasses/shade-profile/bel-air-blue.jpg" },
+  { id: "big-apple-fade", name: "Big Apple Fade", image: "/glasses/shade-profile/big-apple-fade.jpg" },
+  { id: "broadway-blue-fade", name: "Broadway Blue Fade", image: "/glasses/shade-profile/broadway-blue-fade.jpg" },
+  { id: "cabernet", name: "Cabernet", image: "/glasses/shade-profile/cabernet.jpg" },
+  { id: "candy-corn", name: "Candy Corn", image: "/glasses/shade-profile/candy-corn.jpg" },
+  { id: "celebrity-blue", name: "Celebrity Blue", image: "/glasses/shade-profile/celebrity-blue.jpg" },
+  { id: "chestnut-fade", name: "Chestnut Fade", image: "/glasses/shade-profile/chestnut-fade.jpg" },
+  { id: "city-lights", name: "City Lights", image: "/glasses/shade-profile/city-lights.jpg" },
+  { id: "denim-blue", name: "Denim Blue", image: "/glasses/shade-profile/denim-blue.jpg" },
+  { id: "forest-wood", name: "Forest Wood", image: "/glasses/shade-profile/forest-wood.jpg" },
+  { id: "g-15-fade", name: "G-15 Fade", image: "/glasses/shade-profile/g-15-fade.jpg" },
+  { id: "garnet-green", name: "Garnet Green", image: "/glasses/shade-profile/garnet-green.jpg" },
+  { id: "lavender", name: "Lavender", image: "/glasses/shade-profile/lavender.jpg" },
+  { id: "limelight", name: "Limelight", image: "/glasses/shade-profile/limelight.jpg" },
+  { id: "mellow-yellow", name: "Mellow Yellow", image: "/glasses/shade-profile/mellow-yellow.jpg" },
+  { id: "new-york-rose", name: "New York Rose", image: "/glasses/shade-profile/new-york-rose.jpg" },
+  { id: "pastel-yellow", name: "Pastel Yellow", image: "/glasses/shade-profile/pastel-yellow.jpg" },
+  { id: "purple-nurple", name: "Purple Nurple", image: "/glasses/shade-profile/purple-nurple.jpg" },
+  { id: "root-beer-fade", name: "Root Beer Fade", image: "/glasses/shade-profile/root-beer-fade.jpg" },
+  { id: "turquoise", name: "Turquoise", image: "/glasses/shade-profile/turquoise.jpg" },
+  { id: "woodstock-orange", name: "Woodstock Orange", image: "/glasses/shade-profile/woodstock-orange.jpg" },
 ];
 
 const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderProps) => {
@@ -199,26 +211,29 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 paddingBottom: '56%',
               }}
             >
-              <div
-                className="absolute inset-0 w-full h-full pointer-events-none"
-                style={{
-                  zIndex: 1,
-                  background: gradientMode 
-                    ? `linear-gradient(180deg, ${lensColor.color} 0%, ${gradientSecondary.color} 100%)`
-                    : lensColor.color,
-                  maskImage: `url(${selectedFrame.image.replace('_-_CLEAR', '')})`,
-                  maskSize: 'contain',
-                  maskRepeat: 'no-repeat',
-                  maskPosition: 'center',
-                  WebkitMaskImage: `url(${selectedFrame.image.replace('_-_CLEAR', '')})`,
-                  WebkitMaskSize: 'contain',
-                  WebkitMaskRepeat: 'no-repeat',
-                  WebkitMaskPosition: 'center',
-                  opacity: Math.max(0.4, Math.min(0.95, 1 - (vlt || 50) / 100))
-                }}
-              />
+              {/* Only show dynamic lens overlay if we are NOT using a pre-rendered shaded image */
+              !SHADE_MAP[selectedFrame.id]?.[lensColor.id] && (
+                <div
+                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  style={{
+                    zIndex: 1,
+                    backgroundImage: `url(${lensColor.image})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    maskImage: `url(${selectedFrame.image.replace('_-_CLEAR', '')})`,
+                    maskSize: 'contain',
+                    maskRepeat: 'no-repeat',
+                    maskPosition: 'center',
+                    WebkitMaskImage: `url(${selectedFrame.image.replace('_-_CLEAR', '')})`,
+                    WebkitMaskSize: 'contain',
+                    WebkitMaskRepeat: 'no-repeat',
+                    WebkitMaskPosition: 'center',
+                    opacity: Math.max(0.4, Math.min(0.95, 1 - (vlt || 50) / 100))
+                  }}
+                />
+              )}
               <img
-                src={selectedFrame.image}
+                src={SHADE_MAP[selectedFrame.id]?.[lensColor.id] || selectedFrame.image}
                 alt={selectedFrame.name}
                 className="absolute w-full h-full object-contain drop-shadow-2xl pointer-events-none"
                 style={{ zIndex: 2 }}
@@ -247,9 +262,9 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             <div
               className="fixed inset-0 pointer-events-none transition-all duration-500"
               style={{
-                background: gradientMode
-                  ? `linear-gradient(180deg, ${lensColor.color} 0%, ${gradientSecondary.color} 100%)`
-                  : lensColor.color,
+                backgroundImage: `url(${lensColor.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
                 opacity: Math.max(0.15, Math.min(0.6, 1 - vlt / 100)),
                 zIndex: 9999,
               }}

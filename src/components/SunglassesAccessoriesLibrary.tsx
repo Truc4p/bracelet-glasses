@@ -6,8 +6,8 @@ type TabType = 'accessories' | 'lensColors';
 
 interface SunglassesAccessoriesLibraryProps {
   onSelectAccessory: (accessory: SunglassesAccessory) => void;
-  onSelectLensColor: (lensColor: { id: string; name: string; color: string; gradient: string }) => void;
-  onSelectSecondaryColor: (lensColor: { id: string; name: string; color: string; gradient: string }) => void;
+  onSelectLensColor: (lensColor: { id: string; name: string; image: string }) => void;
+  onSelectSecondaryColor: (lensColor: { id: string; name: string; image: string }) => void;
   gradientMode: boolean;
   open: boolean;
   onClose: () => void;
@@ -140,8 +140,8 @@ const SunglassesAccessoriesLibrary = ({
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
                 >
                   <div
-                    className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0"
-                    style={{ background: lensColor.gradient || lensColor.color }}
+                    className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${lensColor.image})` }}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>
@@ -164,8 +164,8 @@ const SunglassesAccessoriesLibrary = ({
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
                   >
                     <div
-                      className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0"
-                      style={{ background: lensColor.gradient || lensColor.color }}
+                      className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${lensColor.image})` }}
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>

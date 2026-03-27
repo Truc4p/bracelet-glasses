@@ -46,11 +46,12 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
   const renderLens = (side: "left" | "right") => {
     const lensOpacity = tintDensity / 100;
     const xOffset = side === "left" ? -65 : 65;
+    const fillValue = `url(#pattern-${lensColorId})`;
     const shapes: Record<string, JSX.Element> = {
       "cat-eye": (
         <path
           d={`M${xOffset - 40},0 Q${xOffset - 45},-35 ${xOffset - 15},-38 Q${xOffset + 15},-30 ${xOffset + 40},-5 Q${xOffset + 40},30 ${xOffset},35 Q${xOffset - 40},30 ${xOffset - 40},0 Z`}
-          fill={lensColor.color}
+          fill={fillValue}
           fillOpacity={lensOpacity}
           stroke="hsl(var(--foreground))"
           strokeWidth="2.5"
@@ -59,7 +60,7 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
       aviator: (
         <path
           d={`M${xOffset - 42},-15 Q${xOffset - 42},-38 ${xOffset},-38 Q${xOffset + 42},-38 ${xOffset + 42},-15 Q${xOffset + 42},25 ${xOffset + 10},35 Q${xOffset - 10},38 ${xOffset - 30},30 Q${xOffset - 42},20 ${xOffset - 42},-15 Z`}
-          fill={lensColor.color}
+          fill={fillValue}
           fillOpacity={lensOpacity}
           stroke="hsl(var(--foreground))"
           strokeWidth="2.5"
@@ -72,7 +73,7 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
           width={80}
           height={65}
           rx={8}
-          fill={lensColor.color}
+          fill={fillValue}
           fillOpacity={lensOpacity}
           stroke="hsl(var(--foreground))"
           strokeWidth="2.5"
@@ -83,7 +84,7 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
           cx={xOffset}
           cy={0}
           r={36}
-          fill={lensColor.color}
+          fill={fillValue}
           fillOpacity={lensOpacity}
           stroke="hsl(var(--foreground))"
           strokeWidth="2.5"
@@ -95,7 +96,7 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
           cy={0}
           rx={48}
           ry={40}
-          fill={lensColor.color}
+          fill={fillValue}
           fillOpacity={lensOpacity}
           stroke="hsl(var(--foreground))"
           strokeWidth="2.5"
@@ -109,11 +110,16 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
     const lensOpacity = tintDensity / 100;
     return (
       <svg viewBox="-120 -80 240 160" className="w-full max-w-md">
+        <defs>
+          <pattern id={`pattern-${lensColorId}`} patternUnits="userSpaceOnUse" width="240" height="160" x="-120" y="-80">
+            <image href={lensColor.image} width="240" height="160" preserveAspectRatio="xMidYMid slice" />
+          </pattern>
+        </defs>
         {/* Temple arm */}
         <line x1="40" y1="-20" x2="110" y2="-30" stroke="hsl(var(--foreground))" strokeWidth="3" strokeLinecap="round" />
         <line x1="110" y1="-30" x2="115" y2="-10" stroke="hsl(var(--foreground))" strokeWidth="2.5" strokeLinecap="round" />
         {/* Lens side profile */}
-        <ellipse cx={0} cy={0} rx={15} ry={35} fill={lensColor.color} fillOpacity={lensOpacity} stroke="hsl(var(--foreground))" strokeWidth="2.5" />
+        <ellipse cx={0} cy={0} rx={15} ry={35} fill={`url(#pattern-${lensColorId})`} fillOpacity={lensOpacity} stroke="hsl(var(--foreground))" strokeWidth="2.5" />
         {/* Front frame edge */}
         <line x1="-15" y1="-35" x2="-60" y2="-35" stroke="hsl(var(--foreground))" strokeWidth="2.5" strokeLinecap="round" />
         {/* Nose pad */}
@@ -128,6 +134,11 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
       <div className="flex-1 flex items-center justify-center p-8 relative">
         {view === "front" ? (
           <svg viewBox="-160 -80 320 160" className="w-full max-w-lg">
+            <defs>
+              <pattern id={`pattern-${lensColorId}`} patternUnits="userSpaceOnUse" width="320" height="160" x="-160" y="-80">
+                <image href={lensColor.image} width="320" height="160" preserveAspectRatio="xMidYMid slice" />
+              </pattern>
+            </defs>
             {/* Bridge */}
             <path d="M-22,-15 Q0,-25 22,-15" fill="none" stroke="hsl(var(--foreground))" strokeWidth="2.5" />
             {/* Lenses */}
@@ -198,10 +209,10 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
                   onClick={() => {
                     setLensColorId(l.id);
                   }}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                  className={`w-8 h-8 rounded-full border-2 transition-all bg-cover bg-center ${
                     lensColorId === l.id ? "border-primary scale-110" : "border-border hover:scale-105"
                   }`}
-                  style={{ background: l.color }}
+                  style={{ backgroundImage: `url(${l.image})` }}
                   title={l.name}
                 />
               ))}
