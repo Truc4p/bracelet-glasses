@@ -100,16 +100,10 @@ export interface FrameOption {
 }
 
 export const FRAME_OPTIONS: FrameOption[] = [
-  { id: "PK002", name: "PK002", icon: "👓", dimensions: "52□23-149", image: "/PK002.png" },
-  { id: "PK003", name: "PK003", icon: "🕶️", dimensions: "53□23-150", image: "/PK003.png" },
-  { id: "PK005", name: "PK005", icon: "😎", dimensions: "51□24-149", image: "/PK005.png" },
-  { id: "PK006", name: "PK006", icon: "⭕", dimensions: "53□24-149", image: "/PK006.png" },
-  { id: "PK007", name: "PK007", icon: "🔲", dimensions: "53□21-150", image: "/PK007.png" },
-  { id: "PK008", name: "PK008", icon: "👓", dimensions: "53□22-150", image: "/PK008_-_CLEAR.png" },
-  { id: "PK009", name: "PK009", icon: "🕶️", dimensions: "53□23-149", image: "/PK009_-_CLEAR.png" },
-  { id: "PK010", name: "PK010", icon: "😎", dimensions: "55□20-149", image: "/PK010_-_CLEAR.png" },
-  { id: "PK011", name: "PK011", icon: "⭕", dimensions: "55□22-149", image: "/PK011_-_CLEAR.png" },
-  { id: "PK8018", name: "PK8018-S", icon: "🔲", dimensions: "63□17-150", image: "/PK8018_-_CLEAR.png" },
+  { id: "black-out", name: "Black Out", icon: "👓", dimensions: "52□23-149", image: "/glasses/BLACK_OUT.jpg" },
+  { id: "blonde-clear", name: "Blonde Clear", icon: "🕶️", dimensions: "53□23-150", image: "/glasses/Blonde_Clear.jpg" },
+  { id: "light-grey", name: "Light Grey", icon: "😎", dimensions: "51□24-149", image: "/glasses/Light_Grey.jpg" },
+  { id: "tortoise-out", name: "Tortoise Out", icon: "⭕", dimensions: "53□24-149", image: "/glasses/TORTOISE_OUT.jpg" },
 ];
 
 export const LENS_COLORS = [

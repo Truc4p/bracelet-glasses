@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
 import SunglassesAccessoriesLibrary from "@/components/SunglassesAccessoriesLibrary";
-import LensRenderer from "@/components/LensRenderer";
 import { FRAME_OPTIONS, FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
 
 interface AdvancedSunglassesBuilderProps {
@@ -200,11 +199,23 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 paddingBottom: '56%',
               }}
             >
-              <LensRenderer 
-                primaryColor={lensColor.color}
-                secondaryColor={gradientSecondary.color}
-                vlt={vlt}
-                gradientMode={gradientMode}
+              <div
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                style={{
+                  zIndex: 1,
+                  background: gradientMode 
+                    ? `linear-gradient(180deg, ${lensColor.color} 0%, ${gradientSecondary.color} 100%)`
+                    : lensColor.color,
+                  maskImage: `url(${selectedFrame.image.replace('_-_CLEAR', '')})`,
+                  maskSize: 'contain',
+                  maskRepeat: 'no-repeat',
+                  maskPosition: 'center',
+                  WebkitMaskImage: `url(${selectedFrame.image.replace('_-_CLEAR', '')})`,
+                  WebkitMaskSize: 'contain',
+                  WebkitMaskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'center',
+                  opacity: Math.max(0.4, Math.min(0.95, 1 - (vlt || 50) / 100))
+                }}
               />
               <img
                 src={selectedFrame.image}
