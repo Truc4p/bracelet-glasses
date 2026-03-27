@@ -207,19 +207,16 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   const handleSelectBead = (bead: CrystalBead) => {
     setSelectedItem({ kind: "crystal", crystal: bead });
     autoPlaceItem("crystal", bead);
-    setLibraryOpen(false);
   };
 
   const handleSelectSpacer = (spacer: Spacer) => {
     setSelectedItem({ kind: "spacer", spacer });
     autoPlaceItem("spacer", spacer);
-    setAccessoriesOpen(false);
   };
 
   const handleSelectCharm = (charm: ZodiacCharm) => {
     setSelectedItem({ kind: "charm", charm });
     autoPlaceItem("charm", charm);
-    setAccessoriesOpen(false);
   };
 
   const handleReset = () => {
