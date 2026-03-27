@@ -140,9 +140,14 @@ const SunglassesAccessoriesLibrary = ({
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
                 >
                   <div
-                    className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${lensColor.image})` }}
-                  />
+                    className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0 flex items-center justify-center overflow-hidden"
+                  >
+                    <img 
+                      src={lensColor.image} 
+                      alt={lensColor.name} 
+                      className="w-full h-full object-cover scale-[1.35]" 
+                    />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>
                   </div>
@@ -164,9 +169,14 @@ const SunglassesAccessoriesLibrary = ({
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
                   >
                     <div
-                      className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${lensColor.image})` }}
-                    />
+                      className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0 flex items-center justify-center overflow-hidden"
+                    >
+                      <img 
+                        src={lensColor.image} 
+                        alt={lensColor.name} 
+                        className="w-full h-full object-cover scale-[1.35]" 
+                      />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>
                     </div>

@@ -209,12 +209,13 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
                   onClick={() => {
                     setLensColorId(l.id);
                   }}
-                  className={`w-8 h-8 rounded-full border-2 transition-all bg-cover bg-center ${
-                    lensColorId === l.id ? "border-primary scale-110" : "border-border hover:scale-105"
+                  className={`relative w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden transition-all ${
+                    lensColorId === l.id ? "ring-2 ring-primary scale-110" : "ring-1 ring-border hover:scale-105"
                   }`}
-                  style={{ backgroundImage: `url(${l.image})` }}
                   title={l.name}
-                />
+                >
+                  <img src={l.image} alt={l.name} className="w-full h-full object-cover scale-[1.35]" />
+                </button>
               ))}
             </div>
           </div>
