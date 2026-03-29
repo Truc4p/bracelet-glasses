@@ -28,7 +28,21 @@ const CatalogueAdmin = () => {
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<ModalState>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [expandedFrames, setExpandedFrames] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const toggleFrameExpansion = (id: string, e?: React.MouseEvent) => {
+    if (e) {
+      // Prevent expanding/collapsing when clicking buttons inside the row
+      if ((e.target as HTMLElement).closest('button')) return;
+    }
+    setExpandedFrames(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Scroll to top when opening an edit/add modal
   useEffect(() => {
@@ -145,76 +159,125 @@ const CatalogueAdmin = () => {
                 {filteredGlasses.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-8">No glasses found.</p>
                 )}
-                {filteredGlasses.map((f) => (
-                  <div key={f.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
-                    modal?.type === "edit-glasses" && modal.entry.id === f.id
-                      ? "bg-primary/15 ring-2 ring-primary border-transparent"
-                      : "hover:bg-muted/80 focus-within:bg-muted/80"
-                  }`}>
-                    {/* Frame image */}
-                    {f.image ? (
-                      <img
-                        src={f.image}
-                        alt={f.name}
-                        className="w-12 h-12 object-contain bg-muted/50 rounded pointer-events-none drop-shadow-sm"
-                        crossOrigin="anonymous"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-muted/50 rounded flex items-center justify-center text-xl shadow-sm">
-                        {f.icon || "👓"}
+                {filteredGlasses.map((f) => {
+                  const isExpanded = expandedFrames.has(f.id);
+                  return (
+                  <div key={f.id} className="flex flex-col gap-1">
+                    <div 
+                      onClick={(e) => toggleFrameExpansion(f.id, e)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group cursor-pointer ${
+                      modal?.type === "edit-glasses" && modal.entry.id === f.id
+                        ? "bg-primary/15 ring-2 ring-primary border-transparent"
+                        : "hover:bg-muted/80 focus-within:bg-muted/80"
+                    }`}>
+                      {/* Frame image */}
+                      {f.image ? (
+                        <img
+                          src={f.image}
+                          alt={f.name}
+                          className="w-12 h-12 object-contain bg-muted/50 rounded pointer-events-none drop-shadow-sm"
+                          crossOrigin="anonymous"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-muted/50 rounded flex items-center justify-center text-xl shadow-sm">
+                          {f.icon || "👓"}
+                        </div>
+                      )}
+                      
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-semibold text-sm truncate">{f.name}</span>
+                          <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
+                            {f.id}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{f.dimensions}</span>
+                          <span>•</span>
+                          <span>{Object.keys(f.shades || {}).length} shade profiles</span>
+                        </div>
                       </div>
-                    )}
-                    
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-semibold text-sm truncate">{f.name}</span>
-                        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
-                          {f.id}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{f.dimensions}</span>
-                        <span>•</span>
-                        <span>{Object.keys(f.shades || {}).length} shade profiles</span>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                        {confirmDelete === f.id ? (
+                          <div className="flex items-center gap-1 pr-2">
+                            <span className="text-xs text-destructive font-medium mr-2 animate-in fade-in slide-in-from-right-2">Delete style?</span>
+                            <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:bg-muted" onClick={cancelDelete}>
+                              <X className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button size="icon" variant="destructive" className="h-7 w-7" onClick={() => confirmDeleteFn(f.id)}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setModal({ type: "edit-glasses", entry: f });
+                              }}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                requestDelete(f.id);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                            <div className="w-px h-4 bg-border mx-1" />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className={`h-8 w-8 text-muted-foreground hover:text-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                            >
+                              <ChevronDown className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                      {confirmDelete === f.id ? (
-                        <div className="flex items-center gap-1 pr-2">
-                          <span className="text-xs text-destructive font-medium mr-2 animate-in fade-in slide-in-from-right-2">Delete style?</span>
-                          <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:bg-muted" onClick={cancelDelete}>
-                            <X className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button size="icon" variant="destructive" className="h-7 w-7" onClick={() => confirmDeleteFn(f.id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
+                    {/* Expandable Shade Profiles */}
+                    {isExpanded && (
+                      <div className="pl-[76px] pr-4 pb-4 pt-1 animate-in slide-in-from-top-2 fade-in">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 bg-muted/20 p-3 rounded-lg border border-border/50">
+                          {Object.entries(f.shades || {}).map(([shadeId, shadeImage]) => (
+                            <div key={shadeId} className="flex flex-col items-center gap-2 p-2 rounded-md bg-background border border-border/50 text-center shadow-sm">
+                              {shadeImage ? (
+                                <img src={shadeImage} alt={shadeId} className="w-full h-16 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
+                              ) : (
+                                <div className="w-full h-16 rounded bg-muted/50 flex flex-col items-center justify-center text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                                  <span>No</span>
+                                  <span>Image</span>
+                                </div>
+                              )}
+                              <span className="text-xs font-medium w-full truncate px-1" title={shadeId}>
+                                {shadeId}
+                              </span>
+                            </div>
+                          ))}
+                          {Object.keys(f.shades || {}).length === 0 && (
+                            <div className="col-span-full py-6 text-center text-sm text-muted-foreground">
+                              No shade profiles configured. Click the pencil icon to add some.
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                            onClick={() => setModal({ type: "edit-glasses", entry: f })}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => requestDelete(f.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
