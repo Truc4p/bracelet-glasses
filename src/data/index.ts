@@ -82,21 +82,37 @@ export function useCatalogue(): CatalogueState {
     };
   });
 
-  // Fetch shades from MongoDB backend over API
+  // Fetch frames from MongoDB backend over API
   useEffect(() => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-    fetch(`${BACKEND_URL}/api/shades`)
+    // 1. Fetch frames first
+    fetch(`${BACKEND_URL}/api/frames`)
+      .then(res => res.json())
+      .then(dbFrames => {
+        if (dbFrames && Array.isArray(dbFrames) && dbFrames.length > 0) {
+          setStore(prevStore => ({
+            ...prevStore,
+            frames: merge(DEFAULT_FRAMES, dbFrames)
+          }));
+        }
+        
+        // 2. Fallback fetch shades for backwards compatibility with the seed.js data
+        return fetch(`${BACKEND_URL}/api/shades`);
+      })
       .then(res => res.json())
       .then(data => {
         setStore(prevStore => {
-          const updatedFrames = prevStore.frames.map(frame => ({
-            ...frame,
-            shades: data[frame.id] || frame.shades
-          }));
+          const updatedFrames = prevStore.frames.map(frame => {
+            // merge MongoDB shades with the local ones if backend has any
+            return {
+              ...frame,
+              shades: { ...frame.shades, ...data[frame.id] }
+            };
+          });
           return { ...prevStore, frames: updatedFrames };
         });
       })
-      .catch(err => console.error("Could not load shade properties from MongoDB backend:", err));
+      .catch(err => console.error("Could not load catalogue data from MongoDB backend:", err));
   }, []);
 
   // Persist whenever store changes
@@ -170,21 +186,45 @@ export function useCatalogue(): CatalogueState {
 
   // ── Frame mutations ──
   const addFrame = useCallback(
-    (entry: FrameEntry) =>
-      persist({ ...store, frames: [...store.frames, entry] }),
+    (entry: FrameEntry) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/frames`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry)
+      }).catch(err => console.error("Failed to add frame to MongoDB", err));
+      
+      persist({ ...store, frames: [...store.frames, entry] });
+    },
     [store, persist]
   );
+  
   const updateFrame = useCallback(
-    (entry: FrameEntry) =>
+    (entry: FrameEntry) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/frames/${entry.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry)
+      }).catch(err => console.error("Failed to update frame in MongoDB", err));
+
       persist({
         ...store,
         frames: store.frames.map((f) => (f.id === entry.id ? entry : f)),
-      }),
+      });
+    },
     [store, persist]
   );
+  
   const deleteFrame = useCallback(
-    (id: string) =>
-      persist({ ...store, frames: store.frames.filter((f) => f.id !== id) }),
+    (id: string) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/frames/${id}`, {
+        method: "DELETE"
+      }).catch(err => console.error("Failed to delete frame from MongoDB", err));
+
+      persist({ ...store, frames: store.frames.filter((f) => f.id !== id) });
+    },
     [store, persist]
   );
 

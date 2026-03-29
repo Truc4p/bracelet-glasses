@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { FrameEntry } from "@/data/glasses";
 
@@ -17,6 +17,7 @@ export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
   const [shades, setShades] = useState<Array<{ lensId: string; image: string }>>(
     Object.entries(initial?.shades || {}).map(([lensId, image]) => ({ lensId, image: image || "" }))
   );
+  const [uploading, setUploading] = useState(false);
 
   const set = (k: keyof FrameEntry, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -31,6 +32,32 @@ export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
   
   const removeShade = (index: number) => {
     setShades((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    setUploading(true);
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      const res = await fetch(`${backendUrl}/api/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      callback(data.imageUrl);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setUploading(false);
+      if (e.target) e.target.value = ''; // trigger onChange again if needed
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -82,22 +109,50 @@ export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
         </div>
         <div className="col-span-2">
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Base Image URL *</label>
-          <input
-            required
-            className="w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
-            value={form.image}
-            onChange={(e) => set("image", e.target.value)}
-            placeholder="/glasses/frames/BLACK_OUT.jpg"
-          />
+          <div className="flex gap-2">
+            <input
+              required
+              className="flex-1 w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
+              value={form.image}
+              onChange={(e) => set("image", e.target.value)}
+              placeholder="Paste URL or upload image"
+            />
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="upload-base-image"
+                onChange={(e) => handleUpload(e, (url) => set("image", url))}
+              />
+              <label htmlFor="upload-base-image" className="cursor-pointer bg-muted border border-border rounded px-4 h-full flex items-center text-sm font-medium hover:bg-muted/80 transition-colors whitespace-nowrap gap-1">
+                {uploading ? "..." : <><UploadCloud className="w-4 h-4" /> Upload</>}
+              </label>
+            </div>
+          </div>
         </div>
         <div className="col-span-2">
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Clear Image URL (Optional)</label>
-          <input
-            className="w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
-            value={form.clearImage || ""}
-            onChange={(e) => set("clearImage", e.target.value)}
-            placeholder="/glasses/frames/BLACK_OUT_CLEAR.jpg"
-          />
+          <div className="flex gap-2">
+            <input
+              className="flex-1 w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
+              value={form.clearImage || ""}
+              onChange={(e) => set("clearImage", e.target.value)}
+              placeholder="Paste URL or upload image"
+            />
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                id="upload-clear-image"
+                onChange={(e) => handleUpload(e, (url) => set("clearImage", url))}
+              />
+              <label htmlFor="upload-clear-image" className="cursor-pointer bg-muted border border-border rounded px-4 h-full flex items-center text-sm font-medium hover:bg-muted/80 transition-colors whitespace-nowrap gap-1">
+                {uploading ? "..." : <><UploadCloud className="w-4 h-4" /> Upload</>}
+              </label>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -122,13 +177,27 @@ export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
                   value={shade.lensId}
                   onChange={(e) => updateShade(i, "lensId", e.target.value)}
                 />
-                <input
-                  required
-                  placeholder="Image URL"
-                  className="flex-1 w-full text-sm border border-border rounded p-2 focus:ring-1 focus:ring-primary outline-none bg-background"
-                  value={shade.image}
-                  onChange={(e) => updateShade(i, "image", e.target.value)}
-                />
+                <div className="flex-1 flex gap-2">
+                  <input
+                    required
+                    placeholder="Image URL"
+                    className="flex-1 w-full text-sm border border-border rounded p-2 focus:ring-1 focus:ring-primary outline-none bg-background"
+                    value={shade.image}
+                    onChange={(e) => updateShade(i, "image", e.target.value)}
+                  />
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      id={`upload-shade-image-${i}`}
+                      onChange={(e) => handleUpload(e, (url) => updateShade(i, "image", url))}
+                    />
+                    <label htmlFor={`upload-shade-image-${i}`} className="cursor-pointer bg-muted border border-border rounded px-3 h-full flex items-center text-sm font-medium hover:bg-muted/80 transition-colors whitespace-nowrap" title="Upload Image">
+                      <UploadCloud className="w-4 h-4" />
+                    </label>
+                  </div>
+                </div>
               </div>
               <Button type="button" variant="ghost" size="icon" onClick={() => removeShade(i)} className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive">
                 <Trash2 className="w-4 h-4" />
