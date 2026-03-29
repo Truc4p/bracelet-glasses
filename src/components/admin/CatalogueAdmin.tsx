@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Plus, Pencil, Trash2, RotateCcw, Search, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Plus, Pencil, Trash2, RotateCcw, Search, X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCatalogue } from "@/data/index";
 import type { CrystalEntry } from "@/data/crystals";
@@ -24,24 +24,18 @@ type ModalState =
 
 const CatalogueAdmin = () => {
   const cat = useCatalogue();
-  const [tab, setTab] = useState<AdminTab>("crystals");
+  const [tab, setTab] = useState<AdminTab>("glasses");
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<ModalState>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [expandedFrames, setExpandedFrames] = useState<Set<string>>(new Set());
+  const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const toggleFrameExpansion = (id: string, e?: React.MouseEvent) => {
     if (e) {
-      // Prevent expanding/collapsing when clicking buttons inside the row
       if ((e.target as HTMLElement).closest('button')) return;
     }
-    setExpandedFrames(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    setSelectedFrameId(id);
   };
 
   // Scroll to top when opening an edit/add modal
@@ -125,42 +119,109 @@ const CatalogueAdmin = () => {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Toolbar */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-            <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={`Search ${tabLabel(tab).toLowerCase()}...`}
-                className="w-full pl-9 pr-3 py-1.5 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
-              />
-            </div>
-            <Button
-              size="sm"
-              onClick={() => {
-                if (tab === "crystals") setModal({ type: "add-crystal" });
-                else if (tab === "spacers") setModal({ type: "add-spacer" });
-                else if (tab === "glasses") setModal({ type: "add-glasses" });
-                else setModal({ type: "add-charm" });
-                setSearch("");
-              }}
-              className="gap-1.5 shrink-0"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Add {tabLabel(tab).slice(0, tab === "glasses" ? tabLabel(tab).length : -1)}
-            </Button>
+            {tab === "glasses" && selectedFrameId ? (
+              (() => {
+                const frame = cat.frames?.find((f) => f.id === selectedFrameId);
+                if (!frame) return <div className="flex-1 max-w-xs h-8" />;
+                return (
+                  <>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedFrameId(null)}>
+                      <ArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <div className="flex items-center gap-4">
+                      {frame.image ? (
+                        <img src={frame.image} alt={frame.name} className="w-16 h-16 object-contain bg-muted/50 rounded drop-shadow" crossOrigin="anonymous" />
+                      ) : (
+                        <div className="w-16 h-16 bg-muted/50 rounded flex items-center justify-center text-2xl shadow-sm">{frame.icon || "👓"}</div>
+                      )}
+                      <div>
+                        <h2 className="text-xl font-bold font-display">{frame.name}</h2>
+                        <p className="text-sm text-muted-foreground">{frame.dimensions} • {frame.id}</p>
+                      </div>
+                    </div>
+                    <div className="ml-auto flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setModal({ type: "edit-glasses", entry: frame })}>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    </div>
+                  </>
+                );
+              })()
+            ) : (
+              <div className="relative flex-1 max-w-xs">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={`Search ${tabLabel(tab).toLowerCase()}...`}
+                  className="w-full pl-9 pr-3 py-1.5 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
+                />
+              </div>
+            )}
+            {!(tab === "glasses" && selectedFrameId) && (
+              <Button
+                size="sm"
+                onClick={() => {
+                  if (tab === "crystals") setModal({ type: "add-crystal" });
+                  else if (tab === "spacers") setModal({ type: "add-spacer" });
+                  else if (tab === "glasses") setModal({ type: "add-glasses" });
+                  else setModal({ type: "add-charm" });
+                  setSearch("");
+                }}
+                className="gap-1.5 shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add {tabLabel(tab).slice(0, tab === "glasses" ? tabLabel(tab).length : -1)}
+              </Button>
+            )}
           </div>
 
           {/* List */}
           <div className="flex-1 overflow-y-auto p-4" ref={scrollRef}>
             {/* Glasses table */}
-            {tab === "glasses" && (
+            {tab === "glasses" && selectedFrameId ? (
+              // Detail Page
+              <div className="animate-in slide-in-from-right-2 fade-in space-y-6">
+                {(() => {
+                  const frame = cat.frames?.find((f) => f.id === selectedFrameId);
+                  if (!frame) return <p>Frame not found</p>;
+                  return (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4">Shade Profiles ({Object.keys(frame.shades || {}).length})</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {Object.entries(frame.shades || {}).map(([shadeId, shadeImage]) => (
+                          <div key={shadeId} className="flex flex-col items-center gap-3 p-3 rounded-lg bg-background border border-border text-center shadow-sm">
+                            {shadeImage ? (
+                              <img src={shadeImage} alt={shadeId} className="w-full h-24 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
+                            ) : (
+                              <div className="w-full h-24 rounded bg-muted flex flex-col items-center justify-center text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                                <span>No</span>
+                                <span>Image</span>
+                              </div>
+                            )}
+                            <span className="text-sm font-medium w-full truncate px-1" title={shadeId}>
+                              {shadeId}
+                            </span>
+                          </div>
+                        ))}
+                        {Object.keys(frame.shades || {}).length === 0 && (
+                          <div className="col-span-full py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/20">
+                            No shade profiles configured. Click Edit to add some.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            ) : tab === "glasses" && !selectedFrameId && (
               <div className="space-y-1">
                 {filteredGlasses.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-8">No glasses found.</p>
                 )}
                 {filteredGlasses.map((f) => {
-                  const isExpanded = expandedFrames.has(f.id);
                   return (
                   <div key={f.id} className="flex flex-col gap-1">
                     <div 
@@ -235,46 +296,10 @@ const CatalogueAdmin = () => {
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
-                            <div className="w-px h-4 bg-border mx-1" />
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className={`h-8 w-8 text-muted-foreground hover:text-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                            >
-                              <ChevronDown className="w-4 h-4" />
-                            </Button>
                           </>
                         )}
                       </div>
                     </div>
-
-                    {/* Expandable Shade Profiles */}
-                    {isExpanded && (
-                      <div className="pl-[76px] pr-4 pb-4 pt-1 animate-in slide-in-from-top-2 fade-in">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 bg-muted/20 p-3 rounded-lg border border-border/50">
-                          {Object.entries(f.shades || {}).map(([shadeId, shadeImage]) => (
-                            <div key={shadeId} className="flex flex-col items-center gap-2 p-2 rounded-md bg-background border border-border/50 text-center shadow-sm">
-                              {shadeImage ? (
-                                <img src={shadeImage} alt={shadeId} className="w-full h-16 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
-                              ) : (
-                                <div className="w-full h-16 rounded bg-muted/50 flex flex-col items-center justify-center text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                                  <span>No</span>
-                                  <span>Image</span>
-                                </div>
-                              )}
-                              <span className="text-xs font-medium w-full truncate px-1" title={shadeId}>
-                                {shadeId}
-                              </span>
-                            </div>
-                          ))}
-                          {Object.keys(f.shades || {}).length === 0 && (
-                            <div className="col-span-full py-6 text-center text-sm text-muted-foreground">
-                              No shade profiles configured. Click the pencil icon to add some.
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
                   </div>
                   );
                 })}
