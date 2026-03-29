@@ -143,14 +143,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
           <span className="text-sm font-body">{vlt}% VLT</span>
         </div>
 
-        <Button
-          variant={gradientMode ? "default" : "luxe-outline"}
-          size="sm"
-          onClick={() => setGradientMode(!gradientMode)}
-        >
-          <Waves className="w-3.5 h-3.5" />
-          Gradient
-        </Button>
+
 
         <div className="flex items-center gap-2 ml-auto">
           <Button
@@ -182,7 +175,9 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
       </div>
 
       <div className="flex-1 relative overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-slate-50">
-        <div className="min-h-full flex items-center justify-center p-6">
+        <div className={`min-h-full flex items-center justify-center p-6 transition-all duration-300 ${
+          (accessoriesOpen || frameLibraryOpen) ? "lg:pl-[340px]" : ""
+        }`}>
           <FrameLibrary
             open={frameLibraryOpen}
             onSelectFrame={handleFrameSelect}
@@ -278,31 +273,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
       </div>
 
       <div className="flex-shrink-0 px-6 py-4 border-t border-border bg-white space-y-4">
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={gradientMode}
-              onChange={(e) => handleGradientToggle(e.target.checked)}
-              className="w-4 h-4"
-            />
-            <span className="text-sm font-medium font-heading">Gradient Lens (+$20)</span>
-          </label>
 
-          {gradientMode && (
-            <select
-              value={gradientSecondary.id}
-              onChange={(e) => setGradientSecondary(LENS_COLORS.find(c => c.id === e.target.value)!)}
-              className="px-3 py-1.5 rounded-md border bg-background text-sm font-body"
-            >
-              {LENS_COLORS.map((color) => (
-                <option key={color.id} value={color.id}>
-                  {color.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
 
         <div className="text-xs text-muted-foreground font-body">
           {placedAccessories.length} accessories added • Drag items from the Customize panel to add them to your sunglasses

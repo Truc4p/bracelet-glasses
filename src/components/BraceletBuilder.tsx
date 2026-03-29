@@ -352,7 +352,9 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
       </div>
 
       {/* Canvas area */}
-      <div className="flex-1 relative flex items-center justify-center gap-8 p-6">
+      <div className={`flex-1 relative flex items-center justify-center gap-8 p-6 transition-all duration-300 ${
+        (libraryOpen || accessoriesOpen) ? "lg:pl-[340px]" : ""
+      }`}>
         <BeadLibrary
           open={libraryOpen}
           onSelectBead={handleSelectBead}
