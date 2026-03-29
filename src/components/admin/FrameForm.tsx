@@ -108,29 +108,29 @@ export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
             <Plus className="w-3 h-3" /> Add Profile
           </Button>
         </div>
-        <div className="space-y-3 max-h-64 overflow-y-auto pr-1 pb-1">
+        <div className="space-y-3 pr-1 pb-1">
           {shades.length === 0 && (
             <div className="text-xs text-muted-foreground italic text-center py-2">No shade profiles added.</div>
           )}
           {shades.map((shade, i) => (
             <div key={i} className="flex gap-2 items-start bg-muted/30 p-2 rounded border border-border">
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 flex flex-col sm:flex-row gap-2">
                 <input
                   required
                   placeholder="Lens ID (e.g. amber)"
-                  className="w-full text-xs font-mono border border-border rounded p-1.5 focus:ring-1 focus:ring-primary outline-none"
+                  className="sm:w-1/3 w-full text-sm font-mono border border-border rounded p-2 focus:ring-1 focus:ring-primary outline-none bg-background"
                   value={shade.lensId}
                   onChange={(e) => updateShade(i, "lensId", e.target.value)}
                 />
                 <input
                   required
                   placeholder="Image URL"
-                  className="w-full text-xs border border-border rounded p-1.5 focus:ring-1 focus:ring-primary outline-none"
+                  className="flex-1 w-full text-sm border border-border rounded p-2 focus:ring-1 focus:ring-primary outline-none bg-background"
                   value={shade.image}
                   onChange={(e) => updateShade(i, "image", e.target.value)}
                 />
               </div>
-              <Button type="button" variant="ghost" size="icon" onClick={() => removeShade(i)} className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive">
+              <Button type="button" variant="ghost" size="icon" onClick={() => removeShade(i)} className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive">
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>

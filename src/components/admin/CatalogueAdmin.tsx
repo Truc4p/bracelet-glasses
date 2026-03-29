@@ -18,8 +18,6 @@ type ModalState =
   | { type: "edit-spacer"; entry: SpacerEntry }
   | { type: "add-charm" }
   | { type: "edit-charm"; entry: CharmEntry }
-  | { type: "add-glasses" }
-  | { type: "edit-glasses"; entry: FrameEntry }
   | null;
 
 const CatalogueAdmin = () => {
@@ -29,6 +27,7 @@ const CatalogueAdmin = () => {
   const [modal, setModal] = useState<ModalState>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
+  const [isEditingFrame, setIsEditingFrame] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const toggleFrameExpansion = (id: string, e?: React.MouseEvent) => {
@@ -36,14 +35,15 @@ const CatalogueAdmin = () => {
       if ((e.target as HTMLElement).closest('button')) return;
     }
     setSelectedFrameId(id);
+    setIsEditingFrame(false);
   };
 
-  // Scroll to top when opening an edit/add modal
+  // Scroll to top when opening an edit/add modal or page
   useEffect(() => {
-    if (modal && scrollRef.current) {
+    if ((modal || selectedFrameId) && scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-  }, [modal]);
+  }, [modal, selectedFrameId, isEditingFrame]);
 
   const tabLabel = (t: AdminTab) =>
     ({ crystals: "Crystals", spacers: "Spacers", charms: "Charms", glasses: "Glasses" })[t];
@@ -103,7 +103,7 @@ const CatalogueAdmin = () => {
           {(["glasses", "crystals", "spacers", "charms"] as AdminTab[]).map((t) => (
             <button
               key={t}
-              onClick={() => { setTab(t); setSearch(""); setModal(null); }}
+              onClick={() => { setTab(t); setSearch(""); setModal(null); setSelectedFrameId(null); setIsEditingFrame(false); }}
               className={`w-full text-left px-3 py-2 rounded-md text-sm font-body transition-colors ${
                 tab === t
                   ? "bg-primary text-primary-foreground"
@@ -121,11 +121,30 @@ const CatalogueAdmin = () => {
           <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
             {tab === "glasses" && selectedFrameId ? (
               (() => {
+                if (selectedFrameId === "new") {
+                  return (
+                    <>
+                      <Button variant="ghost" size="icon" onClick={() => { setSelectedFrameId(null); setIsEditingFrame(false); }}>
+                        <ArrowLeft className="w-5 h-5" />
+                      </Button>
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <h2 className="text-xl font-bold font-display">New Frame</h2>
+                          <p className="text-sm text-muted-foreground">Add a new glasses style</p>
+                        </div>
+                      </div>
+                    </>
+                  );
+                }
+
                 const frame = cat.frames?.find((f) => f.id === selectedFrameId);
                 if (!frame) return <div className="flex-1 max-w-xs h-8" />;
                 return (
                   <>
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedFrameId(null)}>
+                    <Button variant="ghost" size="icon" onClick={() => {
+                        if (isEditingFrame) setIsEditingFrame(false);
+                        else setSelectedFrameId(null);
+                      }}>
                       <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div className="flex items-center gap-4">
@@ -139,12 +158,14 @@ const CatalogueAdmin = () => {
                         <p className="text-sm text-muted-foreground">{frame.dimensions} • {frame.id}</p>
                       </div>
                     </div>
-                    <div className="ml-auto flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setModal({ type: "edit-glasses", entry: frame })}>
-                        <Pencil className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                    </div>
+                    {!isEditingFrame && (
+                      <div className="ml-auto flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setIsEditingFrame(true)}>
+                          <Pencil className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </div>
+                    )}
                   </>
                 );
               })()
@@ -166,7 +187,7 @@ const CatalogueAdmin = () => {
                 onClick={() => {
                   if (tab === "crystals") setModal({ type: "add-crystal" });
                   else if (tab === "spacers") setModal({ type: "add-spacer" });
-                  else if (tab === "glasses") setModal({ type: "add-glasses" });
+                  else if (tab === "glasses") { setSelectedFrameId("new"); setIsEditingFrame(true); }
                   else setModal({ type: "add-charm" });
                   setSearch("");
                 }}
@@ -182,39 +203,59 @@ const CatalogueAdmin = () => {
           <div className="flex-1 overflow-y-auto p-4" ref={scrollRef}>
             {/* Glasses table */}
             {tab === "glasses" && selectedFrameId ? (
-              // Detail Page
-              <div className="animate-in slide-in-from-right-2 fade-in space-y-6">
-                {(() => {
-                  const frame = cat.frames?.find((f) => f.id === selectedFrameId);
-                  if (!frame) return <p>Frame not found</p>;
-                  return (
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Shade Profiles ({Object.keys(frame.shades || {}).length})</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {Object.entries(frame.shades || {}).map(([shadeId, shadeImage]) => (
-                          <div key={shadeId} className="flex flex-col items-center gap-3 p-3 rounded-lg bg-background border border-border text-center shadow-sm">
-                            {shadeImage ? (
-                              <img src={shadeImage} alt={shadeId} className="w-full h-24 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
-                            ) : (
-                              <div className="w-full h-24 rounded bg-muted flex flex-col items-center justify-center text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                                <span>No</span>
-                                <span>Image</span>
-                              </div>
-                            )}
-                            <span className="text-sm font-medium w-full truncate px-1" title={shadeId}>
-                              {shadeId}
-                            </span>
-                          </div>
-                        ))}
-                        {Object.keys(frame.shades || {}).length === 0 && (
-                          <div className="col-span-full py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/20">
-                            No shade profiles configured. Click Edit to add some.
-                          </div>
-                        )}
+              // Detail/Edit Page
+              <div className="animate-in slide-in-from-right-2 fade-in max-w-4xl mx-auto pt-2 pb-8 w-full">
+                {selectedFrameId === "new" ? (
+                  <FrameForm
+                    onSave={(e) => { cat.addFrame(e); setSelectedFrameId(null); setIsEditingFrame(false); }}
+                    onCancel={() => { setSelectedFrameId(null); setIsEditingFrame(false); }}
+                  />
+                ) : isEditingFrame ? (
+                  (() => {
+                    const frame = cat.frames?.find((f) => f.id === selectedFrameId);
+                    if (!frame) return <p>Frame not found</p>;
+                    return (
+                      <FrameForm
+                        key={`edit-glasses-${frame.id}`}
+                        initial={frame}
+                        onSave={(e) => { cat.updateFrame(e); setIsEditingFrame(false); }}
+                        onCancel={() => setIsEditingFrame(false)}
+                      />
+                    );
+                  })()
+                ) : (
+                  (() => {
+                    const frame = cat.frames?.find((f) => f.id === selectedFrameId);
+                    if (!frame) return <p>Frame not found</p>;
+                    return (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4">Shade Profiles ({Object.keys(frame.shades || {}).length})</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {Object.entries(frame.shades || {}).map(([shadeId, shadeImage]) => (
+                            <div key={shadeId} className="flex flex-col items-center gap-3 p-3 rounded-lg bg-background border border-border text-center shadow-sm">
+                              {shadeImage ? (
+                                <img src={shadeImage} alt={shadeId} className="w-full h-24 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
+                              ) : (
+                                <div className="w-full h-24 rounded bg-muted flex flex-col items-center justify-center text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                                  <span>No</span>
+                                  <span>Image</span>
+                                </div>
+                              )}
+                              <span className="text-sm font-medium w-full truncate px-1" title={shadeId}>
+                                {shadeId}
+                              </span>
+                            </div>
+                          ))}
+                          {Object.keys(frame.shades || {}).length === 0 && (
+                            <div className="col-span-full py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/20">
+                              No shade profiles configured. Click Edit to add some.
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })()}
+                    );
+                  })()
+                )}
               </div>
             ) : tab === "glasses" && !selectedFrameId && (
               <div className="space-y-1">
@@ -227,7 +268,7 @@ const CatalogueAdmin = () => {
                     <div 
                       onClick={(e) => toggleFrameExpansion(f.id, e)}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group cursor-pointer ${
-                      modal?.type === "edit-glasses" && modal.entry.id === f.id
+                      selectedFrameId === f.id
                         ? "bg-primary/15 ring-2 ring-primary border-transparent"
                         : "hover:bg-muted/80 focus-within:bg-muted/80"
                     }`}>
@@ -280,7 +321,7 @@ const CatalogueAdmin = () => {
                               className="h-8 w-8 text-muted-foreground hover:text-foreground"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setModal({ type: "edit-glasses", entry: f });
+                                setSelectedFrameId(f.id);
                               }}
                             >
                               <Pencil className="w-4 h-4" />
@@ -508,18 +549,12 @@ const CatalogueAdmin = () => {
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold font-display">
                 {modal.type.startsWith("add") ? "New" : "Edit"}{" "}
-                {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : modal.type.includes("charm") ? "Charm" : "Glasses"}
+                {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : "Charm"}
               </h3>
               <button onClick={closeModal} className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            {modal.type === "add-glasses" && (
-              <FrameForm key="add-glasses" onSave={(e) => { cat.addFrame(e); closeModal(); }} onCancel={closeModal} />
-            )}
-            {modal.type === "edit-glasses" && (
-              <FrameForm key={`edit-glasses-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateFrame(e); closeModal(); }} onCancel={closeModal} />
-            )}
             {modal.type === "add-crystal" && (
               <CrystalForm key="add-crystal" onSave={(e) => { cat.addCrystal(e); closeModal(); }} onCancel={closeModal} />
             )}
