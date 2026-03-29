@@ -5,10 +5,12 @@ import { useCatalogue } from "@/data/index";
 import type { CrystalEntry } from "@/data/crystals";
 import type { SpacerEntry } from "@/data/spacers";
 import type { CharmEntry } from "@/data/charms";
+import type { FrameEntry } from "@/data/glasses";
 import { CrystalForm, SpacerForm, CharmForm } from "./CrystalForm";
+import { FrameForm } from "./FrameForm";
 import StockBadge from "./StockBadge";
 
-type AdminTab = "crystals" | "spacers" | "charms";
+type AdminTab = "crystals" | "spacers" | "charms" | "glasses";
 type ModalState =
   | { type: "add-crystal" }
   | { type: "edit-crystal"; entry: CrystalEntry }
@@ -16,6 +18,8 @@ type ModalState =
   | { type: "edit-spacer"; entry: SpacerEntry }
   | { type: "add-charm" }
   | { type: "edit-charm"; entry: CharmEntry }
+  | { type: "add-glasses" }
+  | { type: "edit-glasses"; entry: FrameEntry }
   | null;
 
 const CatalogueAdmin = () => {
@@ -34,7 +38,7 @@ const CatalogueAdmin = () => {
   }, [modal]);
 
   const tabLabel = (t: AdminTab) =>
-    ({ crystals: "Crystals", spacers: "Spacers", charms: "Charms" })[t];
+    ({ crystals: "Crystals", spacers: "Spacers", charms: "Charms", glasses: "Glasses" })[t];
 
   // ── Filtered lists ──
   const q = search.toLowerCase();
@@ -43,6 +47,9 @@ const CatalogueAdmin = () => {
   const filteredCharms = cat.charms.filter((c) =>
     c.animal.toLowerCase().includes(q) || c.design.includes(q)
   );
+  const filteredGlasses = cat.frames?.filter((f) =>
+    f.name.toLowerCase().includes(q)
+  ) || [];
 
   // ── Delete with confirmation ──
   const requestDelete = (id: string) => setConfirmDelete(id);
@@ -50,6 +57,7 @@ const CatalogueAdmin = () => {
   const confirmDeleteFn = (id: string) => {
     if (tab === "crystals") cat.deleteCrystal(id);
     else if (tab === "spacers") cat.deleteSpacer(id);
+    else if (tab === "glasses") cat.deleteFrame(id);
     else cat.deleteCharm(id);
     setConfirmDelete(null);
   };
@@ -84,7 +92,7 @@ const CatalogueAdmin = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar tabs */}
         <div className="w-36 border-r border-border flex flex-col gap-1 p-3 shrink-0">
-          {(["crystals", "spacers", "charms"] as AdminTab[]).map((t) => (
+          {(["glasses", "crystals", "spacers", "charms"] as AdminTab[]).map((t) => (
             <button
               key={t}
               onClick={() => { setTab(t); setSearch(""); setModal(null); }}
@@ -118,18 +126,98 @@ const CatalogueAdmin = () => {
               onClick={() => {
                 if (tab === "crystals") setModal({ type: "add-crystal" });
                 else if (tab === "spacers") setModal({ type: "add-spacer" });
+                else if (tab === "glasses") setModal({ type: "add-glasses" });
                 else setModal({ type: "add-charm" });
                 setSearch("");
               }}
               className="gap-1.5 shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
-              Add {tabLabel(tab).slice(0, -1)}
+              Add {tabLabel(tab).slice(0, tab === "glasses" ? tabLabel(tab).length : -1)}
             </Button>
           </div>
 
           {/* List */}
           <div className="flex-1 overflow-y-auto p-4" ref={scrollRef}>
+            {/* Glasses table */}
+            {tab === "glasses" && (
+              <div className="space-y-1">
+                {filteredGlasses.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-8">No glasses found.</p>
+                )}
+                {filteredGlasses.map((f) => (
+                  <div key={f.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
+                    modal?.type === "edit-glasses" && modal.entry.id === f.id
+                      ? "bg-primary/15 ring-2 ring-primary border-transparent"
+                      : "hover:bg-muted/80 focus-within:bg-muted/80"
+                  }`}>
+                    {/* Frame image */}
+                    {f.image ? (
+                      <img
+                        src={f.image}
+                        alt={f.name}
+                        className="w-12 h-12 object-contain bg-muted/50 rounded pointer-events-none drop-shadow-sm"
+                        crossOrigin="anonymous"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-muted/50 rounded flex items-center justify-center text-xl shadow-sm">
+                        {f.icon || "👓"}
+                      </div>
+                    )}
+                    
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="font-semibold text-sm truncate">{f.name}</span>
+                        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
+                          {f.id}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{f.dimensions}</span>
+                        <span>•</span>
+                        <span>{Object.keys(f.shades || {}).length} shade profiles</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                      {confirmDelete === f.id ? (
+                        <div className="flex items-center gap-1 pr-2">
+                          <span className="text-xs text-destructive font-medium mr-2 animate-in fade-in slide-in-from-right-2">Delete style?</span>
+                          <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:bg-muted" onClick={cancelDelete}>
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button size="icon" variant="destructive" className="h-7 w-7" onClick={() => confirmDeleteFn(f.id)}>
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={() => setModal({ type: "edit-glasses", entry: f })}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => requestDelete(f.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Crystals table */}
             {tab === "crystals" && (
               <div className="space-y-1">
@@ -310,6 +398,7 @@ const CatalogueAdmin = () => {
 
           {/* Footer stats */}
           <div className="px-4 py-3 border-t border-border text-xs text-muted-foreground font-body flex gap-4">
+            <span>{cat.frames?.length || 0} glasses</span>
             <span>{cat.crystals.length} crystals</span>
             <span>{cat.spacers.length} spacers</span>
             <span>{cat.charms.length} charms</span>
@@ -331,12 +420,18 @@ const CatalogueAdmin = () => {
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold font-display">
                 {modal.type.startsWith("add") ? "New" : "Edit"}{" "}
-                {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : "Charm"}
+                {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : modal.type.includes("charm") ? "Charm" : "Glasses"}
               </h3>
               <button onClick={closeModal} className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
+            {modal.type === "add-glasses" && (
+              <FrameForm key="add-glasses" onSave={(e) => { cat.addFrame(e); closeModal(); }} onCancel={closeModal} />
+            )}
+            {modal.type === "edit-glasses" && (
+              <FrameForm key={`edit-glasses-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateFrame(e); closeModal(); }} onCancel={closeModal} />
+            )}
             {modal.type === "add-crystal" && (
               <CrystalForm key="add-crystal" onSave={(e) => { cat.addCrystal(e); closeModal(); }} onCancel={closeModal} />
             )}

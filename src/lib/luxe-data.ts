@@ -15,6 +15,7 @@
 import { DEFAULT_CRYSTALS } from "@/data/crystals";
 import { DEFAULT_SPACERS } from "@/data/spacers";
 import { DEFAULT_CHARMS } from "@/data/charms";
+import { DEFAULT_FRAMES } from "@/data/glasses";
 import { getCatalogueSnapshot } from "@/data/index";
 
 // Re-export entry types under the legacy names used across the app
@@ -43,7 +44,7 @@ export type ZodiacCharmAlias = CharmEntry;
  */
 function snapshot() {
   if (typeof window === "undefined") {
-    return { crystals: DEFAULT_CRYSTALS, spacers: DEFAULT_SPACERS, charms: DEFAULT_CHARMS };
+    return { crystals: DEFAULT_CRYSTALS, spacers: DEFAULT_SPACERS, charms: DEFAULT_CHARMS, frames: DEFAULT_FRAMES };
   }
   return getCatalogueSnapshot();
 }
@@ -97,14 +98,10 @@ export interface FrameOption {
   dimensions: string;
   image: string;
   clearImage?: string;
+  shades?: Record<string, string | null>;
 }
 
-export const FRAME_OPTIONS: FrameOption[] = [
-  { id: "black-out", name: "Black Out", icon: "👓", dimensions: "52□23-149", image: "/glasses/frames/BLACK_OUT.jpg" },
-  { id: "blonde-clear", name: "Blonde Clear", icon: "🕶️", dimensions: "53□23-150", image: "/glasses/frames/Blonde_Clear.jpg" },
-  { id: "light-grey", name: "Light Grey", icon: "😎", dimensions: "51□24-149", image: "/glasses/frames/Light_Grey.jpg" },
-  { id: "tortoise-out", name: "Tortoise Out", icon: "⭕", dimensions: "53□24-149", image: "/glasses/frames/TORTOISE_OUT.jpg" },
-];
+export const FRAME_OPTIONS: FrameOption[] = snapshot().frames;
 
 export const LENS_COLORS = [
   { id: "amber", name: "Amber", image: "/glasses/shade-profile/amber.jpg" },

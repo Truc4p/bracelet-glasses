@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
-import { FRAME_OPTIONS, type FrameOption } from "@/lib/luxe-data";
+import type { FrameOption } from "@/lib/luxe-data";
+import { useCatalogue } from "@/data/index";
 
 interface FrameLibraryProps {
   onSelectFrame: (frame: FrameOption) => void;
@@ -9,10 +10,11 @@ interface FrameLibraryProps {
 }
 
 const FrameLibrary = ({ onSelectFrame, open, onClose }: FrameLibraryProps) => {
+  const { frames } = useCatalogue();
   const [search, setSearch] = useState("");
 
   const filteredFrames = useMemo(
-    () => FRAME_OPTIONS.filter((f) =>
+    () => frames.filter((f) =>
       f.name.toLowerCase().includes(search.toLowerCase()) ||
       f.dimensions.includes(search)
     ),

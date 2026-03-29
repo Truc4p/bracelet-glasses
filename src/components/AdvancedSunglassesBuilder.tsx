@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
 import SunglassesAccessoriesLibrary from "@/components/SunglassesAccessoriesLibrary";
-import { FRAME_OPTIONS, FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
-import { SHADE_MAP } from "@/lib/shadeMap";
+import { FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
+import { useCatalogue } from "@/data/index";
 
 interface AdvancedSunglassesBuilderProps {
   onPriceChange: (price: number) => void;
@@ -45,7 +45,34 @@ const LENS_COLORS: LensColor[] = [
 ];
 
 const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderProps) => {
-  const [selectedFrame, setSelectedFrame] = useState<FrameOption>(FRAME_OPTIONS[0]);
+  const { frames } = useCatalogue();
+  const fallbackFrame: FrameOption = {
+    id: "fallback",
+    name: "No Frames Available",
+    icon: "👓",
+    dimensions: "-",
+    image: "",
+    clearImage: ""
+  };
+  const [selectedFrame, setSelectedFrame] = useState<FrameOption>(frames[0] || fallbackFrame);
+
+  // Update selected frame data if it gets updated in the catalogue
+  useEffect(() => {
+    if (frames.length > 0) {
+      const updated = frames.find(f => f.id === selectedFrame?.id);
+      if (updated) {
+        // Only update if something changed (like new image/shade) to avoid loop
+        if (JSON.stringify(updated) !== JSON.stringify(selectedFrame)) {
+          setSelectedFrame(updated);
+        }
+      } else {
+        setSelectedFrame(frames[0]);
+      }
+    } else {
+      setSelectedFrame(fallbackFrame);
+    }
+  }, [frames, selectedFrame]);
+
   const [lensColor, setLensColor] = useState<LensColor>(LENS_COLORS[0]);
   const [vlt, setVlt] = useState(15);
   const [gradientMode, setGradientMode] = useState(false);
@@ -207,7 +234,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
               }}
             >
               {/* Only show dynamic lens overlay if we are NOT using a pre-rendered shaded image */
-              !SHADE_MAP[selectedFrame.id]?.[lensColor.id] && (
+              !selectedFrame.shades?.[lensColor.id] && (
                 <div
                   className="absolute inset-0 w-full h-full pointer-events-none"
                   style={{
@@ -228,7 +255,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 />
               )}
               <img
-                src={SHADE_MAP[selectedFrame.id]?.[lensColor.id] || selectedFrame.image}
+                src={selectedFrame.shades?.[lensColor.id] || selectedFrame.image}
                 alt={selectedFrame.name}
                 className="absolute w-full h-full object-contain drop-shadow-2xl pointer-events-none"
                 style={{ zIndex: 2 }}
@@ -272,11 +299,13 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         </div>
       </div>
 
-      <div className="flex-shrink-0 px-6 py-4 border-t border-border bg-white space-y-4">
-
-
+      <div className="flex-shrink-0 px-6 py-4 border-t border-border bg-white flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="text-xs text-muted-foreground font-body">
           {placedAccessories.length} accessories added • Drag items from the Customize panel to add them to your sunglasses
+        </div>
+
+        <div className="text-sm font-body text-muted-foreground bg-muted/30 px-4 py-2 rounded-full border border-border/50 text-center md:text-right">
+          Want to get it customised to your prescription? <a href="mailto:contact@binofoundry.com" className="text-primary font-medium hover:underline underline-offset-2">Contact us</a> for your personalised quote.
         </div>
       </div>
     </div>
