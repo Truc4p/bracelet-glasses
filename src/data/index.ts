@@ -82,6 +82,23 @@ export function useCatalogue(): CatalogueState {
     };
   });
 
+  // Fetch shades from MongoDB backend over API
+  useEffect(() => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/shades`)
+      .then(res => res.json())
+      .then(data => {
+        setStore(prevStore => {
+          const updatedFrames = prevStore.frames.map(frame => ({
+            ...frame,
+            shades: data[frame.id] || frame.shades
+          }));
+          return { ...prevStore, frames: updatedFrames };
+        });
+      })
+      .catch(err => console.error("Could not load shade properties from MongoDB backend:", err));
+  }, []);
+
   // Persist whenever store changes
   useEffect(() => {
     saveToStorage(store);

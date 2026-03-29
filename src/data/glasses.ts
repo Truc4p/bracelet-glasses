@@ -1,5 +1,4 @@
-import shadeMapJson from "../lib/shadeMap.json";
-
+// shadeMap data is now fetched directly from the database or API.
 export interface FrameEntry {
   id: string;
   name: string;
@@ -19,5 +18,5 @@ const STATIC_FRAMES = [
 
 export const DEFAULT_FRAMES: FrameEntry[] = STATIC_FRAMES.map((f) => ({
   ...f,
-  shades: (shadeMapJson as Record<string, Record<string, string | null>>)[f.id] || {}
+  shades: {} // Intentionally empty, will be populated dynamically from MongoDB via API
 }));

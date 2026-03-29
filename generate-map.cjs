@@ -44,5 +44,5 @@ Object.keys(mapping).forEach(dir => {
   });
 });
 
-fs.writeFileSync(path.join(__dirname, 'src/lib/shadeMap.json'), JSON.stringify(map, null, 2));
+fs.writeFileSync(path.join(__dirname, 'backend/shadeMap.json'), JSON.stringify(map, null, 2));
 console.log('done');
