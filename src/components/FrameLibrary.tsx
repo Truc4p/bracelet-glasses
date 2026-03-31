@@ -56,7 +56,7 @@ const FrameLibrary = ({ onSelectFrame, open, onClose }: FrameLibraryProps) => {
           >
             <div className="w-full aspect-video bg-gradient-to-br from-gray-50 to-gray-100 rounded flex items-center justify-center overflow-hidden">
               <img
-                src={frame.image}
+                src={frame.images?.[0]}
                 alt={frame.name}
                 className="w-full h-full object-contain p-2"
               />

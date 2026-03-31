@@ -49,10 +49,9 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const fallbackFrame: FrameOption = {
     id: "fallback",
     name: "No Frames Available",
-    icon: "👓",
     dimensions: "-",
-    image: "",
-    clearImage: ""
+    description: "Fallback description",
+    images: []
   };
   const [selectedFrame, setSelectedFrame] = useState<FrameOption>(frames[0] || fallbackFrame);
 
@@ -158,7 +157,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Frame</span>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-body">
-            {selectedFrame.icon} {selectedFrame.name}
+            {selectedFrame.name}
           </div>
         </div>
 
@@ -233,8 +232,8 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 paddingBottom: '56%',
               }}
             >
-              {/* Only show dynamic lens overlay if we are NOT using a pre-rendered shaded image */
-              !selectedFrame.shades?.[lensColor.id] && (
+              {/* Show dynamic lens overlay */
+              (
                 <div
                   className="absolute inset-0 w-full h-full pointer-events-none"
                   style={{
@@ -242,11 +241,11 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                     backgroundImage: `url(${lensColor.image})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    maskImage: `url(${selectedFrame.image?.replace('_-_CLEAR', '') || ''})`,
+                    maskImage: `url(${selectedFrame.images?.[0]?.replace('_-_CLEAR', '') || ''})`,
                     maskSize: 'contain',
                     maskRepeat: 'no-repeat',
                     maskPosition: 'center',
-                    WebkitMaskImage: `url(${selectedFrame.image?.replace('_-_CLEAR', '') || ''})`,
+                    WebkitMaskImage: `url(${selectedFrame.images?.[0]?.replace('_-_CLEAR', '') || ''})`,
                     WebkitMaskSize: 'contain',
                     WebkitMaskRepeat: 'no-repeat',
                     WebkitMaskPosition: 'center',
@@ -255,7 +254,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 />
               )}
               <img
-                src={selectedFrame.shades?.[lensColor.id] || selectedFrame.image}
+                src={selectedFrame.images?.[0]}
                 alt={selectedFrame.name}
                 className="absolute w-full h-full object-contain drop-shadow-2xl pointer-events-none"
                 style={{ zIndex: 2 }}
