@@ -94,11 +94,9 @@ export interface SunglassesConfig {
 export interface FrameOption {
   id: string;
   name: string;
-  icon: string;
   dimensions: string;
-  image: string;
-  clearImage?: string;
-  shades?: Record<string, string | null>;
+  description: string;
+  images: string[];
 }
 
 export const FRAME_OPTIONS: FrameOption[] = snapshot().frames;

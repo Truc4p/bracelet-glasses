@@ -148,10 +148,10 @@ const CatalogueAdmin = () => {
                       <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div className="flex items-center gap-4">
-                      {frame.image ? (
-                        <img src={frame.image} alt={frame.name} className="w-16 h-16 object-contain bg-muted/50 rounded drop-shadow" crossOrigin="anonymous" />
+                      {frame.images && frame.images.length > 0 ? (
+                        <img src={frame.images[0]} alt={frame.name} className="w-16 h-16 object-contain bg-muted/50 rounded drop-shadow" crossOrigin="anonymous" />
                       ) : (
-                        <div className="w-16 h-16 bg-muted/50 rounded flex items-center justify-center text-2xl shadow-sm">{frame.icon || "👓"}</div>
+                        <div className="w-16 h-16 bg-muted/50 rounded flex items-center justify-center text-2xl shadow-sm">👓</div>
                       )}
                       <div>
                         <h2 className="text-xl font-bold font-display">{frame.name}</h2>
@@ -229,26 +229,26 @@ const CatalogueAdmin = () => {
                     if (!frame) return <p>Frame not found</p>;
                     return (
                       <div>
-                        <h3 className="text-lg font-semibold mb-4">Shade Profiles ({Object.keys(frame.shades || {}).length})</h3>
+                        <h3 className="text-lg font-semibold mb-4">Images ({frame.images?.length || 0})</h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                          {Object.entries(frame.shades || {}).map(([shadeId, shadeImage]) => (
-                            <div key={shadeId} className="flex flex-col items-center gap-3 p-3 rounded-lg bg-background border border-border text-center shadow-sm">
-                              {shadeImage ? (
-                                <img src={shadeImage} alt={shadeId} className="w-full h-24 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
+                          {(frame.images || []).map((img, idx) => (
+                            <div key={idx} className="flex flex-col items-center gap-3 p-3 rounded-lg bg-background border border-border text-center shadow-sm">
+                              {img ? (
+                                <img src={img} alt={`Frame image ${idx + 1}`} className="w-full h-24 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
                               ) : (
                                 <div className="w-full h-24 rounded bg-muted flex flex-col items-center justify-center text-xs text-muted-foreground uppercase tracking-wider font-semibold">
                                   <span>No</span>
                                   <span>Image</span>
                                 </div>
                               )}
-                              <span className="text-sm font-medium w-full truncate px-1" title={shadeId}>
-                                {shadeId}
+                              <span className="text-sm font-medium w-full truncate px-1" title={img}>
+                                {img.split('/').pop() || `Image ${idx + 1}`}
                               </span>
                             </div>
                           ))}
-                          {Object.keys(frame.shades || {}).length === 0 && (
+                          {(frame.images?.length || 0) === 0 && (
                             <div className="col-span-full py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/20">
-                              No shade profiles configured. Click Edit to add some.
+                              No images configured. Click Edit to add some.
                             </div>
                           )}
                         </div>
@@ -273,16 +273,16 @@ const CatalogueAdmin = () => {
                         : "hover:bg-muted/80 focus-within:bg-muted/80"
                     }`}>
                       {/* Frame image */}
-                      {f.image ? (
+                      {f.images && f.images.length > 0 ? (
                         <img
-                          src={f.image}
+                          src={f.images[0]}
                           alt={f.name}
                           className="w-12 h-12 object-contain bg-muted/50 rounded pointer-events-none drop-shadow-sm"
                           crossOrigin="anonymous"
                         />
                       ) : (
                         <div className="w-12 h-12 bg-muted/50 rounded flex items-center justify-center text-xl shadow-sm">
-                          {f.icon || "👓"}
+                          👓
                         </div>
                       )}
                       
@@ -297,7 +297,7 @@ const CatalogueAdmin = () => {
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span>{f.dimensions}</span>
                           <span>•</span>
-                          <span>{Object.keys(f.shades || {}).length} shade profiles</span>
+                          <span>{f.images?.length || 0} images</span>
                         </div>
                       </div>
 

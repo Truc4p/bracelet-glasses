@@ -55,15 +55,7 @@ app.get('/api/shades', async (req, res) => {
 app.get('/api/frames', async (req, res) => {
   try {
     const frames = await Frame.find({});
-    // Format map back to object for frontend
-    const formattedFrames = frames.map(f => {
-      const obj = f.toObject();
-      if (obj.shades) {
-        obj.shades = Object.fromEntries(Object.entries(obj.shades));
-      }
-      return obj;
-    });
-    res.json(formattedFrames);
+    res.json(frames);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching frames', error: error.message });
   }
@@ -102,19 +94,8 @@ app.delete('/api/frames/:id', async (req, res) => {
 
     const imageIdsToDelete = [];
     
-    // Check base and clear images
-    if (frame.image) {
-      const id = extractImageId(frame.image);
-      if (id) imageIdsToDelete.push(id);
-    }
-    if (frame.clearImage) {
-      const id = extractImageId(frame.clearImage);
-      if (id) imageIdsToDelete.push(id);
-    }
-    
-    // Check all shade associated images
-    if (frame.shades) {
-      for (const [lensId, url] of frame.shades.entries()) {
+    if (frame.images && Array.isArray(frame.images)) {
+      for (const url of frame.images) {
         const id = extractImageId(url);
         if (id) imageIdsToDelete.push(id);
       }

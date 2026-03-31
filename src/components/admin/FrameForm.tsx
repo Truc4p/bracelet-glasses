@@ -11,27 +11,25 @@ interface FrameFormProps {
 
 export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
   const blank: FrameEntry = {
-    id: "", name: "", icon: "👓", dimensions: "", image: "", clearImage: "", shades: {}
+    id: "", name: "", dimensions: "", description: "", images: []
   };
   const [form, setForm] = useState<FrameEntry>(initial ?? blank);
-  const [shades, setShades] = useState<Array<{ lensId: string; image: string }>>(
-    Object.entries(initial?.shades || {}).map(([lensId, image]) => ({ lensId, image: image || "" }))
-  );
+  const [images, setImages] = useState<string[]>(initial?.images || []);
   const [uploading, setUploading] = useState(false);
 
   const set = (k: keyof FrameEntry, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const addShade = () => setShades((prev) => [...prev, { lensId: "", image: "" }]);
+  const addImage = () => setImages((prev) => [...prev, ""]);
   
-  const updateShade = (index: number, key: "lensId" | "image", value: string) => {
-    const updated = [...shades];
-    updated[index][key] = value;
-    setShades(updated);
+  const updateImage = (index: number, value: string) => {
+    const updated = [...images];
+    updated[index] = value;
+    setImages(updated);
   };
   
-  const removeShade = (index: number) => {
-    setShades((prev) => prev.filter((_, i) => i !== index));
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
@@ -65,14 +63,10 @@ export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
     if (!form.name.trim()) return;
     const id = form.id || form.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     
-    const shadesRecord: Record<string, string> = {};
-    for (const shade of shades) {
-      if (shade.lensId.trim() && shade.image.trim()) {
-        shadesRecord[shade.lensId.trim()] = shade.image.trim();
-      }
-    }
+    // Filter out empty images
+    const validImages = images.filter(img => img.trim() !== "");
     
-    onSave({ ...form, id, shades: shadesRecord });
+    onSave({ ...form, id, images: validImages });
   };
 
   return (
@@ -90,15 +84,6 @@ export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
           />
         </div>
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Icon</label>
-          <input
-            className="w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
-            value={form.icon}
-            onChange={(e) => set("icon", e.target.value)}
-            placeholder="e.g. 👓"
-          />
-        </div>
-        <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Dimensions</label>
           <input
             className="w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
@@ -107,101 +92,55 @@ export const FrameForm = ({ initial, onSave, onCancel }: FrameFormProps) => {
             placeholder="e.g. 52□23-149"
           />
         </div>
-        <div className="col-span-2">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Base Image URL *</label>
-          <div className="flex gap-2">
-            <input
-              required
-              className="flex-1 w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
-              value={form.image}
-              onChange={(e) => set("image", e.target.value)}
-              placeholder="Paste URL or upload image"
-            />
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="upload-base-image"
-                onChange={(e) => handleUpload(e, (url) => set("image", url))}
-              />
-              <label htmlFor="upload-base-image" className="cursor-pointer bg-muted border border-border rounded px-4 h-full flex items-center text-sm font-medium hover:bg-muted/80 transition-colors whitespace-nowrap gap-1">
-                {uploading ? "..." : <><UploadCloud className="w-4 h-4" /> Upload</>}
-              </label>
-            </div>
-          </div>
-        </div>
-        <div className="col-span-2">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Clear Image URL (Optional)</label>
-          <div className="flex gap-2">
-            <input
-              className="flex-1 w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
-              value={form.clearImage || ""}
-              onChange={(e) => set("clearImage", e.target.value)}
-              placeholder="Paste URL or upload image"
-            />
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id="upload-clear-image"
-                onChange={(e) => handleUpload(e, (url) => set("clearImage", url))}
-              />
-              <label htmlFor="upload-clear-image" className="cursor-pointer bg-muted border border-border rounded px-4 h-full flex items-center text-sm font-medium hover:bg-muted/80 transition-colors whitespace-nowrap gap-1">
-                {uploading ? "..." : <><UploadCloud className="w-4 h-4" /> Upload</>}
-              </label>
-            </div>
-          </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Description</label>
+          <input
+            className="w-full text-sm border border-border rounded p-2 bg-background focus:ring-1 focus:ring-primary outline-none"
+            value={form.description}
+            onChange={(e) => set("description", e.target.value)}
+            placeholder="Description..."
+          />
         </div>
       </div>
       
       <div className="border-t border-border pt-4 mt-4">
         <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-semibold text-foreground">Shade Profiles</label>
-          <Button type="button" variant="outline" size="sm" onClick={addShade} className="h-7 text-xs gap-1">
-            <Plus className="w-3 h-3" /> Add Profile
+          <label className="text-sm font-semibold text-foreground">Frame Images</label>
+          <Button type="button" variant="outline" size="sm" onClick={addImage} className="h-7 text-xs gap-1">
+            <Plus className="w-3 h-3" /> Add Image
           </Button>
         </div>
         <div className="space-y-3 pr-1 pb-1">
-          {shades.length === 0 && (
-            <div className="text-xs text-muted-foreground italic text-center py-2">No shade profiles added.</div>
+          {images.length === 0 && (
+            <div className="text-xs text-muted-foreground italic text-center py-2">No images added.</div>
           )}
-          {shades.map((shade, i) => (
-            <div key={i} className="flex gap-2 items-start bg-muted/30 p-2 rounded border border-border">
-              <div className="flex-1 flex flex-col sm:flex-row gap-2">
-                <input
-                  required
-                  placeholder="Lens ID (e.g. amber)"
-                  className="sm:w-1/3 w-full text-sm font-mono border border-border rounded p-2 focus:ring-1 focus:ring-primary outline-none bg-background"
-                  value={shade.lensId}
-                  onChange={(e) => updateShade(i, "lensId", e.target.value)}
-                />
-                <div className="flex-1 flex gap-2">
-                  <input
-                    required
-                    placeholder="Image URL"
-                    className="flex-1 w-full text-sm border border-border rounded p-2 focus:ring-1 focus:ring-primary outline-none bg-background"
-                    value={shade.image}
-                    onChange={(e) => updateShade(i, "image", e.target.value)}
-                  />
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`upload-shade-image-${i}`}
-                      onChange={(e) => handleUpload(e, (url) => updateShade(i, "image", url))}
-                    />
-                    <label htmlFor={`upload-shade-image-${i}`} className="cursor-pointer bg-muted border border-border rounded px-3 h-full flex items-center text-sm font-medium hover:bg-muted/80 transition-colors whitespace-nowrap" title="Upload Image">
-                      <UploadCloud className="w-4 h-4" />
-                    </label>
-                  </div>
-                </div>
+          {images.map((image, i) => (
+            <div key={i} className="flex gap-2 items-center bg-muted/30 p-2 rounded border border-border">
+              <div className="flex-1 flex items-center gap-3">
+                {image ? (
+                  <img src={image} alt={`Frame image ${i + 1}`} className="h-12 w-auto object-cover rounded bg-white/50" />
+                ) : (
+                  <span className="text-sm text-muted-foreground italic px-2">No image uploaded</span>
+                )}
               </div>
-              <Button type="button" variant="ghost" size="icon" onClick={() => removeShade(i)} className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive">
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              <div className="flex gap-2 items-center">
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id={`upload-frame-image-${i}`}
+                    onChange={(e) => handleUpload(e, (url) => updateImage(i, url))}
+                  />
+                  <label htmlFor={`upload-frame-image-${i}`} className="cursor-pointer bg-background border border-border rounded px-3 py-1.5 flex items-center gap-2 text-sm font-medium hover:bg-muted/80 transition-colors whitespace-nowrap" title="Upload Image">
+                    <UploadCloud className="w-4 h-4" />
+                    <span>Upload</span>
+                  </label>
+                </div>
+                <Button type="button" variant="ghost" size="icon" onClick={() => removeImage(i)} className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
