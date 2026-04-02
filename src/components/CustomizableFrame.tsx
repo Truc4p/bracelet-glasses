@@ -46,9 +46,9 @@ export const CustomizableFrame: React.FC<CustomizableFrameProps> = ({
         <img
           src={imageSrc}
           alt={alt}
-          className="absolute w-full h-full object-contain drop-shadow-xl"
+          className="absolute w-full h-full object-contain"
           style={{
-            transform,
+            transform: transform ? `${transform} scale(1.01)` : 'scale(1.01)',
             top: '0',
             left: '0',
             zIndex: 1,

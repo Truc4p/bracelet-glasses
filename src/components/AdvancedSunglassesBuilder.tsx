@@ -313,7 +313,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
               <img
                 src={lensColor?.image || selectedFrame.frameImages?.[0]}
                 alt={`${selectedFrame.name} - ${lensColor?.name || 'Default'}`}
-                className="absolute w-full h-full object-contain drop-shadow-2xl pointer-events-none"
+                className="absolute w-full h-full object-contain pointer-events-none"
                 style={{ zIndex: 2 }}
               />
 

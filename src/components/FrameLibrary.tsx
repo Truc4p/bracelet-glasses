@@ -45,7 +45,7 @@ const FrameLibrary = ({ onSelectFrame, open, onClose }: FrameLibraryProps) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-3">
+      <div className="flex-1 overflow-y-auto p-3 grid grid-cols-2 gap-3 content-start">
         {filteredFrames.map((frame) => (
           <button
             key={frame.id}
