@@ -41,7 +41,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     : LENS_COLORS;
     
   const availableLensColors: LensColor[] = [
-    { id: "clear", name: "Clear / Original", image: "" },
+    { id: "clear", name: "Original", image: "" },
     ...customLensColors
   ];
 
