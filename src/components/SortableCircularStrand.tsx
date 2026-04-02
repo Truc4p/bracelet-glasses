@@ -42,11 +42,17 @@ interface SortableBeadProps {
 function getBeadBackground(bead: PlacedBead | null): string {
   if (!bead) return "hsl(var(--muted))";
   if (bead.type === "crystal" && bead.crystal) {
-    if (bead.crystal.image) return `url(${bead.crystal.image}?v=2) center / cover no-repeat`;
+    if (bead.crystal.image) {
+      const isDataUrl = bead.crystal.image.startsWith("data:");
+      return `url("${bead.crystal.image}${isDataUrl ? "" : "?v=2"}") center / cover no-repeat`;
+    }
     return "hsl(var(--muted))"; // Fallback if no image
   }
   if (bead.type === "spacer" && bead.spacer) {
-    if (bead.spacer.image) return `url(${bead.spacer.image}?v=2) center / cover no-repeat`;
+    if (bead.spacer.image) {
+      const isDataUrl = bead.spacer.image.startsWith("data:");
+      return `url("${bead.spacer.image}${isDataUrl ? "" : "?v=2"}") center / cover no-repeat`;
+    }
     return bead.spacer.metallic;
   }
   if (bead.type === "charm") return "#F5F5DC";

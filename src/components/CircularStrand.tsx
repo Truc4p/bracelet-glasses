@@ -9,6 +9,23 @@ interface CircularStrandProps {
   wristSize: number;
 }
 
+function getBeadBackground(bead: PlacedBead | null | undefined): string {
+  if (!bead) return "hsl(var(--muted))";
+  if (bead.type === "crystal" && bead.crystal?.image) {
+    const isDataUrl = bead.crystal.image.startsWith("data:");
+    return `url("${bead.crystal.image}${isDataUrl ? "" : "?v=2"}") center / cover no-repeat`;
+  }
+  if (bead.type === "spacer" && bead.spacer) {
+    if (bead.spacer.image) {
+      const isDataUrl = bead.spacer.image.startsWith("data:");
+      return `url("${bead.spacer.image}${isDataUrl ? "" : "?v=2"}") center / cover no-repeat`;
+    }
+    return bead.spacer.metallic;
+  }
+  if (bead.type === "charm") return "#F5F5DC";
+  return "hsl(var(--muted))";
+}
+
 const CircularStrand = ({ beadCount, placedBeads, onSlotClick, onBeadDrop, label, wristSize }: CircularStrandProps) => {
   const canvasSize = 320;
   const center = canvasSize / 2;
@@ -66,16 +83,29 @@ const CircularStrand = ({ beadCount, placedBeads, onSlotClick, onBeadDrop, label
                 height: slot.beadPixelSize,
                 left: slot.x - slot.beadPixelSize / 2,
                 top: slot.y - slot.beadPixelSize / 2,
-                background: slot.placed
-                  ? `url(${slot.placed.crystal.image}?v=2) center / cover no-repeat`
-                  : "hsl(var(--muted))",
+                background: getBeadBackground(slot.placed),
                 borderColor: slot.placed ? "transparent" : "hsl(var(--border))",
                 boxShadow: slot.placed ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
               }}
-              title={slot.placed ? `${slot.placed.crystal.name} (${slot.placed.beadSize}mm)` : `Slot ${slot.index + 1}`}
+              title={
+                slot.placed
+                  ? slot.placed.type === "crystal" && slot.placed.crystal
+                    ? `${slot.placed.crystal.name} (${slot.placed.beadSize}mm)`
+                    : slot.placed.type === "spacer" && slot.placed.spacer
+                    ? `${slot.placed.spacer.name} Spacer`
+                    : slot.placed.type === "charm" && slot.placed.charm
+                    ? `${slot.placed.charm.animal} Charm (${slot.placed.charm.design})`
+                    : `Slot ${slot.index + 1}`
+                  : `Slot ${slot.index + 1}`
+              }
             >
-              {slot.placed && (
-                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              {slot.placed && slot.placed.type === "charm" && slot.placed.charm && (
+                <span className="text-xs flex items-center justify-center h-full">
+                  {slot.placed.charm.emoji}
+                </span>
+              )}
+              {slot.placed && slot.placed.type === "crystal" && (
+                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                   {slot.placed.beadSize}mm
                 </span>
               )}
