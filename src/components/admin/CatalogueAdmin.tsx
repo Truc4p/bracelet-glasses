@@ -417,7 +417,14 @@ const CatalogueAdmin = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-foreground">{c.name}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">${c.price.toFixed(2)} / bead</span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-muted-foreground">${c.price.toFixed(2)} / bead</span>
+                        {c.type && (
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
+                            {c.type}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {/* Removed Edit/Delete */}
                   </div>

@@ -33,6 +33,7 @@ router.post('/', async (req, res) => {
     name: req.body.name,
     price: req.body.price,
     image: req.body.image,
+    type: req.body.type,
     description: req.body.description,
   });
 
@@ -53,6 +54,7 @@ router.put('/:id', async (req, res) => {
     if (req.body.name) crystal.name = req.body.name;
     if (req.body.price != null) crystal.price = req.body.price;
     if (req.body.image !== undefined) crystal.image = req.body.image;
+    if (req.body.type !== undefined) crystal.type = req.body.type;
     if (req.body.description !== undefined) crystal.description = req.body.description;
 
     const updatedCrystal = await crystal.save();

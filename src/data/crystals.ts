@@ -4,6 +4,7 @@ export interface CrystalEntry {
   name: string;
   price: number;
   image: string;
+  type?: string;
   description: string;
 }
 

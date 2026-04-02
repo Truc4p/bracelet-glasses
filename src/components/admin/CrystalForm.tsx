@@ -15,7 +15,7 @@ interface CrystalFormProps {
 
 export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => {
   const blank: CrystalEntry = {
-    id: "", name: "", price: 1.00, image: "", description: "",
+    id: "", name: "", price: 1.00, image: "", type: "", description: "",
   };
   const [form, setForm] = useState<CrystalEntry>(initial ?? blank);
   const [showPreview, setShowPreview] = useState(false);
@@ -50,6 +50,17 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
             type="number" min={0} step={0.01}
             value={form.price}
             onChange={(e) => set("price", parseFloat(e.target.value) || 0)}
+            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Type</label>
+          <input
+            type="text"
+            value={form.type ?? ""}
+            onChange={(e) => set("type", e.target.value)}
+            placeholder="e.g. gem, glass..."
             className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
           />
         </div>

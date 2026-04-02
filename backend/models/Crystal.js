@@ -20,6 +20,11 @@ const crystalSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  type: {
+    type: String,
+    trim: true,
+    default: ""
+  },
   description: {
     type: String,
     trim: true,
