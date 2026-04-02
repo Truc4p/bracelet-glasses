@@ -4,14 +4,18 @@ import { Button } from "@/components/ui/button";
 import { useCatalogue } from "@/data/index";
 import type { CrystalEntry } from "@/data/crystals";
 import type { FrameEntry } from "@/data/glasses";
+import type { TypeEntry } from "@/data/index";
 import { CrystalForm } from "./CrystalForm";
 import { FrameForm } from "./FrameForm";
+import { TypeForm } from "./TypeForm";
 import StockBadge from "./StockBadge";
 
-type AdminTab = "crystals" | "glasses";
+type AdminTab = "crystals" | "glasses" | "types";
 type ModalState =
   | { type: "add-crystal" }
   | { type: "edit-crystal"; entry: CrystalEntry }
+  | { type: "add-type" }
+  | { type: "edit-type"; entry: TypeEntry }
   | null;
 
 const CatalogueAdmin = () => {
@@ -40,13 +44,16 @@ const CatalogueAdmin = () => {
   }, [modal, selectedFrameId, isEditingFrame]);
 
   const tabLabel = (t: AdminTab) =>
-    ({ crystals: "Crystals", glasses: "Glasses" })[t];
+    ({ crystals: "Crystals", glasses: "Glasses", types: "Types" })[t];
 
   // ── Filtered lists ──
   const q = search.toLowerCase();
   const filteredCrystals = cat.crystals.filter((c) => c.name.toLowerCase().includes(q));
   const filteredGlasses = cat.frames?.filter((f) =>
     f.name.toLowerCase().includes(q)
+  ) || [];
+  const filteredTypes = cat.types?.filter((t) =>
+    t.name.toLowerCase().includes(q)
   ) || [];
 
   // ── Delete with confirmation ──
@@ -55,6 +62,7 @@ const CatalogueAdmin = () => {
   const confirmDeleteFn = (id: string) => {
     if (tab === "crystals") cat.deleteCrystal(id);
     else if (tab === "glasses") cat.deleteFrame(id);
+    else if (tab === "types") cat.deleteType(id);
     setConfirmDelete(null);
   };
 
@@ -88,7 +96,7 @@ const CatalogueAdmin = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar tabs */}
         <div className="w-36 border-r border-border flex flex-col gap-1 p-3 shrink-0">
-          {(["glasses", "crystals"] as AdminTab[]).map((t) => (
+          {(["glasses", "crystals", "types"] as AdminTab[]).map((t) => (
             <button
               key={t}
               onClick={() => { setTab(t); setSearch(""); setModal(null); setSelectedFrameId(null); setIsEditingFrame(false); }}
@@ -183,7 +191,7 @@ const CatalogueAdmin = () => {
                   <div>
                     <h2 className="text-xl font-bold font-display">
                       {modal.type.startsWith("add") ? "New" : "Edit"}{" "}
-                      {modal.type.includes("crystal") ? "Crystal" : ""}
+                      {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("type") ? "Type" : ""}
                     </h2>
                   </div>
                 </div>
@@ -224,6 +232,7 @@ const CatalogueAdmin = () => {
                 size="sm"
                 onClick={() => {
                   if (tab === "crystals") setModal({ type: "add-crystal" });
+                  else if (tab === "types") setModal({ type: "add-type" });
                   else if (tab === "glasses") { setSelectedFrameId("new"); setIsEditingFrame(true); }
                   setSearch("");
                 }}
@@ -407,12 +416,41 @@ const CatalogueAdmin = () => {
                         <span className="text-xs text-muted-foreground">${c.price.toFixed(2)} / bead</span>
                         {c.type && (
                           <span className="text-[10px] uppercase font-bold tracking-wider text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
-                            {c.type}
+                            {cat.types?.find(t => t.id === c.type)?.name || c.type}
                           </span>
                         )}
                       </div>
                     </div>
                     {/* Removed Edit/Delete */}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Types table */}
+            {tab === "types" && !modal && (
+              <div className="space-y-1">
+                {filteredTypes.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-8">No types found.</p>
+                )}
+                {filteredTypes.map((t) => (
+                  <div 
+                    key={t.id} 
+                    onClick={() => setModal({ type: "edit-type", entry: t })}
+                    className={`cursor-pointer flex flex-col gap-1 px-3 py-2.5 rounded-md transition-all group ${
+                    modal?.type === "edit-type" && modal.entry.id === t.id
+                      ? "bg-primary/15 ring-2 ring-primary border-transparent"
+                      : "hover:bg-muted/80 focus-within:bg-muted/80"
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-foreground">{t.name}</span>
+                      <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
+                        {t.id}
+                      </span>
+                    </div>
+                    {t.description && (
+                      <span className="text-xs text-muted-foreground line-clamp-1">{t.description}</span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -427,6 +465,12 @@ const CatalogueAdmin = () => {
                 {modal.type === "edit-crystal" && (
                   <CrystalForm key={`edit-crystal-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCrystal(e); closeModal(); }} onCancel={closeModal} />
                 )}
+                {modal.type === "add-type" && (
+                  <TypeForm key="add-type" onSave={(e) => { cat.addType(e); closeModal(); }} onCancel={closeModal} />
+                )}
+                {modal.type === "edit-type" && (
+                  <TypeForm key={`edit-type-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateType(e); closeModal(); }} onCancel={closeModal} />
+                )}
               </div>
             )}
           </div>
@@ -435,6 +479,7 @@ const CatalogueAdmin = () => {
           <div className="px-4 py-3 border-t border-border text-xs text-muted-foreground font-body flex gap-4">
             <span>{cat.frames?.length || 0} glasses</span>
             <span>{cat.crystals.length} crystals</span>
+            <span>{cat.types?.length || 0} types</span>
           </div>
         </div>
       </div>

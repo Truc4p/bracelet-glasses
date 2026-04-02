@@ -3,6 +3,7 @@ import { Search, X, Info } from "lucide-react";
 import { useCatalogue } from "@/data/index";
 import type { CrystalEntry } from "@/data/crystals";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // ── Types that the rest of the app still uses via the legacy name ──────────
 // BeadLibrary is passed a CrystalEntry (same shape as the old CrystalBead)
@@ -15,16 +16,30 @@ interface BeadLibraryProps {
 }
 
 const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
-  const { crystals } = useCatalogue();
+  const { crystals, types } = useCatalogue();
   const [search, setSearch] = useState("");
+  const [selectedType, setSelectedType] = useState<string>("all");
+
+  const availableTypes = useMemo(() => {
+    const typeIds = new Set<string>();
+    crystals.forEach((c) => {
+      if (c.type) typeIds.add(c.type);
+    });
+    // Map IDs to names if type exists in Catalogue
+    return Array.from(typeIds).map(id => {
+      const typeObj = types?.find(t => t.id === id);
+      return { id, name: typeObj?.name || id };
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }, [crystals, types]);
 
   const filteredCrystals = useMemo(
     () =>
       crystals.filter((b) => {
         const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase());
-        return matchesSearch;
+        const matchesType = selectedType === "all" || b.type === selectedType;
+        return matchesSearch && matchesType;
       }),
-    [crystals, search]
+    [crystals, search, selectedType]
   );
 
   if (!open) return null;
@@ -38,8 +53,8 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
         </button>
       </div>
 
-      {/* Search */}
-      <div className="p-3">
+      {/* Search & Filter */}
+      <div className="p-3 space-y-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
@@ -50,6 +65,20 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
             className="w-full pl-9 pr-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary font-body"
           />
         </div>
+        
+        <Select value={selectedType} onValueChange={setSelectedType}>
+          <SelectTrigger className="w-full h-8 text-xs font-body">
+            <SelectValue placeholder="Filter by type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="text-xs font-body">All Types</SelectItem>
+            {availableTypes.map(({ id, name }) => (
+              <SelectItem key={id} value={id} className="text-xs font-body">
+                {name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Crystal list */}

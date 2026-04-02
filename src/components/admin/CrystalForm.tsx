@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCatalogue } from "@/data/index";
 import type { CrystalEntry } from "@/data/crystals";
 
 // ── Crystal Form ─────────────────────────────────────────────────────────────
@@ -12,6 +13,7 @@ interface CrystalFormProps {
 }
 
 export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => {
+  const cat = useCatalogue();
   const blank: CrystalEntry = {
     id: "", name: "", price: 1.00, image: "", type: "", description: "",
   };
@@ -54,13 +56,16 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
 
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Type</label>
-          <input
-            type="text"
+          <select
             value={form.type ?? ""}
             onChange={(e) => set("type", e.target.value)}
-            placeholder="e.g. gem, glass..."
             className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
-          />
+          >
+            <option value="">Select a type</option>
+            {cat.types && cat.types.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="col-span-2">

@@ -2,6 +2,12 @@ import { useState, useCallback, useEffect } from "react";
 import { DEFAULT_CRYSTALS, type CrystalEntry } from "./crystals";
 import { DEFAULT_FRAMES, type FrameEntry } from "./glasses";
 
+export interface TypeEntry {
+  id: string; // The MongoDB ObjectId
+  name: string;
+  description: string;
+}
+
 export type { CrystalEntry, FrameEntry };
 
 // ── Storage key ──────────────────────────────────────────────────────────────
@@ -10,6 +16,7 @@ const STORAGE_KEY = "bino_catalogue_v3";
 interface CatalogueStore {
   crystals: CrystalEntry[];
   frames: FrameEntry[];
+  types: TypeEntry[];
 }
 
 function loadFromStorage(): Partial<CatalogueStore> {
@@ -55,6 +62,10 @@ export interface CatalogueState extends CatalogueStore {
   addFrame: (entry: FrameEntry) => void;
   updateFrame: (entry: FrameEntry) => void;
   deleteFrame: (id: string) => void;
+  // Type helpers
+  addType: (entry: TypeEntry) => void;
+  updateType: (entry: TypeEntry) => void;
+  deleteType: (id: string) => void;
   // Reset everything to defaults
   resetToDefaults: () => void;
 }
@@ -65,6 +76,7 @@ export function useCatalogue(): CatalogueState {
     return {
       crystals: merge(DEFAULT_CRYSTALS, saved.crystals ?? []),
       frames: merge(DEFAULT_FRAMES, saved.frames ?? []),
+      types: merge([], saved.types ?? []),
     };
   });
 
@@ -96,6 +108,19 @@ export function useCatalogue(): CatalogueState {
         }
       })
       .catch(err => console.error("Could not load crystal data from MongoDB backend:", err));
+
+    // Fetch types
+    fetch(`${BACKEND_URL}/api/types`)
+      .then(res => res.json())
+      .then(dbTypes => {
+        if (dbTypes && Array.isArray(dbTypes)) {
+          setStore(prevStore => ({
+            ...prevStore,
+            types: merge([], dbTypes)
+          }));
+        }
+      })
+      .catch(err => console.error("Could not load type data from MongoDB backend:", err));
   }, []);
 
   // Persist whenever store changes
@@ -195,11 +220,59 @@ export function useCatalogue(): CatalogueState {
     [store, persist]
   );
 
+  // ── Type mutations ──
+  const addType = useCallback(
+    (entry: TypeEntry) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/types`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry)
+      })
+      .then(res => res.json())
+      .then(savedType => {
+         persist({ ...store, types: [...store.types, savedType] });
+      })
+      .catch(err => console.error("Failed to add type to MongoDB", err));
+    },
+    [store, persist]
+  );
+  
+  const updateType = useCallback(
+    (entry: TypeEntry) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/types/${entry.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry)
+      }).catch(err => console.error("Failed to update type in MongoDB", err));
+
+      persist({
+        ...store,
+        types: store.types.map((t) => (t.id === entry.id ? entry : t)),
+      });
+    },
+    [store, persist]
+  );
+  
+  const deleteType = useCallback(
+    (id: string) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/types/${id}`, {
+        method: "DELETE"
+      }).catch(err => console.error("Failed to delete type from MongoDB", err));
+
+      persist({ ...store, types: store.types.filter((t) => t.id !== id) });
+    },
+    [store, persist]
+  );
+
   const resetToDefaults = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     persist({
       crystals: [...DEFAULT_CRYSTALS],
       frames: [...DEFAULT_FRAMES],
+      types: [],
     });
   }, [persist]);
 
@@ -211,6 +284,9 @@ export function useCatalogue(): CatalogueState {
     addFrame,
     updateFrame,
     deleteFrame,
+    addType,
+    updateType,
+    deleteType,
     resetToDefaults,
   };
 }
@@ -221,6 +297,7 @@ export function getCatalogueSnapshot(): CatalogueStore {
   return {
     crystals: merge(DEFAULT_CRYSTALS, saved.crystals ?? []),
     frames: merge(DEFAULT_FRAMES, saved.frames ?? []),
+    types: merge([], saved.types ?? []),
   };
 }
 

@@ -21,9 +21,8 @@ const crystalSchema = new mongoose.Schema({
     default: ""
   },
   type: {
-    type: String,
-    trim: true,
-    default: ""
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Type'
   },
   description: {
     type: String,
