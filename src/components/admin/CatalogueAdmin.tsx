@@ -186,6 +186,39 @@ const CatalogueAdmin = () => {
                   </>
                 );
               })()
+            ) : modal ? (
+              <>
+                <Button variant="ghost" size="icon" onClick={closeModal}>
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div className="flex items-center gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold font-display">
+                      {modal.type.startsWith("add") ? "New" : "Edit"}{" "}
+                      {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : "Charm"}
+                    </h2>
+                  </div>
+                </div>
+                {modal.type.startsWith("edit") && (
+                  <div className="ml-auto flex items-center gap-2">
+                    {confirmDelete === ("entry" in modal ? modal.entry.id : null) ? (
+                      <>
+                        <span className="text-xs text-destructive font-medium mr-2 animate-in fade-in">Delete?</span>
+                        <Button variant="ghost" size="sm" onClick={cancelDelete}>Cancel</Button>
+                        <Button variant="destructive" size="sm" onClick={() => { 
+                          confirmDeleteFn("entry" in modal ? modal.entry.id : ""); 
+                          closeModal(); 
+                        }}>Confirm</Button>
+                      </>
+                    ) : (
+                      <Button variant="outline" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => requestDelete("entry" in modal ? modal.entry.id : "")}>
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </>
             ) : (
               <div className="relative flex-1 max-w-xs">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
@@ -198,7 +231,7 @@ const CatalogueAdmin = () => {
                 />
               </div>
             )}
-            {!(tab === "glasses" && selectedFrameId) && (
+            {!(tab === "glasses" && selectedFrameId) && !modal && (
               <Button
                 size="sm"
                 onClick={() => {
@@ -349,13 +382,16 @@ const CatalogueAdmin = () => {
             )}
 
             {/* Crystals table */}
-            {tab === "crystals" && (
+            {tab === "crystals" && !modal && (
               <div className="space-y-1">
                 {filteredCrystals.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-8">No crystals found.</p>
                 )}
                 {filteredCrystals.map((c) => (
-                  <div key={c.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
+                  <div 
+                    key={c.id} 
+                    onClick={() => setModal({ type: "edit-crystal", entry: c })}
+                    className={`cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
                     modal?.type === "edit-crystal" && modal.entry.id === c.id
                       ? "bg-primary/15 ring-2 ring-primary border-transparent"
                       : "hover:bg-muted/80 focus-within:bg-muted/80"
@@ -396,13 +432,16 @@ const CatalogueAdmin = () => {
             )}
 
             {/* Spacers table */}
-            {tab === "spacers" && (
+            {tab === "spacers" && !modal && (
               <div className="space-y-1">
                 {filteredSpacers.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-8">No spacers found.</p>
                 )}
                 {filteredSpacers.map((s) => (
-                  <div key={s.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
+                  <div 
+                    key={s.id} 
+                    onClick={() => setModal({ type: "edit-spacer", entry: s })}
+                    className={`cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
                     modal?.type === "edit-spacer" && modal.entry.id === s.id
                       ? "bg-primary/15 ring-2 ring-primary border-transparent"
                       : "hover:bg-muted/80 focus-within:bg-muted/80"
@@ -437,13 +476,16 @@ const CatalogueAdmin = () => {
             )}
 
             {/* Charms table */}
-            {tab === "charms" && (
+            {tab === "charms" && !modal && (
               <div className="space-y-1">
                 {filteredCharms.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-8">No charms found.</p>
                 )}
                 {filteredCharms.map((c) => (
-                  <div key={c.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
+                  <div 
+                    key={c.id} 
+                    onClick={() => setModal({ type: "edit-charm", entry: c })}
+                    className={`cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
                     modal?.type === "edit-charm" && modal.entry.id === c.id
                       ? "bg-primary/15 ring-2 ring-primary border-transparent"
                       : "hover:bg-muted/80 focus-within:bg-muted/80"
@@ -476,6 +518,30 @@ const CatalogueAdmin = () => {
                 ))}
               </div>
             )}
+
+            {/* Inline Modal Forms */}
+            {modal && tab !== "glasses" && (
+              <div className="animate-in slide-in-from-right-2 fade-in max-w-4xl mx-auto pt-2 pb-8 w-full">
+                {modal.type === "add-crystal" && (
+                  <CrystalForm key="add-crystal" onSave={(e) => { cat.addCrystal(e); closeModal(); }} onCancel={closeModal} />
+                )}
+                {modal.type === "edit-crystal" && (
+                  <CrystalForm key={`edit-crystal-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCrystal(e); closeModal(); }} onCancel={closeModal} />
+                )}
+                {modal.type === "add-spacer" && (
+                  <SpacerForm key="add-spacer" onSave={(e) => { cat.addSpacer(e); closeModal(); }} onCancel={closeModal} />
+                )}
+                {modal.type === "edit-spacer" && (
+                  <SpacerForm key={`edit-spacer-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateSpacer(e); closeModal(); }} onCancel={closeModal} />
+                )}
+                {modal.type === "add-charm" && (
+                  <CharmForm key="add-charm" onSave={(e) => { cat.addCharm(e); closeModal(); }} onCancel={closeModal} />
+                )}
+                {modal.type === "edit-charm" && (
+                  <CharmForm key={`edit-charm-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCharm(e); closeModal(); }} onCancel={closeModal} />
+                )}
+              </div>
+            )}
           </div>
 
           {/* Footer stats */}
@@ -494,41 +560,6 @@ const CatalogueAdmin = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal Overlay */}
-      {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200" onClick={closeModal}>
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-background rounded-lg border border-border shadow-2xl p-5" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold font-display">
-                {modal.type.startsWith("add") ? "New" : "Edit"}{" "}
-                {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : "Charm"}
-              </h3>
-              <button onClick={closeModal} className="p-1 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            {modal.type === "add-crystal" && (
-              <CrystalForm key="add-crystal" onSave={(e) => { cat.addCrystal(e); closeModal(); }} onCancel={closeModal} />
-            )}
-            {modal.type === "edit-crystal" && (
-              <CrystalForm key={`edit-crystal-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCrystal(e); closeModal(); }} onCancel={closeModal} />
-            )}
-            {modal.type === "add-spacer" && (
-              <SpacerForm key="add-spacer" onSave={(e) => { cat.addSpacer(e); closeModal(); }} onCancel={closeModal} />
-            )}
-            {modal.type === "edit-spacer" && (
-              <SpacerForm key={`edit-spacer-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateSpacer(e); closeModal(); }} onCancel={closeModal} />
-            )}
-            {modal.type === "add-charm" && (
-              <CharmForm key="add-charm" onSave={(e) => { cat.addCharm(e); closeModal(); }} onCancel={closeModal} />
-            )}
-            {modal.type === "edit-charm" && (
-              <CharmForm key={`edit-charm-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCharm(e); closeModal(); }} onCancel={closeModal} />
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
