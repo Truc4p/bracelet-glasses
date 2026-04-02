@@ -3,8 +3,8 @@ import { Glasses, Sparkles, RotateCcw, Waves, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
-import SunglassesAccessoriesLibrary from "@/components/SunglassesAccessoriesLibrary";
-import { FRAME_BASE_PRICE, type FrameOption, type PlacedAccessory, type SunglassesAccessory } from "@/lib/luxe-data";
+import SunglassesCustomizeLibrary from "@/components/SunglassesCustomizeLibrary";
+import { FRAME_BASE_PRICE, type FrameOption } from "@/lib/luxe-data";
 import { useCatalogue } from "@/data/index";
 
 interface AdvancedSunglassesBuilderProps {
@@ -75,7 +75,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const [vlt, setVlt] = useState(15);
   const [gradientMode, setGradientMode] = useState(false);
   const [gradientSecondary, setGradientSecondary] = useState<LensColor>(availableLensColors[1] || availableLensColors[0] || defaultLensColor);
-  const [placedAccessories, setPlacedAccessories] = useState<PlacedAccessory[]>([]);
 
   // Update selected frame data if it gets updated in the catalogue
   useEffect(() => {
@@ -106,77 +105,48 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     }
   }, [selectedFrame.lensColors]);
   const [frameLibraryOpen, setFrameLibraryOpen] = useState(true);
-  const [accessoriesOpen, setAccessoriesOpen] = useState(false);
-  const [draggedAccessory, setDraggedAccessory] = useState<SunglassesAccessory | null>(null);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
   const [povMode, setPovMode] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const updatePrice = useCallback(
-    (accessories: PlacedAccessory[], currentVlt: number, isGradient: boolean) => {
+    (currentVlt: number, isGradient: boolean) => {
       const basePrice = FRAME_BASE_PRICE;
       const vltPrice = currentVlt < 20 ? 25 : currentVlt < 50 ? 15 : 10;
       const gradientPrice = isGradient ? 20 : 0;
-      const accessoriesPrice = accessories.reduce((sum, a) => sum + a.accessory.price, 0);
-      onPriceChange(basePrice + vltPrice + gradientPrice + accessoriesPrice);
+      onPriceChange(basePrice + vltPrice + gradientPrice);
     },
     [onPriceChange]
   );
 
   useEffect(() => {
-    updatePrice(placedAccessories, vlt, gradientMode);
-  }, [updatePrice, placedAccessories, vlt, gradientMode]);
+    updatePrice(vlt, gradientMode);
+  }, [updatePrice, vlt, gradientMode]);
 
   const handleFrameSelect = (frame: FrameOption) => {
     setSelectedFrame(frame);
-    setPlacedAccessories([]);
-    updatePrice([], vlt, gradientMode);
+    updatePrice(vlt, gradientMode);
   };
 
   const handleVltChange = (val: number[]) => {
     setVlt(val[0]);
-    updatePrice(placedAccessories, val[0], gradientMode);
+    updatePrice(val[0], gradientMode);
   };
 
   const handleGradientToggle = (checked: boolean) => {
     setGradientMode(checked);
-    updatePrice(placedAccessories, vlt, checked);
+    updatePrice(vlt, checked);
   };
 
   const handleCanvasDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (!canvasRef.current || !draggedAccessory) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-    const newAccessory: PlacedAccessory = {
-      id: `${draggedAccessory.id}-${Date.now()}`,
-      accessory: draggedAccessory,
-      x,
-      y,
-      scale: 1,
-      rotation: 0,
-    };
-
-    const updated = [...placedAccessories, newAccessory];
-    setPlacedAccessories(updated);
-    setDraggedAccessory(null);
-    updatePrice(updated, vlt, gradientMode);
-  };
-
-  const handleAccessoryClick = (id: string) => {
-    const updated = placedAccessories.filter((a) => a.id !== id);
-    setPlacedAccessories(updated);
-    updatePrice(updated, vlt, gradientMode);
   };
 
   const handleReset = () => {
-    setPlacedAccessories([]);
     setVlt(15);
     setGradientMode(false);
     setLensColor(availableLensColors[0] || { id: "default", name: "Default Base", image: "" });
-    updatePrice([], 15, false);
+    updatePrice(15, false);
   };
 
   return (
@@ -193,7 +163,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
           <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Lens Tint</span>
           <button 
             onClick={() => {
-              setAccessoriesOpen(true);
+              setCustomizeOpen(true);
               setFrameLibraryOpen(false);
               // Small hack to switch to the Lens Colors tab if we had references, 
               // but we just let the user see the customize panel for now.
@@ -237,13 +207,13 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
           </Button>
           <Button variant="luxe-outline" size="sm" onClick={() => {
             setFrameLibraryOpen(!frameLibraryOpen);
-            setAccessoriesOpen(false);
+            setCustomizeOpen(false);
           }}>
             <Glasses className="w-3.5 h-3.5" />
             Frames
           </Button>
           <Button variant="luxe-outline" size="sm" onClick={() => {
-            setAccessoriesOpen(!accessoriesOpen);
+            setCustomizeOpen(!customizeOpen);
             setFrameLibraryOpen(false);
           }}>
             <Sparkles className="w-3.5 h-3.5" />
@@ -257,7 +227,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
 
       <div className="flex-1 relative overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-slate-50">
         <div className={`min-h-full flex items-center justify-center p-6 transition-all duration-300 ${
-          (accessoriesOpen || frameLibraryOpen) ? "lg:pl-[340px]" : ""
+          (customizeOpen || frameLibraryOpen) ? "lg:pl-[340px]" : ""
         }`}>
           <FrameLibrary
             open={frameLibraryOpen}
@@ -265,16 +235,15 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             onClose={() => setFrameLibraryOpen(false)}
           />
 
-          <SunglassesAccessoriesLibrary
-            open={accessoriesOpen}
-            onSelectAccessory={(acc) => setDraggedAccessory(acc)}
+          <SunglassesCustomizeLibrary
+            open={customizeOpen}
             onSelectLensColor={(color) => setLensColor(color)}
             onSelectSecondaryColor={(color) => setGradientSecondary(color)}
             currentLensColorId={lensColor?.id}
             currentSecondaryColorId={gradientSecondary?.id}
             gradientMode={gradientMode}
             availableLensColors={availableLensColors}
-            onClose={() => setAccessoriesOpen(false)}
+            onClose={() => setCustomizeOpen(false)}
           />
 
           <div
@@ -315,23 +284,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 className="absolute w-full h-full object-contain pointer-events-none"
                 style={{ zIndex: 2 }}
               />
-
-              {placedAccessories.map((placed) => (
-                <button
-                  key={placed.id}
-                  onClick={() => handleAccessoryClick(placed.id)}
-                  className="absolute text-3xl hover:scale-110 transition-transform cursor-pointer z-10"
-                  style={{
-                    left: `${placed.x}%`,
-                    top: `${placed.y}%`,
-                    transform: `translate(-50%, -50%) scale(${placed.scale}) rotate(${placed.rotation}deg)`,
-                    zIndex: 3,
-                  }}
-                  title={`${placed.accessory.name} - Click to remove`}
-                >
-                  {placed.accessory.emoji}
-                </button>
-              ))}
             </div>
           </div>
 

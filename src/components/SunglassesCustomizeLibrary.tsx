@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 
-interface SunglassesAccessoriesLibraryProps {
+interface SunglassesCustomizeLibraryProps {
   onSelectLensColor: (lensColor: { id: string; name: string; image: string }) => void;
   onSelectSecondaryColor: (lensColor: { id: string; name: string; image: string }) => void;
   currentLensColorId?: string;
@@ -11,7 +11,7 @@ interface SunglassesAccessoriesLibraryProps {
   onClose: () => void;
 }
 
-const SunglassesAccessoriesLibrary = ({
+const SunglassesCustomizeLibrary = ({
   onSelectLensColor,
   onSelectSecondaryColor,
   currentLensColorId,
@@ -20,7 +20,7 @@ const SunglassesAccessoriesLibrary = ({
   availableLensColors = [],
   open,
   onClose
-}: SunglassesAccessoriesLibraryProps) => {
+}: SunglassesCustomizeLibraryProps) => {
 
   if (!open) return null;
 
@@ -105,4 +105,4 @@ const SunglassesAccessoriesLibrary = ({
   );
 };
 
-export default SunglassesAccessoriesLibrary;
+export default SunglassesCustomizeLibrary;

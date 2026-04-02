@@ -21,16 +21,9 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
   const [selectedType, setSelectedType] = useState<string>("all");
 
   const availableTypes = useMemo(() => {
-    const typeIds = new Set<string>();
-    crystals.forEach((c) => {
-      if (c.type) typeIds.add(c.type);
-    });
-    // Map IDs to names if type exists in Catalogue
-    return Array.from(typeIds).map(id => {
-      const typeObj = types?.find(t => t.id === id);
-      return { id, name: typeObj?.name || id };
-    }).sort((a, b) => a.name.localeCompare(b.name));
-  }, [crystals, types]);
+    if (!types) return [];
+    return [...types].sort((a, b) => a.name.localeCompare(b.name));
+  }, [types]);
 
   const filteredCrystals = useMemo(
     () =>

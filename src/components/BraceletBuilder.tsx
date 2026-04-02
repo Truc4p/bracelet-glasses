@@ -42,7 +42,6 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   const [placedBeadsB, setPlacedBeadsB] = useState<PlacedBead[]>([]);
   const [twinning, setTwinning] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(true);
-  const [accessoriesOpen, setAccessoriesOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<SelectedItem>(null);
 
   // Convenience accessors kept for display/backwards-compat
@@ -289,19 +288,9 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
               <span className="text-xs text-muted-foreground">✕</span>
             </div>
           )}
-          <Button variant="luxe-outline" size="sm" onClick={() => {
-            setLibraryOpen(!libraryOpen);
-            setAccessoriesOpen(false);
-          }}>
+          <Button variant="luxe-outline" size="sm" onClick={() => setLibraryOpen(!libraryOpen)}>
             <Library className="w-3.5 h-3.5" />
             Crystals
-          </Button>
-          <Button variant="luxe-outline" size="sm" onClick={() => {
-            setAccessoriesOpen(!accessoriesOpen);
-            setLibraryOpen(false);
-          }}>
-            <Sparkles className="w-3.5 h-3.5" />
-            Accessories
           </Button>
           <Button variant="luxe-outline" size="sm" onClick={handleToggleTwinning}>
             <Copy className="w-3.5 h-3.5" />
@@ -315,7 +304,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
 
       {/* Canvas area */}
       <div className={`flex-1 relative flex items-center justify-center gap-8 p-6 transition-all duration-300 ${
-        (libraryOpen || accessoriesOpen) ? "lg:pl-[340px]" : ""
+        libraryOpen ? "lg:pl-[340px]" : ""
       }`}>
         <BeadLibrary
           open={libraryOpen}

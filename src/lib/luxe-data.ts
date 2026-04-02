@@ -2,8 +2,8 @@
  * luxe-data.ts
  *
  * This file re-exports everything that the rest of the app uses, but now
- * sources its data from the `src/data/` registry layer so that crystals,
- * accessories are managed in one place (with localStorage persistence
+ * sources its data from the `src/data/` registry layer so that crystals
+ * and frames are managed in one place (with localStorage persistence
  * via `useCatalogue()`).
  *
  * The type names and all function signatures remain exactly the same so no
@@ -113,32 +113,4 @@ export const LENS_COLORS = [
 export const FRAME_BASE_PRICE = 45;
 export const COATING_PRICE_PER_10 = 2;
 
-export interface SunglassesAccessory {
-  id: string;
-  name: string;
-  type: "chain" | "nosePad" | "decal";
-  emoji: string;
-  price: number;
-  color?: string;
-  metallic?: string;
-}
 
-export interface PlacedAccessory {
-  id: string;
-  accessory: SunglassesAccessory;
-  x: number;
-  y: number;
-  scale?: number;
-  rotation?: number;
-}
-
-export const SUNGLASSES_ACCESSORIES: SunglassesAccessory[] = [
-  { id: "chain-gold", name: "Gold Chain", type: "chain", emoji: "🔗", price: 12.00, metallic: "linear-gradient(135deg, #FFED4E, #D4AF37)" },
-  { id: "chain-silver", name: "Silver Chain", type: "chain", emoji: "⛓️", price: 10.00, metallic: "linear-gradient(135deg, #E8E8E8, #A0A0A0)" },
-  { id: "chain-pearls", name: "Pearl Chain", type: "chain", emoji: "📿", price: 18.00, color: "#F5F5DC" },
-  { id: "nosepads-silicone", name: "Comfort Nose Pads", type: "nosePad", emoji: "⬜", price: 3.00, color: "#E0E0E0" },
-  { id: "nosepads-gold", name: "Gold Nose Pads", type: "nosePad", emoji: "🟨", price: 5.00, metallic: "linear-gradient(135deg, #FFED4E, #D4AF37)" },
-  { id: "decal-star", name: "Star Decal", type: "decal", emoji: "⭐", price: 2.50, color: "#FFD700" },
-  { id: "decal-heart", name: "Heart Decal", type: "decal", emoji: "❤️", price: 2.50, color: "#E63946" },
-  { id: "decal-lightning", name: "Lightning Decal", type: "decal", emoji: "⚡", price: 2.50, color: "#FFEA00" },
-];
