@@ -91,13 +91,7 @@ export interface SunglassesConfig {
   lensGradient: string;
 }
 
-export interface FrameOption {
-  id: string;
-  name: string;
-  dimensions: string;
-  description: string;
-  images: string[];
-}
+export type FrameOption = FrameEntry;
 
 export const FRAME_OPTIONS: FrameOption[] = snapshot().frames;
 

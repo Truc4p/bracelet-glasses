@@ -1,27 +1,36 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  FRAME_OPTIONS,
-  LENS_COLORS,
   FRAME_BASE_PRICE,
   COATING_PRICE_PER_10,
 } from "@/lib/luxe-data";
+import { useCatalogue, type FrameEntry } from "@/data/index";
 
 interface SunglassesBuilderProps {
   onPriceChange: (price: number) => void;
 }
 
 const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
-  const [frame, setFrame] = useState("aviator");
+  const { frames } = useCatalogue();
+  const [frame, setFrame] = useState(frames[0]?.id || "aviator");
   const [tintDensity, setTintDensity] = useState(50);
-  const [lensColorId, setLensColorId] = useState("blue-clear");
+  const [lensColorId, setLensColorId] = useState("");
   const [view, setView] = useState<"front" | "side">("front");
 
-  const lensColor = LENS_COLORS.find((l) => l.id === lensColorId)!;
-  const selectedFrame = FRAME_OPTIONS.find((f) => f.id === frame)!;
+  const selectedFrame = frames.find((f) => f.id === frame) || frames[0];
+  const lensColors = selectedFrame?.lensColors || [];
+  
+  // Set initial lens color id when frame changes or on load
+  useEffect(() => {
+    if (lensColors.length > 0 && !lensColors.find(l => l.colorName === lensColorId)) {
+      setLensColorId(lensColors[0].colorName);
+    }
+  }, [frame, lensColors, lensColorId]);
 
-  const price = FRAME_BASE_PRICE + Math.floor(tintDensity / 10) * COATING_PRICE_PER_10;
+  const lensColor = lensColors.find((l) => l.colorName === lensColorId) || lensColors[0] || { colorName: "Default", image: "" };
+
+  const price = (selectedFrame?.price || FRAME_BASE_PRICE) + Math.floor(tintDensity / 10) * COATING_PRICE_PER_10;
 
   const updatePrice = useCallback(() => {
     onPriceChange(price);
@@ -39,7 +48,7 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
 
   const handleTintChange = (val: number) => {
     setTintDensity(val);
-    onPriceChange(FRAME_BASE_PRICE + Math.floor(val / 10) * COATING_PRICE_PER_10);
+    onPriceChange((selectedFrame?.price || FRAME_BASE_PRICE) + Math.floor(val / 10) * COATING_PRICE_PER_10);
   };
 
   // Frame shapes as SVG paths
@@ -165,19 +174,21 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
         {/* Frames */}
         <div>
           <label className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2 block">Frame Style</label>
-          <div className="flex gap-2">
-            {FRAME_OPTIONS.map((f) => (
+          <div className="flex gap-2 min-h-[50px] overflow-x-auto pb-2 -mb-2">
+            {frames.map((f) => (
               <button
                 key={f.id}
                 onClick={() => handleFrameChange(f.id)}
-                className={`flex flex-col items-center gap-1 px-4 py-2.5 rounded-lg border transition-all text-sm font-body ${
+                className={`flex shrink-0 flex-col items-center gap-1 px-4 py-2.5 rounded-lg border transition-all text-sm font-body ${
                   frame === f.id
                     ? "border-primary bg-primary/5 text-foreground"
                     : "border-border text-muted-foreground hover:border-primary/30"
                 }`}
               >
-                <span className="text-lg">{f.icon}</span>
-                <span className="text-[11px]">{f.name}</span>
+                <div className="h-6 flex items-center justify-center">
+                  <img src={f.frameImages?.[0] || ''} className="h-4 object-contain max-w-[40px] grayscale" />
+                </div>
+                <span className="text-[11px] font-semibold whitespace-nowrap">{f.name}</span>
               </button>
             ))}
           </div>
@@ -202,21 +213,29 @@ const SunglassesBuilder = ({ onPriceChange }: SunglassesBuilderProps) => {
           {/* Lens color */}
           <div>
             <label className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2 block">Lens Color</label>
-            <div className="flex gap-2">
-              {LENS_COLORS.map((l) => (
-                <button
-                  key={l.id}
-                  onClick={() => {
-                    setLensColorId(l.id);
-                  }}
-                  className={`relative w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden transition-all ${
-                    lensColorId === l.id ? "ring-2 ring-primary scale-110" : "ring-1 ring-border hover:scale-105"
-                  }`}
-                  title={l.name}
-                >
-                  <img src={l.image} alt={l.name} className="w-full h-full object-cover scale-[1.35]" />
-                </button>
-              ))}
+            <div className="flex gap-2 min-h-[40px] items-center overflow-x-auto pb-2 -mb-2">
+              {lensColors.length === 0 ? (
+                <span className="text-xs text-muted-foreground italic">No colors available</span>
+              ) : (
+                lensColors.map((l, i) => (
+                  <button
+                    key={`${l.colorName}-${i}`}
+                    onClick={() => {
+                      setLensColorId(l.colorName);
+                    }}
+                    className={`relative w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden transition-all ${
+                      lensColorId === l.colorName ? "ring-2 ring-primary scale-110" : "ring-1 ring-border hover:scale-105"
+                    }`}
+                    title={l.colorName}
+                  >
+                    {l.image ? (
+                      <img src={l.image} alt={l.colorName} className="w-full h-full object-cover scale-[1.35]" />
+                    ) : (
+                      <div className="w-full h-full bg-primary/20 blur-[2px]" />
+                    )}
+                  </button>
+                ))
+              )}
             </div>
           </div>
         </div>

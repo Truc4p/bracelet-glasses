@@ -1,44 +1,48 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { Shade } from './models/Shade.js';
+import Frame from './models/Frame.js';
 
-// Load env vars
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+dotenv.config({ path: '../.env' }); // Make sure we read from root .env if it is situated there
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/bino-foundry';
 
 const seedDatabase = async () => {
   try {
     await mongoose.connect(MONGODB_URI);
-    console.log('Connected to MongoDB for seeding');
+    console.log('Connected to MongoDB Atlas');
 
-    // Read the original json file
-    const shadeMapPath = join(__dirname, 'shadeMap.json');
-    const rawData = fs.readFileSync(shadeMapPath, 'utf-8');
-    const shadeMap = JSON.parse(rawData);
+    // Clear existing frames for a fresh start (optional, be careful in production!)
+    // await Frame.deleteMany({});
+    
+    const sampleFrame = new Frame({
+      name: 'Classic Aviator',
+      price: 120.00,
+      description: 'Timeless aviator styling with premium metal construction.',
+      frameImages: [
+        'https://example.com/images/aviator-front.jpg',
+        'https://example.com/images/aviator-side.jpg'
+      ],
+      lensColors: [
+        {
+          colorName: 'Midnight Black',
+          image: 'https://example.com/images/aviator-black-lens.jpg'
+        },
+        {
+          colorName: 'Ocean Blue',
+          image: 'https://example.com/images/aviator-blue-lens.jpg'
+        }
+      ]
+    });
 
-    // Clear existing data
-    await Shade.deleteMany({});
-    console.log('Cleared existing shades');
+    await sampleFrame.save();
+    console.log('Sample frame successfully saved to MongoDB Atlas!');
 
-    // Prepare data for insertion
-    const dataToInsert = Object.keys(shadeMap).map((baseColor) => ({
-      baseColor,
-      lenses: shadeMap[baseColor],
-    }));
-
-    await Shade.insertMany(dataToInsert);
-    console.log('Successfully seeded database with shadeMap data');
-
-    mongoose.connection.close();
+    // Disconnect when done
+    await mongoose.disconnect();
+    console.log('Disconnected from MongoDB');
+    process.exit(0);
   } catch (error) {
-    console.error('Error seeding database:', error);
+    console.error('Error seeding the database:', error);
     process.exit(1);
   }
 };

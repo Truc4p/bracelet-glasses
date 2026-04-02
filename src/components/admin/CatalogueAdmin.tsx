@@ -148,22 +148,39 @@ const CatalogueAdmin = () => {
                       <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div className="flex items-center gap-4">
-                      {frame.images && frame.images.length > 0 ? (
-                        <img src={frame.images[0]} alt={frame.name} className="w-16 h-16 object-contain bg-muted/50 rounded drop-shadow" crossOrigin="anonymous" />
+                      {frame.frameImages && frame.frameImages.length > 0 ? (
+                        <img src={frame.frameImages[0]} alt={frame.name} className="w-16 h-16 object-contain bg-muted/50 rounded drop-shadow" crossOrigin="anonymous" />
                       ) : (
                         <div className="w-16 h-16 bg-muted/50 rounded flex items-center justify-center text-2xl shadow-sm">👓</div>
                       )}
                       <div>
                         <h2 className="text-xl font-bold font-display">{frame.name}</h2>
-                        <p className="text-sm text-muted-foreground">{frame.dimensions} • {frame.id}</p>
+                        <p className="text-sm text-muted-foreground">${frame.price} • {frame.id}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {frame.lensColors?.length || 0} colors
+                        </p>
                       </div>
                     </div>
                     {!isEditingFrame && (
                       <div className="ml-auto flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setIsEditingFrame(true)}>
-                          <Pencil className="w-4 h-4 mr-2" />
-                          Edit
-                        </Button>
+                        {confirmDelete === frame.id ? (
+                          <>
+                            <span className="text-xs text-destructive font-medium mr-2 animate-in fade-in">Delete?</span>
+                            <Button variant="ghost" size="sm" onClick={cancelDelete}>Cancel</Button>
+                            <Button variant="destructive" size="sm" onClick={() => { confirmDeleteFn(frame.id); setSelectedFrameId(null); }}>Confirm</Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button variant="outline" size="sm" onClick={() => setIsEditingFrame(true)}>
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button variant="outline" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => requestDelete(frame.id)}>
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </Button>
+                          </>
+                        )}
                       </div>
                     )}
                   </>
@@ -229,9 +246,9 @@ const CatalogueAdmin = () => {
                     if (!frame) return <p>Frame not found</p>;
                     return (
                       <div>
-                        <h3 className="text-lg font-semibold mb-4">Images ({frame.images?.length || 0})</h3>
+                        <h3 className="text-lg font-semibold mb-4">Images ({frame.frameImages?.length || 0})</h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                          {(frame.images || []).map((img, idx) => (
+                          {(frame.frameImages || []).map((img, idx) => (
                             <div key={idx} className="flex flex-col items-center gap-3 p-3 rounded-lg bg-background border border-border text-center shadow-sm">
                               {img ? (
                                 <img src={img} alt={`Frame image ${idx + 1}`} className="w-full h-24 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
@@ -246,11 +263,37 @@ const CatalogueAdmin = () => {
                               </span>
                             </div>
                           ))}
-                          {(frame.images?.length || 0) === 0 && (
+                          {(frame.frameImages?.length || 0) === 0 && (
                             <div className="col-span-full py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/20">
                               No images configured. Click Edit to add some.
                             </div>
                           )}
+                        </div>
+
+                        <div className="mt-8 border-t border-border pt-6">
+                          <h3 className="text-lg font-semibold mb-4">Colors ({frame.lensColors?.length || 0})</h3>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {(frame.lensColors || []).map((lc, idx) => (
+                              <div key={idx} className="flex flex-col items-center gap-3 p-3 rounded-lg bg-background border border-border text-center shadow-sm">
+                                {lc.image ? (
+                                  <img src={lc.image} alt={lc.colorName} className="w-full h-24 object-contain rounded drop-shadow-sm" crossOrigin="anonymous" />
+                                ) : (
+                                  <div className="w-full h-24 rounded bg-muted flex flex-col items-center justify-center text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                                    <span>No</span>
+                                    <span>Image</span>
+                                  </div>
+                                )}
+                                <span className="text-sm font-medium w-full truncate px-1" title={lc.colorName}>
+                                  {lc.colorName || `Color ${idx + 1}`}
+                                </span>
+                              </div>
+                            ))}
+                            {(frame.lensColors?.length || 0) === 0 && (
+                              <div className="col-span-full py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/20">
+                                No lens colors configured. Click Edit to add some.
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -273,9 +316,9 @@ const CatalogueAdmin = () => {
                         : "hover:bg-muted/80 focus-within:bg-muted/80"
                     }`}>
                       {/* Frame image */}
-                      {f.images && f.images.length > 0 ? (
+                      {f.frameImages && f.frameImages.length > 0 ? (
                         <img
-                          src={f.images[0]}
+                          src={f.frameImages[0]}
                           alt={f.name}
                           className="w-12 h-12 object-contain bg-muted/50 rounded pointer-events-none drop-shadow-sm"
                           crossOrigin="anonymous"
@@ -294,52 +337,10 @@ const CatalogueAdmin = () => {
                             {f.id}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{f.dimensions}</span>
-                          <span>•</span>
-                          <span>{f.images?.length || 0} images</span>
-                        </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                        {confirmDelete === f.id ? (
-                          <div className="flex items-center gap-1 pr-2">
-                            <span className="text-xs text-destructive font-medium mr-2 animate-in fade-in slide-in-from-right-2">Delete style?</span>
-                            <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:bg-muted" onClick={cancelDelete}>
-                              <X className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button size="icon" variant="destructive" className="h-7 w-7" onClick={() => confirmDeleteFn(f.id)}>
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedFrameId(f.id);
-                              }}
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                requestDelete(f.id);
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                      {/* Removed Edit/Delete */}
                     </div>
                   </div>
                   );
@@ -388,23 +389,7 @@ const CatalogueAdmin = () => {
                       </div>
                       <span className="text-xs text-muted-foreground">${c.price.toFixed(2)} / bead</span>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {confirmDelete === c.id ? (
-                        <>
-                          <Button size="sm" variant="destructive" onClick={() => confirmDeleteFn(c.id)} className="h-7 px-2 text-xs">Confirm</Button>
-                          <Button size="sm" variant="ghost" onClick={cancelDelete} className="h-7 px-2 text-xs">Cancel</Button>
-                        </>
-                      ) : (
-                        <>
-                          <button onClick={() => setModal({ type: "edit-crystal", entry: c })} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Edit">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => requestDelete(c.id)} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Delete">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    {/* Removed Edit/Delete */}
                   </div>
                 ))}
               </div>
@@ -445,23 +430,7 @@ const CatalogueAdmin = () => {
                       </div>
                       <span className="text-xs text-muted-foreground">${s.price.toFixed(2)} / spacer</span>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {confirmDelete === s.id ? (
-                        <>
-                          <Button size="sm" variant="destructive" onClick={() => confirmDeleteFn(s.id)} className="h-7 px-2 text-xs">Confirm</Button>
-                          <Button size="sm" variant="ghost" onClick={cancelDelete} className="h-7 px-2 text-xs">Cancel</Button>
-                        </>
-                      ) : (
-                        <>
-                          <button onClick={() => setModal({ type: "edit-spacer", entry: s })} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Edit">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => requestDelete(s.id)} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Delete">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    {/* Removed Edit/Delete */}
                   </div>
                 ))}
               </div>
@@ -502,23 +471,7 @@ const CatalogueAdmin = () => {
                       </div>
                       <span className="text-xs text-muted-foreground">${c.price.toFixed(2)}</span>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {confirmDelete === c.id ? (
-                        <>
-                          <Button size="sm" variant="destructive" onClick={() => confirmDeleteFn(c.id)} className="h-7 px-2 text-xs">Confirm</Button>
-                          <Button size="sm" variant="ghost" onClick={cancelDelete} className="h-7 px-2 text-xs">Cancel</Button>
-                        </>
-                      ) : (
-                        <>
-                          <button onClick={() => setModal({ type: "edit-charm", entry: c })} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Edit">
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button onClick={() => requestDelete(c.id)} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Delete">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    {/* Removed Edit/Delete */}
                   </div>
                 ))}
               </div>

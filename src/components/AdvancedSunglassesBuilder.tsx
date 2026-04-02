@@ -51,9 +51,32 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     name: "No Frames Available",
     dimensions: "-",
     description: "Fallback description",
-    images: []
+    frameImages: [],
+    price: 0,
+    lensColors: []
   };
   const [selectedFrame, setSelectedFrame] = useState<FrameOption>(frames[0] || fallbackFrame);
+
+  // Use the lens colors from the selected frame or a fallback if none exist
+  const customLensColors: LensColor[] = (selectedFrame?.lensColors && selectedFrame.lensColors.length > 0)
+    ? selectedFrame.lensColors.map((lc, idx) => ({
+        id: lc.colorName.toLowerCase().replace(/\s+/g, '-'),
+        name: lc.colorName,
+        image: lc.image
+      }))
+    : LENS_COLORS;
+    
+  const availableLensColors: LensColor[] = [
+    { id: "clear", name: "Clear / Original", image: "" },
+    ...customLensColors
+  ];
+
+  const defaultLensColor: LensColor = availableLensColors[0] || { id: "default", name: "Default Base", image: "" };
+  const [lensColor, setLensColor] = useState<LensColor>(defaultLensColor);
+  const [vlt, setVlt] = useState(15);
+  const [gradientMode, setGradientMode] = useState(false);
+  const [gradientSecondary, setGradientSecondary] = useState<LensColor>(availableLensColors[1] || availableLensColors[0] || defaultLensColor);
+  const [placedAccessories, setPlacedAccessories] = useState<PlacedAccessory[]>([]);
 
   // Update selected frame data if it gets updated in the catalogue
   useEffect(() => {
@@ -72,11 +95,17 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     }
   }, [frames, selectedFrame]);
 
-  const [lensColor, setLensColor] = useState<LensColor>(LENS_COLORS[0]);
-  const [vlt, setVlt] = useState(15);
-  const [gradientMode, setGradientMode] = useState(false);
-  const [gradientSecondary, setGradientSecondary] = useState<LensColor>(LENS_COLORS[1]);
-  const [placedAccessories, setPlacedAccessories] = useState<PlacedAccessory[]>([]);
+  // Update selected lens color when available colors change
+  useEffect(() => {
+    if (availableLensColors.length > 0) {
+      setLensColor(prev => availableLensColors.find(l => l.id === prev?.id) || availableLensColors[0]);
+      setGradientSecondary(prev => availableLensColors.find(l => l.id === prev?.id) || availableLensColors[1] || availableLensColors[0]);
+    } else {
+      const fb = { id: "default", name: "Default Base", image: "" };
+      setLensColor(fb);
+      setGradientSecondary(fb);
+    }
+  }, [selectedFrame.lensColors]);
   const [frameLibraryOpen, setFrameLibraryOpen] = useState(true);
   const [accessoriesOpen, setAccessoriesOpen] = useState(false);
   const [draggedAccessory, setDraggedAccessory] = useState<SunglassesAccessory | null>(null);
@@ -147,7 +176,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
     setPlacedAccessories([]);
     setVlt(15);
     setGradientMode(false);
-    setLensColor(LENS_COLORS[0]);
+    setLensColor(availableLensColors[0] || { id: "default", name: "Default Base", image: "" });
     updatePrice([], 15, false);
   };
 
@@ -159,6 +188,33 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-body">
             {selectedFrame.name}
           </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Lens Tint</span>
+          <button 
+            onClick={() => {
+              setAccessoriesOpen(true);
+              setFrameLibraryOpen(false);
+              // Small hack to switch to the Lens Colors tab if we had references, 
+              // but we just let the user see the customize panel for now.
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors text-sm font-body cursor-pointer group"
+          >
+            <div 
+              className="w-3.5 h-3.5 rounded-full border border-black/10 overflow-hidden flex-shrink-0"
+              style={{ 
+                backgroundImage: `url(${lensColor?.image || ''})`, 
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundColor: lensColor?.id?.includes('amber') ? '#FFBF00' : (lensColor?.image ? 'transparent' : '#71717a') // Fallback color
+              }} 
+            />
+            <span>
+              {lensColor?.name} {gradientMode && <span className="opacity-60 text-xs">/ {gradientSecondary?.name}</span>}
+            </span>
+            <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-1">Change</span>
+          </button>
         </div>
 
         <div className="flex items-center gap-2">
@@ -215,7 +271,10 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             onSelectAccessory={(acc) => setDraggedAccessory(acc)}
             onSelectLensColor={(color) => setLensColor(color)}
             onSelectSecondaryColor={(color) => setGradientSecondary(color)}
+            currentLensColorId={lensColor?.id}
+            currentSecondaryColorId={gradientSecondary?.id}
             gradientMode={gradientMode}
+            availableLensColors={availableLensColors}
             onClose={() => setAccessoriesOpen(false)}
           />
 
@@ -235,27 +294,25 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
               {/* Show dynamic lens overlay */
               (
                 <div
-                  className="absolute inset-0 w-full h-full pointer-events-none"
+                  className="absolute inset-0 w-full h-full pointer-events-none mix-blend-multiply"
                   style={{
                     zIndex: 1,
-                    backgroundImage: `url(${lensColor.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    maskImage: `url(${selectedFrame.images?.[0]?.replace('_-_CLEAR', '') || ''})`,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    maskImage: `url(${selectedFrame.frameImages?.[0]?.replace('_-_CLEAR', '') || ''})`,
                     maskSize: 'contain',
                     maskRepeat: 'no-repeat',
                     maskPosition: 'center',
-                    WebkitMaskImage: `url(${selectedFrame.images?.[0]?.replace('_-_CLEAR', '') || ''})`,
+                    WebkitMaskImage: `url(${selectedFrame.frameImages?.[0]?.replace('_-_CLEAR', '') || ''})`,
                     WebkitMaskSize: 'contain',
                     WebkitMaskRepeat: 'no-repeat',
                     WebkitMaskPosition: 'center',
-                    opacity: Math.max(0.4, Math.min(0.95, 1 - (vlt || 50) / 100))
+                    opacity: Math.max(0, Math.min(0.8, 1 - (vlt || 50) / 100))
                   }}
                 />
               )}
               <img
-                src={selectedFrame.images?.[0]}
-                alt={selectedFrame.name}
+                src={lensColor?.image || selectedFrame.frameImages?.[0]}
+                alt={`${selectedFrame.name} - ${lensColor?.name || 'Default'}`}
                 className="absolute w-full h-full object-contain drop-shadow-2xl pointer-events-none"
                 style={{ zIndex: 2 }}
               />
@@ -283,9 +340,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             <div
               className="fixed inset-0 pointer-events-none transition-all duration-500"
               style={{
-                backgroundImage: `url(${lensColor.image})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                backgroundColor: lensColor?.id?.includes('amber') ? '#d97706' : (lensColor?.image ? 'rgba(0,0,0,1)' : '#71717a'),
                 opacity: Math.max(0.15, Math.min(0.6, 1 - vlt / 100)),
                 zIndex: 9999,
               }}

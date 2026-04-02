@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Search, X } from "lucide-react";
-import { SUNGLASSES_ACCESSORIES, LENS_COLORS, type SunglassesAccessory } from "@/lib/luxe-data";
+import { SUNGLASSES_ACCESSORIES, type SunglassesAccessory } from "@/lib/luxe-data";
 
 type TabType = 'accessories' | 'lensColors';
 
@@ -8,7 +8,10 @@ interface SunglassesAccessoriesLibraryProps {
   onSelectAccessory: (accessory: SunglassesAccessory) => void;
   onSelectLensColor: (lensColor: { id: string; name: string; image: string }) => void;
   onSelectSecondaryColor: (lensColor: { id: string; name: string; image: string }) => void;
+  currentLensColorId?: string;
+  currentSecondaryColorId?: string;
   gradientMode: boolean;
+  availableLensColors?: { id: string; name: string; image: string }[];
   open: boolean;
   onClose: () => void;
 }
@@ -17,12 +20,15 @@ const SunglassesAccessoriesLibrary = ({
   onSelectAccessory,
   onSelectLensColor,
   onSelectSecondaryColor,
+  currentLensColorId,
+  currentSecondaryColorId,
   gradientMode,
+  availableLensColors = [],
   open,
   onClose
 }: SunglassesAccessoriesLibraryProps) => {
   const [search, setSearch] = useState("");
-  const [activeTab, setActiveTab] = useState<TabType>('accessories');
+  const [activeTab, setActiveTab] = useState<TabType>('lensColors');
   const [filterType, setFilterType] = useState<'all' | 'chain' | 'nosePad' | 'decal' | 'charm'>('all');
 
   const filteredAccessories = useMemo(
@@ -47,16 +53,6 @@ const SunglassesAccessoriesLibrary = ({
 
       <div className="flex gap-1 p-3 border-b border-border">
         <button
-          onClick={() => setActiveTab('accessories')}
-          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-            activeTab === 'accessories'
-              ? 'bg-primary text-primary-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-          }`}
-        >
-          Accessories
-        </button>
-        <button
           onClick={() => setActiveTab('lensColors')}
           className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
             activeTab === 'lensColors'
@@ -65,6 +61,16 @@ const SunglassesAccessoriesLibrary = ({
           }`}
         >
           Shade Profile
+        </button>
+        <button
+          onClick={() => setActiveTab('accessories')}
+          className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            activeTab === 'accessories'
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+          }`}
+        >
+          Accessories
         </button>
       </div>
 
@@ -133,23 +139,27 @@ const SunglassesAccessoriesLibrary = ({
               {gradientMode ? 'Top Color' : 'Base Material'}
             </h4>
             <div className="space-y-1">
-              {LENS_COLORS.map((lensColor) => (
+              {availableLensColors.length === 0 && (
+                <p className="text-xs text-muted-foreground italic px-3 py-2">No custom colors configured for this frame.</p>
+              )}
+              {availableLensColors.map((lensColor) => (
                 <button
                   key={lensColor.id}
                   onClick={() => onSelectLensColor(lensColor)}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-left group ${currentLensColorId === lensColor.id ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted/60'}`}
                 >
                   <div
-                    className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0 flex items-center justify-center overflow-hidden"
+                    className={`w-8 h-8 rounded-full border flex-shrink-0 flex items-center justify-center overflow-hidden ${currentLensColorId === lensColor.id ? 'border-primary' : 'border-border/50'} ${!lensColor.image ? 'bg-gradient-to-br from-white to-gray-200' : ''}`}
                   >
-                    <img 
+                    {lensColor.image && (<img 
                       src={lensColor.image} 
                       alt={lensColor.name} 
                       className="w-full h-full object-cover scale-[1.35]" 
-                    />
+                       />
+                      )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>
+                    <p className={`text-sm font-medium truncate ${currentLensColorId === lensColor.id ? 'text-primary' : 'text-foreground'}`}>{lensColor.name}</p>
                   </div>
                 </button>
               ))}
@@ -162,23 +172,28 @@ const SunglassesAccessoriesLibrary = ({
                 Bottom Color
               </h4>
               <div className="space-y-1">
-                {LENS_COLORS.map((lensColor) => (
+                {availableLensColors.length === 0 && (
+                  <p className="text-xs text-muted-foreground italic px-3 py-2">No custom colors configured for this frame.</p>
+                )}
+                {availableLensColors.map((lensColor) => (
                   <button
                     key={`secondary-${lensColor.id}`}
                     onClick={() => onSelectSecondaryColor(lensColor)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-muted/60 transition-colors text-left group"
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-left group ${currentSecondaryColorId === lensColor.id ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted/60'}`}
                   >
                     <div
-                      className="w-8 h-8 rounded-full border border-border/50 flex-shrink-0 flex items-center justify-center overflow-hidden"
+                      className={`w-8 h-8 rounded-full border flex-shrink-0 flex items-center justify-center overflow-hidden ${currentSecondaryColorId === lensColor.id ? 'border-primary' : 'border-border/50'} ${!lensColor.image ? 'bg-gradient-to-br from-white to-gray-200' : ''}`}
                     >
-                      <img 
-                        src={lensColor.image} 
-                        alt={lensColor.name} 
-                        className="w-full h-full object-cover scale-[1.35]" 
-                      />
+                      {lensColor.image && (
+                        <img 
+                          src={lensColor.image} 
+                          alt={lensColor.name} 
+                          className="w-full h-full object-cover scale-[1.35]" 
+                        />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{lensColor.name}</p>
+                      <p className={`text-sm font-medium truncate ${currentSecondaryColorId === lensColor.id ? 'text-primary' : 'text-foreground'}`}>{lensColor.name}</p>
                     </div>
                   </button>
                 ))}

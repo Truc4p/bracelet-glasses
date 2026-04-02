@@ -16,7 +16,7 @@ const FrameLibrary = ({ onSelectFrame, open, onClose }: FrameLibraryProps) => {
   const filteredFrames = useMemo(
     () => frames.filter((f) =>
       f.name.toLowerCase().includes(search.toLowerCase()) ||
-      f.dimensions.includes(search)
+      (f.description && f.description.toLowerCase().includes(search.toLowerCase()))
     ),
     [search]
   );
@@ -50,20 +50,20 @@ const FrameLibrary = ({ onSelectFrame, open, onClose }: FrameLibraryProps) => {
           <button
             key={frame.id}
             onClick={() => {
-              onSelectFrame(frame);
+              onSelectFrame(frame as any);
             }}
             className="flex flex-col items-center gap-2 p-3 rounded-lg border-2 border-border hover:border-primary transition-all group bg-background"
           >
             <div className="w-full aspect-video bg-gradient-to-br from-gray-50 to-gray-100 rounded flex items-center justify-center overflow-hidden">
               <img
-                src={frame.images?.[0]}
+                src={frame.frameImages?.[0]}
                 alt={frame.name}
                 className="w-full h-full object-contain p-2"
               />
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">{frame.name}</p>
-              <p className="text-xs text-muted-foreground">{frame.dimensions}</p>
+              <p className="text-xs text-muted-foreground">${frame.price}</p>
             </div>
           </button>
         ))}

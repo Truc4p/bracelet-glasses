@@ -95,22 +95,6 @@ export function useCatalogue(): CatalogueState {
             frames: merge(DEFAULT_FRAMES, dbFrames)
           }));
         }
-        
-        // 2. Fallback fetch shades for backwards compatibility with the seed.js data
-        return fetch(`${BACKEND_URL}/api/shades`);
-      })
-      .then(res => res.json())
-      .then(data => {
-        setStore(prevStore => {
-          const updatedFrames = prevStore.frames.map(frame => {
-            // merge MongoDB shades with the local ones if backend has any
-            return {
-              ...frame,
-              shades: { ...frame.shades, ...data[frame.id] }
-            };
-          });
-          return { ...prevStore, frames: updatedFrames };
-        });
       })
       .catch(err => console.error("Could not load catalogue data from MongoDB backend:", err));
   }, []);

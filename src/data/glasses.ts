@@ -1,10 +1,18 @@
+export interface LensColor {
+  _id?: string;
+  colorName: string;
+  image: string;
+}
+
 // shadeMap data is now fetched directly from the database or API.
 export interface FrameEntry {
-  id: string;
+  id: string;        // Client side identifier
+  _id?: string;      // MongoDB identifier
   name: string;
-  dimensions: string;
+  price: number;
   description: string;
-  images: string[];
+  frameImages: string[];
+  lensColors: LensColor[];
 }
 
 const STATIC_FRAMES: FrameEntry[] = [];
