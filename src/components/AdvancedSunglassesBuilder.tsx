@@ -17,32 +17,7 @@ type LensColor = {
   image: string;
 };
 
-const LENS_COLORS: LensColor[] = [
-  { id: "amber", name: "Amber", image: "" },
-  { id: "american-grey-fade", name: "American Grey Fade", image: "" },
-  { id: "aqua-sunrise", name: "Aqua Sunrise", image: "" },
-  { id: "bel-air-blue", name: "Bel Air Blue", image: "" },
-  { id: "big-apple-fade", name: "Big Apple Fade", image: "" },
-  { id: "broadway-blue-fade", name: "Broadway Blue Fade", image: "" },
-  { id: "cabernet", name: "Cabernet", image: "" },
-  { id: "candy-corn", name: "Candy Corn", image: "" },
-  { id: "celebrity-blue", name: "Celebrity Blue", image: "" },
-  { id: "chestnut-fade", name: "Chestnut Fade", image: "" },
-  { id: "city-lights", name: "City Lights", image: "" },
-  { id: "denim-blue", name: "Denim Blue", image: "" },
-  { id: "forest-wood", name: "Forest Wood", image: "" },
-  { id: "g-15-fade", name: "G-15 Fade", image: "" },
-  { id: "garnet-green", name: "Garnet Green", image: "" },
-  { id: "lavender", name: "Lavender", image: "" },
-  { id: "limelight", name: "Limelight", image: "" },
-  { id: "mellow-yellow", name: "Mellow Yellow", image: "" },
-  { id: "new-york-rose", name: "New York Rose", image: "" },
-  { id: "pastel-yellow", name: "Pastel Yellow", image: "" },
-  { id: "purple-nurple", name: "Purple Nurple", image: "" },
-  { id: "root-beer-fade", name: "Root Beer Fade", image: "" },
-  { id: "turquoise", name: "Turquoise", image: "" },
-  { id: "woodstock-orange", name: "Woodstock Orange", image: "" },
-];
+const LENS_COLORS: LensColor[] = [];
 
 const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderProps) => {
   const { frames } = useCatalogue();
