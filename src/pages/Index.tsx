@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Gem, Glasses, Settings } from "lucide-react";
 import LivePrice from "@/components/LivePrice";
 import BraceletBuilder from "@/components/BraceletBuilder";
@@ -8,7 +9,11 @@ import CatalogueAdmin from "@/components/admin/CatalogueAdmin";
 type Module = "bracelet" | "sunglasses" | "admin";
 
 const Index = () => {
-  const [activeModule, setActiveModule] = useState<Module>("bracelet");
+  const { module } = useParams<{ module: string }>();
+  const navigate = useNavigate();
+  
+  const activeModule = (module === "bracelet" || module === "sunglasses" || module === "admin") ? (module as Module) : "bracelet";
+
   const [prices, setPrices] = useState({ bracelet: 0, sunglasses: 0 });
 
   return (
@@ -27,7 +32,7 @@ const Index = () => {
             ]).map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setActiveModule(id)}
+                onClick={() => navigate(`/${id}`)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-body transition-all duration-200 ${
                   activeModule === id
                     ? "bg-primary text-primary-foreground shadow-sm"
