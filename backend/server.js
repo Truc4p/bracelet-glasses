@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import frameRoutes from './routes/frameRoutes.js';
+import crystalRoutes from './routes/crystalRoutes.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -56,6 +57,7 @@ mongoose.connect(MONGODB_URI)
 
 // Routes
 app.use('/api/frames', frameRoutes);
+app.use('/api/crystals', crystalRoutes);
 
 app.get('/', (req, res) => {
   res.send('Bino Foundry Backend API is running! 🚀<br>Go to <a href="/api/status">/api/status</a> to see the status.');

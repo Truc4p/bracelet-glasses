@@ -304,7 +304,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
                 <div 
                   className="w-4 h-4 rounded-full" 
                   style={{ 
-                    background: selectedItem.crystal.image ? `url(${selectedItem.crystal.image}?v=2) center / cover no-repeat` : (selectedItem.crystal.gradient || selectedItem.crystal.color)
+                    background: selectedItem.crystal.image ? `url(${selectedItem.crystal.image}?v=2) center / cover no-repeat` : "hsl(var(--muted))"
                   }} 
                 />
               )}

@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { Search, X, Info } from "lucide-react";
 import { useCatalogue } from "@/data/index";
 import type { CrystalEntry } from "@/data/crystals";
-import StockBadge from "@/components/admin/StockBadge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ── Types that the rest of the app still uses via the legacy name ──────────
@@ -15,23 +14,17 @@ interface BeadLibraryProps {
   onClose: () => void;
 }
 
-const TAG_FILTERS = ["all", "popular", "bestseller", "new"] as const;
-type TagFilter = typeof TAG_FILTERS[number];
-
 const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
   const { crystals } = useCatalogue();
   const [search, setSearch] = useState("");
-  const [tagFilter, setTagFilter] = useState<TagFilter>("all");
 
   const filteredCrystals = useMemo(
     () =>
       crystals.filter((b) => {
         const matchesSearch = b.name.toLowerCase().includes(search.toLowerCase());
-        const matchesTag =
-          tagFilter === "all" || (b.tags ?? []).includes(tagFilter);
-        return matchesSearch && matchesTag;
+        return matchesSearch;
       }),
-    [crystals, search, tagFilter]
+    [crystals, search]
   );
 
   if (!open) return null;
@@ -59,23 +52,6 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
         </div>
       </div>
 
-      {/* Tag filter */}
-      <div className="flex gap-1 px-3 pb-2 flex-wrap">
-        {TAG_FILTERS.map((t) => (
-          <button
-            key={t}
-            onClick={() => setTagFilter(t)}
-            className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition-colors capitalize ${
-              tagFilter === t
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted/60 text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
       {/* Crystal list */}
       <div className="flex-1 overflow-y-auto p-3 space-y-1">
         {filteredCrystals.length === 0 && (
@@ -83,7 +59,7 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
         )}
 
         {filteredCrystals.map((bead) => {
-          const outOfStock = bead.stock === 0;
+          const outOfStock = false;
           return (
             <button
               key={bead.id}
@@ -119,7 +95,7 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
               ) : null}
               <div
                 className={`w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm ${bead.image ? "hidden" : ""}`}
-                style={{ background: bead.gradient || bead.color }}
+                style={{ background: "hsl(var(--muted))" }}
               />
 
               <div className="flex-1 min-w-0">
@@ -140,7 +116,6 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
                 </div>
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <p className="text-xs text-muted-foreground">${bead.price.toFixed(2)} / bead</p>
-                  <StockBadge stock={bead.stock} />
                 </div>
               </div>
 

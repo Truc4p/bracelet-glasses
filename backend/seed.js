@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Frame from './models/Frame.js';
+import Crystal from './models/Crystal.js';
 
 dotenv.config({ path: '../.env' }); // Make sure we read from root .env if it is situated there
 
@@ -36,6 +37,19 @@ const seedDatabase = async () => {
 
     await sampleFrame.save();
     console.log('Sample frame successfully saved to MongoDB Atlas!');
+
+    // Clear existing crystals for a fresh start
+    // await Crystal.deleteMany({});
+
+    const sampleCrystal = new Crystal({
+      name: 'Amethyst',
+      price: 3.50,
+      image: '/crystals/amethyst.svg',
+      description: 'A violet variety of quartz. Known for calming energy.',
+    });
+
+    await sampleCrystal.save();
+    console.log('Sample crystal successfully saved to MongoDB Atlas!');
 
     // Disconnect when done
     await mongoose.disconnect();

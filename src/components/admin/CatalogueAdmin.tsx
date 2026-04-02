@@ -411,17 +411,11 @@ const CatalogueAdmin = () => {
                     ) : null}
                     <div
                       className={`w-8 h-8 rounded-full border border-border/50 shadow-sm flex-shrink-0 ${c.image ? "hidden" : ""}`}
-                      style={{ background: c.gradient || c.color }}
+                      style={{ background: "hsl(var(--muted))" }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-foreground">{c.name}</span>
-                        {(c.tags ?? []).map((tag) => (
-                          <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                            {tag}
-                          </span>
-                        ))}
-                        <StockBadge stock={c.stock} />
                       </div>
                       <span className="text-xs text-muted-foreground">${c.price.toFixed(2)} / bead</span>
                     </div>
@@ -550,13 +544,6 @@ const CatalogueAdmin = () => {
             <span>{cat.crystals.length} crystals</span>
             <span>{cat.spacers.length} spacers</span>
             <span>{cat.charms.length} charms</span>
-            <span className="ml-auto">
-              {cat.crystals.filter((c) => c.stock === 0).length > 0 && (
-                <span className="text-destructive">
-                  {cat.crystals.filter((c) => c.stock === 0).length} out of stock
-                </span>
-              )}
-            </span>
           </div>
         </div>
       </div>

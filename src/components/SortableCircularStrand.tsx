@@ -43,7 +43,7 @@ function getBeadBackground(bead: PlacedBead | null): string {
   if (!bead) return "hsl(var(--muted))";
   if (bead.type === "crystal" && bead.crystal) {
     if (bead.crystal.image) return `url(${bead.crystal.image}?v=2) center / cover no-repeat`;
-    return bead.crystal.gradient || bead.crystal.color;
+    return "hsl(var(--muted))"; // Fallback if no image
   }
   if (bead.type === "spacer" && bead.spacer) {
     if (bead.spacer.image) return `url(${bead.spacer.image}?v=2) center / cover no-repeat`;

@@ -85,7 +85,7 @@ export function useCatalogue(): CatalogueState {
   // Fetch frames from MongoDB backend over API
   useEffect(() => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-    // 1. Fetch frames first
+    // Fetch frames
     fetch(`${BACKEND_URL}/api/frames`)
       .then(res => res.json())
       .then(dbFrames => {
@@ -97,6 +97,19 @@ export function useCatalogue(): CatalogueState {
         }
       })
       .catch(err => console.error("Could not load catalogue data from MongoDB backend:", err));
+
+    // Fetch crystals
+    fetch(`${BACKEND_URL}/api/crystals`)
+      .then(res => res.json())
+      .then(dbCrystals => {
+        if (dbCrystals && Array.isArray(dbCrystals) && dbCrystals.length > 0) {
+          setStore(prevStore => ({
+            ...prevStore,
+            crystals: merge(DEFAULT_CRYSTALS, dbCrystals)
+          }));
+        }
+      })
+      .catch(err => console.error("Could not load crystal data from MongoDB backend:", err));
   }, []);
 
   // Persist whenever store changes
@@ -110,21 +123,45 @@ export function useCatalogue(): CatalogueState {
 
   // ── Crystal mutations ──
   const addCrystal = useCallback(
-    (entry: CrystalEntry) =>
-      persist({ ...store, crystals: [...store.crystals, entry] }),
+    (entry: CrystalEntry) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/crystals`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry)
+      }).catch(err => console.error("Failed to add crystal to MongoDB", err));
+
+      persist({ ...store, crystals: [...store.crystals, entry] });
+    },
     [store, persist]
   );
+  
   const updateCrystal = useCallback(
-    (entry: CrystalEntry) =>
+    (entry: CrystalEntry) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/crystals/${entry.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry)
+      }).catch(err => console.error("Failed to update crystal in MongoDB", err));
+
       persist({
         ...store,
         crystals: store.crystals.map((c) => (c.id === entry.id ? entry : c)),
-      }),
+      });
+    },
     [store, persist]
   );
+  
   const deleteCrystal = useCallback(
-    (id: string) =>
-      persist({ ...store, crystals: store.crystals.filter((c) => c.id !== id) }),
+    (id: string) => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      fetch(`${BACKEND_URL}/api/crystals/${id}`, {
+        method: "DELETE"
+      }).catch(err => console.error("Failed to delete crystal from MongoDB", err));
+
+      persist({ ...store, crystals: store.crystals.filter((c) => c.id !== id) });
+    },
     [store, persist]
   );
 

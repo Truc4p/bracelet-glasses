@@ -15,13 +15,12 @@ interface CrystalFormProps {
 
 export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => {
   const blank: CrystalEntry = {
-    id: "", name: "", color: "#9B59B6", gradient: "", price: 1.00,
-    emoji: "💎", image: "", stock: 999, tags: [], description: "",
+    id: "", name: "", price: 1.00, image: "", description: "",
   };
   const [form, setForm] = useState<CrystalEntry>(initial ?? blank);
   const [showPreview, setShowPreview] = useState(false);
 
-  const set = (k: keyof CrystalEntry, v: string | number | string[]) =>
+  const set = (k: keyof CrystalEntry, v: string | number) =>
     setForm((f) => ({ ...f, [k]: v }));
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,8 +29,6 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
     const id = form.id || form.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     onSave({ ...form, id });
   };
-
-  const tagString = (form.tags ?? []).join(", ");
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
@@ -55,32 +52,6 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
             onChange={(e) => set("price", parseFloat(e.target.value) || 0)}
             className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
           />
-        </div>
-
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Stock (999 = unlimited)</label>
-          <input
-            type="number" min={0}
-            value={form.stock}
-            onChange={(e) => set("stock", parseInt(e.target.value) || 0)}
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
-          />
-        </div>
-
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Fallback Color</label>
-          <div className="flex gap-2 items-center">
-            <input
-              type="color" value={form.color}
-              onChange={(e) => set("color", e.target.value)}
-              className="w-9 h-9 rounded border border-border cursor-pointer bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
-            />
-            <input
-              value={form.color}
-              onChange={(e) => set("color", e.target.value)}
-              className="flex-1 px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body font-mono"
-            />
-          </div>
         </div>
 
         <div className="col-span-2">
@@ -113,7 +84,7 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
                 Upload image
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
-                PNG, JPG or SVG. Falls back to color if missing.
+                PNG, JPG or SVG.
               </p>
               {form.image && (
                 <button
@@ -126,16 +97,6 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
               )}
             </div>
           </div>
-        </div>
-
-        <div className="col-span-2">
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Tags <span className="font-normal opacity-60">(comma-separated, e.g. popular, new)</span></label>
-          <input
-            value={tagString}
-            onChange={(e) => set("tags", e.target.value.split(",").map((t) => t.trim()).filter(Boolean))}
-            placeholder="popular, new, bestseller"
-            className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
-          />
         </div>
 
         <div className="col-span-2">

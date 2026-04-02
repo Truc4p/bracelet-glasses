@@ -67,7 +67,7 @@ const CircularStrand = ({ beadCount, placedBeads, onSlotClick, onBeadDrop, label
                 left: slot.x - slot.beadPixelSize / 2,
                 top: slot.y - slot.beadPixelSize / 2,
                 background: slot.placed
-                  ? slot.placed.crystal.gradient || slot.placed.crystal.color
+                  ? `url(${slot.placed.crystal.image}?v=2) center / cover no-repeat`
                   : "hsl(var(--muted))",
                 borderColor: slot.placed ? "transparent" : "hsl(var(--border))",
                 boxShadow: slot.placed ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
