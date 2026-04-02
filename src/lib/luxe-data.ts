@@ -3,7 +3,7 @@
  *
  * This file re-exports everything that the rest of the app uses, but now
  * sources its data from the `src/data/` registry layer so that crystals,
- * spacers, and charms are managed in one place (with localStorage persistence
+ * accessories are managed in one place (with localStorage persistence
  * via `useCatalogue()`).
  *
  * The type names and all function signatures remain exactly the same so no
@@ -13,25 +13,17 @@
 // ── Types ────────────────────────────────────────────────────────────────────
 
 import { DEFAULT_CRYSTALS } from "@/data/crystals";
-import { DEFAULT_SPACERS } from "@/data/spacers";
-import { DEFAULT_CHARMS } from "@/data/charms";
-import { DEFAULT_FRAMES } from "@/data/glasses";
+import { DEFAULT_FRAMES, type FrameEntry } from "@/data/glasses";
 import { getCatalogueSnapshot } from "@/data/index";
 
 // Re-export entry types under the legacy names used across the app
 export type { CrystalEntry as CrystalBead } from "@/data/crystals";
-export type { SpacerEntry as Spacer } from "@/data/spacers";
-export type { CharmEntry as ZodiacCharm } from "@/data/charms";
 
-// Provide CrystalBead / Spacer / ZodiacCharm as inline aliases too
+// Provide CrystalBead as inline aliases too
 // (some files import them individually)
 import type { CrystalEntry } from "@/data/crystals";
-import type { SpacerEntry } from "@/data/spacers";
-import type { CharmEntry } from "@/data/charms";
 
 export type CrystalBeadAlias = CrystalEntry;
-export type SpacerAlias = SpacerEntry;
-export type ZodiacCharmAlias = CharmEntry;
 
 // ── Static catalogue snapshots (read at module load time) ────────────────────
 // Used by components that don't use the hook (legacy consumers).
@@ -44,14 +36,12 @@ export type ZodiacCharmAlias = CharmEntry;
  */
 function snapshot() {
   if (typeof window === "undefined") {
-    return { crystals: DEFAULT_CRYSTALS, spacers: DEFAULT_SPACERS, charms: DEFAULT_CHARMS, frames: DEFAULT_FRAMES };
+    return { crystals: DEFAULT_CRYSTALS, frames: DEFAULT_FRAMES };
   }
   return getCatalogueSnapshot();
 }
 
 export const CRYSTAL_LIBRARY: CrystalEntry[] = snapshot().crystals;
-export const SPACERS: SpacerEntry[] = snapshot().spacers;
-export const ZODIAC_CHARMS: CharmEntry[] = snapshot().charms;
 
 export const ZODIAC_ANIMALS: string[] = [
   "Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
@@ -61,14 +51,12 @@ export const ZODIAC_ANIMALS: string[] = [
 // ── Business-logic helpers (unchanged) ───────────────────────────────────────
 
 export type BeadSize = 6 | 8 | 10;
-export type ItemType = "crystal" | "spacer" | "charm";
+export type ItemType = "crystal";
 
 export interface PlacedBead {
   position: number;
   type: ItemType;
   crystal?: CrystalEntry;
-  spacer?: SpacerEntry;
-  charm?: CharmEntry;
   beadSize: BeadSize;
 }
 
@@ -128,7 +116,7 @@ export const COATING_PRICE_PER_10 = 2;
 export interface SunglassesAccessory {
   id: string;
   name: string;
-  type: "chain" | "nosePad" | "decal" | "charm";
+  type: "chain" | "nosePad" | "decal";
   emoji: string;
   price: number;
   color?: string;
@@ -153,6 +141,4 @@ export const SUNGLASSES_ACCESSORIES: SunglassesAccessory[] = [
   { id: "decal-star", name: "Star Decal", type: "decal", emoji: "⭐", price: 2.50, color: "#FFD700" },
   { id: "decal-heart", name: "Heart Decal", type: "decal", emoji: "❤️", price: 2.50, color: "#E63946" },
   { id: "decal-lightning", name: "Lightning Decal", type: "decal", emoji: "⚡", price: 2.50, color: "#FFEA00" },
-  { id: "charm-moon", name: "Moon Charm", type: "charm", emoji: "🌙", price: 6.00, metallic: "linear-gradient(135deg, #E8E8E8, #A0A0A0)" },
-  { id: "charm-sun", name: "Sun Charm", type: "charm", emoji: "☀️", price: 6.00, metallic: "linear-gradient(135deg, #FFED4E, #D4AF37)" },
 ];

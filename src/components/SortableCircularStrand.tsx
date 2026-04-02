@@ -48,14 +48,7 @@ function getBeadBackground(bead: PlacedBead | null): string {
     }
     return "hsl(var(--muted))"; // Fallback if no image
   }
-  if (bead.type === "spacer" && bead.spacer) {
-    if (bead.spacer.image) {
-      const isDataUrl = bead.spacer.image.startsWith("data:");
-      return `url("${bead.spacer.image}${isDataUrl ? "" : "?v=2"}") center / cover no-repeat`;
-    }
-    return bead.spacer.metallic;
-  }
-  if (bead.type === "charm") return "#F5F5DC";
+
   return "hsl(var(--muted))";
 }
 
@@ -97,10 +90,6 @@ function SortableBead({
   const title = bead
     ? bead.type === "crystal" && bead.crystal
       ? `${bead.crystal.name} (${bead.beadSize}mm) — Drag to reorder`
-      : bead.type === "spacer" && bead.spacer
-      ? `${bead.spacer.name} Spacer — Drag to reorder`
-      : bead.type === "charm" && bead.charm
-      ? `${bead.charm.animal} Charm (${bead.charm.design}) — Drag to reorder`
       : `Slot ${position + 1}`
     : `Empty slot ${position + 1} — Click to place`;
 
@@ -113,14 +102,12 @@ function SortableBead({
       onClick={() => !bead && onSlotClick(position)}
       className={`absolute border transition-all duration-200 hover:scale-110 active:scale-95 group ${
         bead ? "cursor-grab active:cursor-grabbing" : "cursor-pointer hover:border-primary/60"
-      } ${bead?.type === "charm" ? "rounded" : "rounded-full"}`}
+      } rounded-full`}
       title={title}
     >
-      {bead && bead.type === "charm" && bead.charm && (
-        <span className="text-xs flex items-center justify-center h-full">
-          {bead.charm.emoji}
-        </span>
-      )}
+      {/* 
+      <div 
+      */}
       {bead && bead.type === "crystal" && (
         <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
           {bead.beadSize}mm
@@ -323,9 +310,7 @@ const SortableCircularStrand = ({
           <DragOverlay dropAnimation={null}>
             {activeBead ? (
               <div
-                className={`border-2 border-primary shadow-xl flex items-center justify-center ${
-                  activeBead.type === "charm" ? "rounded" : "rounded-full"
-                }`}
+                className={`border-2 border-primary shadow-xl flex items-center justify-center rounded-full`}
                 style={{
                   width: activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26,
                   height: activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26,
@@ -333,9 +318,6 @@ const SortableCircularStrand = ({
                   opacity: 0.9,
                 }}
               >
-                {activeBead.type === "charm" && activeBead.charm && (
-                  <span className="text-xs">{activeBead.charm.emoji}</span>
-                )}
               </div>
             ) : null}
           </DragOverlay>

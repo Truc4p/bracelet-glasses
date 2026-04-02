@@ -29,7 +29,7 @@ const SunglassesAccessoriesLibrary = ({
 }: SunglassesAccessoriesLibraryProps) => {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>('lensColors');
-  const [filterType, setFilterType] = useState<'all' | 'chain' | 'nosePad' | 'decal' | 'charm'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'chain' | 'nosePad' | 'decal'>('all');
 
   const filteredAccessories = useMemo(
     () => SUNGLASSES_ACCESSORIES.filter((a) => {
@@ -88,7 +88,7 @@ const SunglassesAccessoriesLibrary = ({
               />
             </div>
             <div className="flex flex-wrap gap-1">
-              {(['all', 'chain', 'nosePad', 'decal', 'charm'] as const).map((type) => (
+              {(['all', 'chain', 'nosePad', 'decal'] as const).map((type) => (
                 <button
                   key={type}
                   onClick={() => setFilterType(type)}

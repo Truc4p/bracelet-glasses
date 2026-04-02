@@ -3,21 +3,15 @@ import { Plus, Pencil, Trash2, RotateCcw, Search, X, ArrowLeft } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { useCatalogue } from "@/data/index";
 import type { CrystalEntry } from "@/data/crystals";
-import type { SpacerEntry } from "@/data/spacers";
-import type { CharmEntry } from "@/data/charms";
 import type { FrameEntry } from "@/data/glasses";
-import { CrystalForm, SpacerForm, CharmForm } from "./CrystalForm";
+import { CrystalForm } from "./CrystalForm";
 import { FrameForm } from "./FrameForm";
 import StockBadge from "./StockBadge";
 
-type AdminTab = "crystals" | "spacers" | "charms" | "glasses";
+type AdminTab = "crystals" | "glasses";
 type ModalState =
   | { type: "add-crystal" }
   | { type: "edit-crystal"; entry: CrystalEntry }
-  | { type: "add-spacer" }
-  | { type: "edit-spacer"; entry: SpacerEntry }
-  | { type: "add-charm" }
-  | { type: "edit-charm"; entry: CharmEntry }
   | null;
 
 const CatalogueAdmin = () => {
@@ -46,15 +40,11 @@ const CatalogueAdmin = () => {
   }, [modal, selectedFrameId, isEditingFrame]);
 
   const tabLabel = (t: AdminTab) =>
-    ({ crystals: "Crystals", spacers: "Spacers", charms: "Charms", glasses: "Glasses" })[t];
+    ({ crystals: "Crystals", glasses: "Glasses" })[t];
 
   // ── Filtered lists ──
   const q = search.toLowerCase();
   const filteredCrystals = cat.crystals.filter((c) => c.name.toLowerCase().includes(q));
-  const filteredSpacers = cat.spacers.filter((s) => s.name.toLowerCase().includes(q));
-  const filteredCharms = cat.charms.filter((c) =>
-    c.animal.toLowerCase().includes(q) || c.design.includes(q)
-  );
   const filteredGlasses = cat.frames?.filter((f) =>
     f.name.toLowerCase().includes(q)
   ) || [];
@@ -64,9 +54,7 @@ const CatalogueAdmin = () => {
   const cancelDelete = () => setConfirmDelete(null);
   const confirmDeleteFn = (id: string) => {
     if (tab === "crystals") cat.deleteCrystal(id);
-    else if (tab === "spacers") cat.deleteSpacer(id);
     else if (tab === "glasses") cat.deleteFrame(id);
-    else cat.deleteCharm(id);
     setConfirmDelete(null);
   };
 
@@ -100,7 +88,7 @@ const CatalogueAdmin = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar tabs */}
         <div className="w-36 border-r border-border flex flex-col gap-1 p-3 shrink-0">
-          {(["glasses", "crystals", "spacers", "charms"] as AdminTab[]).map((t) => (
+          {(["glasses", "crystals"] as AdminTab[]).map((t) => (
             <button
               key={t}
               onClick={() => { setTab(t); setSearch(""); setModal(null); setSelectedFrameId(null); setIsEditingFrame(false); }}
@@ -195,7 +183,7 @@ const CatalogueAdmin = () => {
                   <div>
                     <h2 className="text-xl font-bold font-display">
                       {modal.type.startsWith("add") ? "New" : "Edit"}{" "}
-                      {modal.type.includes("crystal") ? "Crystal" : modal.type.includes("spacer") ? "Spacer" : "Charm"}
+                      {modal.type.includes("crystal") ? "Crystal" : ""}
                     </h2>
                   </div>
                 </div>
@@ -236,9 +224,7 @@ const CatalogueAdmin = () => {
                 size="sm"
                 onClick={() => {
                   if (tab === "crystals") setModal({ type: "add-crystal" });
-                  else if (tab === "spacers") setModal({ type: "add-spacer" });
                   else if (tab === "glasses") { setSelectedFrameId("new"); setIsEditingFrame(true); }
-                  else setModal({ type: "add-charm" });
                   setSearch("");
                 }}
                 className="gap-1.5 shrink-0"
@@ -432,94 +418,6 @@ const CatalogueAdmin = () => {
               </div>
             )}
 
-            {/* Spacers table */}
-            {tab === "spacers" && !modal && (
-              <div className="space-y-1">
-                {filteredSpacers.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-8">No spacers found.</p>
-                )}
-                {filteredSpacers.map((s) => (
-                  <div 
-                    key={s.id} 
-                    onClick={() => setModal({ type: "edit-spacer", entry: s })}
-                    className={`cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
-                    modal?.type === "edit-spacer" && modal.entry.id === s.id
-                      ? "bg-primary/15 ring-2 ring-primary border-transparent"
-                      : "hover:bg-muted/80 focus-within:bg-muted/80"
-                  }`}>
-                    {s.image ? (
-                      <img
-                        src={s.image}
-                        alt={s.name}
-                        className="w-8 h-8 rounded-full object-cover border border-border/50 shadow-sm flex-shrink-0"
-                        onError={(e) => {
-                          const el = e.target as HTMLImageElement;
-                          el.style.display = "none";
-                          el.nextElementSibling?.classList.remove("hidden");
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className={`w-8 h-8 rounded-full border border-border/50 shadow-sm flex-shrink-0 ${s.image ? "hidden" : ""}`}
-                      style={{ background: s.metallic }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">{s.name}</span>
-                        <StockBadge stock={s.stock} />
-                      </div>
-                      <span className="text-xs text-muted-foreground">${s.price.toFixed(2)} / spacer</span>
-                    </div>
-                    {/* Removed Edit/Delete */}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Charms table */}
-            {tab === "charms" && !modal && (
-              <div className="space-y-1">
-                {filteredCharms.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-8">No charms found.</p>
-                )}
-                {filteredCharms.map((c) => (
-                  <div 
-                    key={c.id} 
-                    onClick={() => setModal({ type: "edit-charm", entry: c })}
-                    className={`cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-md transition-all group ${
-                    modal?.type === "edit-charm" && modal.entry.id === c.id
-                      ? "bg-primary/15 ring-2 ring-primary border-transparent"
-                      : "hover:bg-muted/80 focus-within:bg-muted/80"
-                  }`}>
-                    {c.image ? (
-                      <img
-                        src={c.image}
-                        alt={c.name}
-                        className="w-8 h-8 rounded-full object-cover border border-border/50 shadow-sm flex-shrink-0"
-                        onError={(e) => {
-                          const el = e.target as HTMLImageElement;
-                          el.style.display = "none";
-                          el.nextElementSibling?.classList.remove("hidden");
-                        }}
-                      />
-                    ) : null}
-                    <div className={`w-8 h-8 flex items-center justify-center text-xl ${c.image ? "hidden" : ""}`}>
-                      {c.emoji}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">{c.animal}</span>
-                        <span className="text-xs text-muted-foreground capitalize">· {c.design}</span>
-                        <StockBadge stock={c.stock} />
-                      </div>
-                      <span className="text-xs text-muted-foreground">${c.price.toFixed(2)}</span>
-                    </div>
-                    {/* Removed Edit/Delete */}
-                  </div>
-                ))}
-              </div>
-            )}
-
             {/* Inline Modal Forms */}
             {modal && tab !== "glasses" && (
               <div className="animate-in slide-in-from-right-2 fade-in max-w-4xl mx-auto pt-2 pb-8 w-full">
@@ -529,18 +427,6 @@ const CatalogueAdmin = () => {
                 {modal.type === "edit-crystal" && (
                   <CrystalForm key={`edit-crystal-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCrystal(e); closeModal(); }} onCancel={closeModal} />
                 )}
-                {modal.type === "add-spacer" && (
-                  <SpacerForm key="add-spacer" onSave={(e) => { cat.addSpacer(e); closeModal(); }} onCancel={closeModal} />
-                )}
-                {modal.type === "edit-spacer" && (
-                  <SpacerForm key={`edit-spacer-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateSpacer(e); closeModal(); }} onCancel={closeModal} />
-                )}
-                {modal.type === "add-charm" && (
-                  <CharmForm key="add-charm" onSave={(e) => { cat.addCharm(e); closeModal(); }} onCancel={closeModal} />
-                )}
-                {modal.type === "edit-charm" && (
-                  <CharmForm key={`edit-charm-${modal.entry.id}`} initial={modal.entry} onSave={(e) => { cat.updateCharm(e); closeModal(); }} onCancel={closeModal} />
-                )}
               </div>
             )}
           </div>
@@ -549,8 +435,6 @@ const CatalogueAdmin = () => {
           <div className="px-4 py-3 border-t border-border text-xs text-muted-foreground font-body flex gap-4">
             <span>{cat.frames?.length || 0} glasses</span>
             <span>{cat.crystals.length} crystals</span>
-            <span>{cat.spacers.length} spacers</span>
-            <span>{cat.charms.length} charms</span>
           </div>
         </div>
       </div>

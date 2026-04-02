@@ -49,7 +49,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   const fallbackFrame: FrameOption = {
     id: "fallback",
     name: "No Frames Available",
-    dimensions: "-",
     description: "Fallback description",
     frameImages: [],
     price: 0,

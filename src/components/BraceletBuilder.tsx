@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { Library, RotateCcw, Copy, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BeadLibrary from "@/components/BeadLibrary";
-import AccessoriesLibrary from "@/components/AccessoriesLibrary";
 import SortableCircularStrand from "@/components/SortableCircularStrand";
 import {
   calculateBeadCount,
@@ -10,14 +9,10 @@ import {
   type BeadSize,
   type PlacedBead,
   type CrystalBead,
-  type Spacer,
-  type ZodiacCharm,
 } from "@/lib/luxe-data";
 
 type SelectedItem =
   | { kind: "crystal"; crystal: CrystalBead }
-  | { kind: "spacer"; spacer: Spacer }
-  | { kind: "charm"; charm: ZodiacCharm }
   | null;
 
 interface BraceletBuilderProps {
@@ -61,10 +56,6 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
       const calculateItemPrice = (item: PlacedBead) => {
         if (item.type === 'crystal' && item.crystal) {
           return calculateBeadPrice(item.crystal.price, item.beadSize);
-        } else if (item.type === 'spacer' && item.spacer) {
-          return item.spacer.price;
-        } else if (item.type === 'charm' && item.charm) {
-          return item.charm.price;
         }
         return 0;
       };
@@ -91,10 +82,9 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
       let newBead: PlacedBead;
       if (selectedItem.kind === "crystal") {
         newBead = { position, type: "crystal", crystal: selectedItem.crystal, beadSize: defaultBeadSize };
-      } else if (selectedItem.kind === "spacer") {
-        newBead = { position, type: "spacer", spacer: selectedItem.spacer, beadSize: defaultBeadSize };
       } else {
-        newBead = { position, type: "charm", charm: selectedItem.charm, beadSize: defaultBeadSize };
+        // Fallback for previous enum combinations if they creep in
+        return;
       }
       // Replace if occupied, append if empty
       updated = existing
@@ -124,10 +114,6 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
     let newItem: PlacedBead;
     if (data.type === "crystal") {
       newItem = { position, type: "crystal", crystal: data.item, beadSize: defaultBeadSize };
-    } else if (data.type === "spacer") {
-      newItem = { position, type: "spacer", spacer: data.item, beadSize: defaultBeadSize };
-    } else if (data.type === "charm") {
-      newItem = { position, type: "charm", charm: data.item, beadSize: defaultBeadSize };
     } else {
       return;
     }
@@ -161,7 +147,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
     setDefaultBeadSize(newSize);
   };
 
-  const autoPlaceItem = (type: "crystal" | "spacer" | "charm", item: any) => {
+  const autoPlaceItem = (type: "crystal", item: any) => {
     let targetBracelet: "A" | "B" = "A";
     let nextPos = -1;
 
@@ -186,10 +172,8 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
       let newBead: PlacedBead;
       if (type === "crystal") {
         newBead = { position: nextPos, type: "crystal", crystal: item, beadSize: defaultBeadSize };
-      } else if (type === "spacer") {
-        newBead = { position: nextPos, type: "spacer", spacer: item, beadSize: defaultBeadSize };
       } else {
-        newBead = { position: nextPos, type: "charm", charm: item, beadSize: defaultBeadSize };
+        return;
       }
       
       if (targetBracelet === "A") {
@@ -207,16 +191,6 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
   const handleSelectBead = (bead: CrystalBead) => {
     setSelectedItem({ kind: "crystal", crystal: bead });
     autoPlaceItem("crystal", bead);
-  };
-
-  const handleSelectSpacer = (spacer: Spacer) => {
-    setSelectedItem({ kind: "spacer", spacer });
-    autoPlaceItem("spacer", spacer);
-  };
-
-  const handleSelectCharm = (charm: ZodiacCharm) => {
-    setSelectedItem({ kind: "charm", charm });
-    autoPlaceItem("charm", charm);
   };
 
   const handleReset = () => {
@@ -308,21 +282,9 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
                   }} 
                 />
               )}
-              {selectedItem.kind === "spacer" && (
-                <div 
-                  className="w-4 h-4 rounded-full" 
-                  style={{ 
-                    background: selectedItem.spacer.image ? `url("${selectedItem.spacer.image}${selectedItem.spacer.image.startsWith('data:') ? '' : '?v=2'}") center / cover no-repeat` : selectedItem.spacer.metallic 
-                  }} 
-                />
-              )}
-              {selectedItem.kind === "charm" && (
-                <span className="text-sm">{selectedItem.charm.emoji}</span>
-              )}
               <span>
                 {selectedItem.kind === "crystal" ? selectedItem.crystal.name
-                  : selectedItem.kind === "spacer" ? `${selectedItem.spacer.name} Spacer`
-                  : `${selectedItem.charm.animal} Charm`}
+                  : ""}
               </span>
               <span className="text-xs text-muted-foreground">✕</span>
             </div>
@@ -359,13 +321,6 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
           open={libraryOpen}
           onSelectBead={handleSelectBead}
           onClose={() => setLibraryOpen(false)}
-        />
-
-        <AccessoriesLibrary
-          open={accessoriesOpen}
-          onSelectSpacer={handleSelectSpacer}
-          onSelectCharm={handleSelectCharm}
-          onClose={() => setAccessoriesOpen(false)}
         />
 
         <SortableCircularStrand

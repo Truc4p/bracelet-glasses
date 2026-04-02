@@ -1,18 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
 import { DEFAULT_CRYSTALS, type CrystalEntry } from "./crystals";
-import { DEFAULT_SPACERS, type SpacerEntry } from "./spacers";
-import { DEFAULT_CHARMS, type CharmEntry } from "./charms";
 import { DEFAULT_FRAMES, type FrameEntry } from "./glasses";
 
-export type { CrystalEntry, SpacerEntry, CharmEntry, FrameEntry };
+export type { CrystalEntry, FrameEntry };
 
 // ── Storage key ──────────────────────────────────────────────────────────────
 const STORAGE_KEY = "bino_catalogue_v3";
 
 interface CatalogueStore {
   crystals: CrystalEntry[];
-  spacers: SpacerEntry[];
-  charms: CharmEntry[];
   frames: FrameEntry[];
 }
 
@@ -55,14 +51,6 @@ export interface CatalogueState extends CatalogueStore {
   addCrystal: (entry: CrystalEntry) => void;
   updateCrystal: (entry: CrystalEntry) => void;
   deleteCrystal: (id: string) => void;
-  // Spacer helpers
-  addSpacer: (entry: SpacerEntry) => void;
-  updateSpacer: (entry: SpacerEntry) => void;
-  deleteSpacer: (id: string) => void;
-  // Charm helpers
-  addCharm: (entry: CharmEntry) => void;
-  updateCharm: (entry: CharmEntry) => void;
-  deleteCharm: (id: string) => void;
   // Frame helpers
   addFrame: (entry: FrameEntry) => void;
   updateFrame: (entry: FrameEntry) => void;
@@ -76,8 +64,6 @@ export function useCatalogue(): CatalogueState {
     const saved = loadFromStorage();
     return {
       crystals: merge(DEFAULT_CRYSTALS, saved.crystals ?? []),
-      spacers: merge(DEFAULT_SPACERS, saved.spacers ?? []),
-      charms: merge(DEFAULT_CHARMS, saved.charms ?? []),
       frames: merge(DEFAULT_FRAMES, saved.frames ?? []),
     };
   });
@@ -165,46 +151,6 @@ export function useCatalogue(): CatalogueState {
     [store, persist]
   );
 
-  // ── Spacer mutations ──
-  const addSpacer = useCallback(
-    (entry: SpacerEntry) =>
-      persist({ ...store, spacers: [...store.spacers, entry] }),
-    [store, persist]
-  );
-  const updateSpacer = useCallback(
-    (entry: SpacerEntry) =>
-      persist({
-        ...store,
-        spacers: store.spacers.map((s) => (s.id === entry.id ? entry : s)),
-      }),
-    [store, persist]
-  );
-  const deleteSpacer = useCallback(
-    (id: string) =>
-      persist({ ...store, spacers: store.spacers.filter((s) => s.id !== id) }),
-    [store, persist]
-  );
-
-  // ── Charm mutations ──
-  const addCharm = useCallback(
-    (entry: CharmEntry) =>
-      persist({ ...store, charms: [...store.charms, entry] }),
-    [store, persist]
-  );
-  const updateCharm = useCallback(
-    (entry: CharmEntry) =>
-      persist({
-        ...store,
-        charms: store.charms.map((c) => (c.id === entry.id ? entry : c)),
-      }),
-    [store, persist]
-  );
-  const deleteCharm = useCallback(
-    (id: string) =>
-      persist({ ...store, charms: store.charms.filter((c) => c.id !== id) }),
-    [store, persist]
-  );
-
   // ── Frame mutations ──
   const addFrame = useCallback(
     (entry: FrameEntry) => {
@@ -253,8 +199,6 @@ export function useCatalogue(): CatalogueState {
     localStorage.removeItem(STORAGE_KEY);
     persist({
       crystals: [...DEFAULT_CRYSTALS],
-      spacers: [...DEFAULT_SPACERS],
-      charms: [...DEFAULT_CHARMS],
       frames: [...DEFAULT_FRAMES],
     });
   }, [persist]);
@@ -264,12 +208,6 @@ export function useCatalogue(): CatalogueState {
     addCrystal,
     updateCrystal,
     deleteCrystal,
-    addSpacer,
-    updateSpacer,
-    deleteSpacer,
-    addCharm,
-    updateCharm,
-    deleteCharm,
     addFrame,
     updateFrame,
     deleteFrame,
@@ -282,10 +220,8 @@ export function getCatalogueSnapshot(): CatalogueStore {
   const saved = loadFromStorage();
   return {
     crystals: merge(DEFAULT_CRYSTALS, saved.crystals ?? []),
-    spacers: merge(DEFAULT_SPACERS, saved.spacers ?? []),
-    charms: merge(DEFAULT_CHARMS, saved.charms ?? []),
     frames: merge(DEFAULT_FRAMES, saved.frames ?? []),
   };
 }
 
-export { DEFAULT_CRYSTALS, DEFAULT_SPACERS, DEFAULT_CHARMS, DEFAULT_FRAMES };
+export { DEFAULT_CRYSTALS, DEFAULT_FRAMES };
