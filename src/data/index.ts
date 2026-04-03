@@ -52,6 +52,25 @@ function merge<T extends { id: string }>(defaults: T[], stored: T[]): T[] {
   return Array.from(map.values());
 }
 
+// ── Global State Management ──────────────────────────────────────────────────
+let globalStore: CatalogueStore = (() => {
+  const saved = loadFromStorage();
+  return {
+    crystals: merge(DEFAULT_CRYSTALS, saved.crystals ?? []),
+    frames: merge(DEFAULT_FRAMES, saved.frames ?? []),
+    types: merge([], saved.types ?? []),
+  };
+})();
+
+let hasFetchedFromBackend = false;
+const listeners = new Set<(store: CatalogueStore) => void>();
+
+function setGlobalStore(newStore: CatalogueStore) {
+  globalStore = newStore;
+  saveToStorage(globalStore);
+  listeners.forEach((listener) => listener(globalStore));
+}
+
 // ── Public hook ──────────────────────────────────────────────────────────────
 export interface CatalogueState extends CatalogueStore {
   // Crystal helpers
@@ -71,27 +90,30 @@ export interface CatalogueState extends CatalogueStore {
 }
 
 export function useCatalogue(): CatalogueState {
-  const [store, setStore] = useState<CatalogueStore>(() => {
-    const saved = loadFromStorage();
-    return {
-      crystals: merge(DEFAULT_CRYSTALS, saved.crystals ?? []),
-      frames: merge(DEFAULT_FRAMES, saved.frames ?? []),
-      types: merge([], saved.types ?? []),
+  const [store, setStore] = useState<CatalogueStore>(globalStore);
+
+  useEffect(() => {
+    listeners.add(setStore);
+    return () => {
+      listeners.delete(setStore);
     };
-  });
+  }, []);
 
   // Fetch frames from MongoDB backend over API
   useEffect(() => {
+    if (hasFetchedFromBackend) return;
+    hasFetchedFromBackend = true;
+
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
     // Fetch frames
     fetch(`${BACKEND_URL}/api/frames`)
       .then(res => res.json())
       .then(dbFrames => {
         if (dbFrames && Array.isArray(dbFrames) && dbFrames.length > 0) {
-          setStore(prevStore => ({
-            ...prevStore,
+          setGlobalStore({
+            ...globalStore,
             frames: merge(DEFAULT_FRAMES, dbFrames)
-          }));
+          });
         }
       })
       .catch(err => console.error("Could not load catalogue data from MongoDB backend:", err));
@@ -101,10 +123,10 @@ export function useCatalogue(): CatalogueState {
       .then(res => res.json())
       .then(dbCrystals => {
         if (dbCrystals && Array.isArray(dbCrystals) && dbCrystals.length > 0) {
-          setStore(prevStore => ({
-            ...prevStore,
+          setGlobalStore({
+            ...globalStore,
             crystals: merge(DEFAULT_CRYSTALS, dbCrystals)
-          }));
+          });
         }
       })
       .catch(err => console.error("Could not load crystal data from MongoDB backend:", err));
@@ -114,167 +136,131 @@ export function useCatalogue(): CatalogueState {
       .then(res => res.json())
       .then(dbTypes => {
         if (dbTypes && Array.isArray(dbTypes)) {
-          setStore(prevStore => ({
-            ...prevStore,
+          setGlobalStore({
+            ...globalStore,
             types: merge([], dbTypes)
-          }));
+          });
         }
       })
       .catch(err => console.error("Could not load type data from MongoDB backend:", err));
   }, []);
 
-  // Persist whenever store changes
-  useEffect(() => {
-    saveToStorage(store);
-  }, [store]);
+  // ── Crystal mutations ──
+  const addCrystal = useCallback((entry: CrystalEntry) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/crystals`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    }).catch(err => console.error("Failed to add crystal to MongoDB", err));
 
-  const persist = useCallback((next: CatalogueStore) => {
-    setStore(next);
+    setGlobalStore({ ...globalStore, crystals: [...globalStore.crystals, entry] });
+  }, []);
+  
+  const updateCrystal = useCallback((entry: CrystalEntry) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/crystals/${entry.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    }).catch(err => console.error("Failed to update crystal in MongoDB", err));
+
+    setGlobalStore({
+      ...globalStore,
+      crystals: globalStore.crystals.map((c) => (c.id === entry.id ? entry : c)),
+    });
+  }, []);
+  
+  const deleteCrystal = useCallback((id: string) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/crystals/${id}`, {
+      method: "DELETE"
+    }).catch(err => console.error("Failed to delete crystal from MongoDB", err));
+
+    setGlobalStore({ ...globalStore, crystals: globalStore.crystals.filter((c) => c.id !== id) });
   }, []);
 
-  // ── Crystal mutations ──
-  const addCrystal = useCallback(
-    (entry: CrystalEntry) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/crystals`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(entry)
-      }).catch(err => console.error("Failed to add crystal to MongoDB", err));
-
-      persist({ ...store, crystals: [...store.crystals, entry] });
-    },
-    [store, persist]
-  );
-  
-  const updateCrystal = useCallback(
-    (entry: CrystalEntry) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/crystals/${entry.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(entry)
-      }).catch(err => console.error("Failed to update crystal in MongoDB", err));
-
-      persist({
-        ...store,
-        crystals: store.crystals.map((c) => (c.id === entry.id ? entry : c)),
-      });
-    },
-    [store, persist]
-  );
-  
-  const deleteCrystal = useCallback(
-    (id: string) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/crystals/${id}`, {
-        method: "DELETE"
-      }).catch(err => console.error("Failed to delete crystal from MongoDB", err));
-
-      persist({ ...store, crystals: store.crystals.filter((c) => c.id !== id) });
-    },
-    [store, persist]
-  );
-
   // ── Frame mutations ──
-  const addFrame = useCallback(
-    (entry: FrameEntry) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/frames`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(entry)
-      }).catch(err => console.error("Failed to add frame to MongoDB", err));
-      
-      persist({ ...store, frames: [...store.frames, entry] });
-    },
-    [store, persist]
-  );
+  const addFrame = useCallback((entry: FrameEntry) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/frames`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    }).catch(err => console.error("Failed to add frame to MongoDB", err));
+    
+    setGlobalStore({ ...globalStore, frames: [...globalStore.frames, entry] });
+  }, []);
   
-  const updateFrame = useCallback(
-    (entry: FrameEntry) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/frames/${entry.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(entry)
-      }).catch(err => console.error("Failed to update frame in MongoDB", err));
+  const updateFrame = useCallback((entry: FrameEntry) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/frames/${entry.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    }).catch(err => console.error("Failed to update frame in MongoDB", err));
 
-      persist({
-        ...store,
-        frames: store.frames.map((f) => (f.id === entry.id ? entry : f)),
-      });
-    },
-    [store, persist]
-  );
+    setGlobalStore({
+      ...globalStore,
+      frames: globalStore.frames.map((f) => (f.id === entry.id ? entry : f)),
+    });
+  }, []);
   
-  const deleteFrame = useCallback(
-    (id: string) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/frames/${id}`, {
-        method: "DELETE"
-      }).catch(err => console.error("Failed to delete frame from MongoDB", err));
+  const deleteFrame = useCallback((id: string) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/frames/${id}`, {
+      method: "DELETE"
+    }).catch(err => console.error("Failed to delete frame from MongoDB", err));
 
-      persist({ ...store, frames: store.frames.filter((f) => f.id !== id) });
-    },
-    [store, persist]
-  );
+    setGlobalStore({ ...globalStore, frames: globalStore.frames.filter((f) => f.id !== id) });
+  }, []);
 
   // ── Type mutations ──
-  const addType = useCallback(
-    (entry: TypeEntry) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/types`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(entry)
-      })
-      .then(res => res.json())
-      .then(savedType => {
-         persist({ ...store, types: [...store.types, savedType] });
-      })
-      .catch(err => console.error("Failed to add type to MongoDB", err));
-    },
-    [store, persist]
-  );
+  const addType = useCallback((entry: TypeEntry) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/types`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    })
+    .then(res => res.json())
+    .then(savedType => {
+       setGlobalStore({ ...globalStore, types: [...globalStore.types, savedType] });
+    })
+    .catch(err => console.error("Failed to add type to MongoDB", err));
+  }, []);
   
-  const updateType = useCallback(
-    (entry: TypeEntry) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/types/${entry.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(entry)
-      }).catch(err => console.error("Failed to update type in MongoDB", err));
+  const updateType = useCallback((entry: TypeEntry) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/types/${entry.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry)
+    }).catch(err => console.error("Failed to update type in MongoDB", err));
 
-      persist({
-        ...store,
-        types: store.types.map((t) => (t.id === entry.id ? entry : t)),
-      });
-    },
-    [store, persist]
-  );
+    setGlobalStore({
+      ...globalStore,
+      types: globalStore.types.map((t) => (t.id === entry.id ? entry : t)),
+    });
+  }, []);
   
-  const deleteType = useCallback(
-    (id: string) => {
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
-      fetch(`${BACKEND_URL}/api/types/${id}`, {
-        method: "DELETE"
-      }).catch(err => console.error("Failed to delete type from MongoDB", err));
+  const deleteType = useCallback((id: string) => {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+    fetch(`${BACKEND_URL}/api/types/${id}`, {
+      method: "DELETE"
+    }).catch(err => console.error("Failed to delete type from MongoDB", err));
 
-      persist({ ...store, types: store.types.filter((t) => t.id !== id) });
-    },
-    [store, persist]
-  );
+    setGlobalStore({ ...globalStore, types: globalStore.types.filter((t) => t.id !== id) });
+  }, []);
 
   const resetToDefaults = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
-    persist({
+    setGlobalStore({
       crystals: [...DEFAULT_CRYSTALS],
       frames: [...DEFAULT_FRAMES],
       types: [],
     });
-  }, [persist]);
+  }, []);
 
   return {
     ...store,
@@ -293,12 +279,7 @@ export function useCatalogue(): CatalogueState {
 
 // ── Singleton read helpers (for use outside React) ────────────────────────────
 export function getCatalogueSnapshot(): CatalogueStore {
-  const saved = loadFromStorage();
-  return {
-    crystals: merge(DEFAULT_CRYSTALS, saved.crystals ?? []),
-    frames: merge(DEFAULT_FRAMES, saved.frames ?? []),
-    types: merge([], saved.types ?? []),
-  };
+  return globalStore;
 }
 
 export { DEFAULT_CRYSTALS, DEFAULT_FRAMES };
