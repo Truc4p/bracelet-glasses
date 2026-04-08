@@ -227,7 +227,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 }}
               >
                 <img
-                  src={lensColor?.image || selectedFrame.frameImages?.[0]}
+                  src={selectedFrame.frameImages?.[0]}
                   alt={`${selectedFrame.name} - ${lensColor?.name || 'Default'}`}
                   className="absolute w-full h-full object-contain pointer-events-none"
                 />
@@ -241,14 +241,27 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                   className="relative rounded-xl border border-border overflow-hidden shadow-md w-full"
                   style={{ aspectRatio: '4/3' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-sky-300 via-blue-100 to-green-200" />
-                  <div
-                    className="absolute inset-0 transition-all duration-300"
-                    style={{
-                      backgroundColor: lensColor?.id?.includes('amber') ? '#d97706' : (lensColor?.image ? '#000' : '#71717a'),
-                      opacity: Math.max(0.15, Math.min(0.6, 1 - vlt / 100)),
-                    }}
-                  />
+                  <div className="absolute inset-0 bg-white" />
+                  {lensColor?.image ? (
+                    <div
+                      className="absolute inset-0 transition-all duration-300"
+                      style={{
+                        backgroundImage: `url(${lensColor.image})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        opacity: Math.max(0.2, Math.min(0.85, 1 - vlt / 100)),
+                        mixBlendMode: 'multiply',
+                      }}
+                    />
+                  ) : lensColor?.id !== 'clear' && (
+                    <div
+                      className="absolute inset-0 transition-all duration-300"
+                      style={{
+                        backgroundColor: '#71717a',
+                        opacity: Math.max(0.15, Math.min(0.6, 1 - vlt / 100)),
+                      }}
+                    />
+                  )}
                   <div className="absolute bottom-2 left-0 right-0 flex justify-center">
                     <span className="text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">{vlt}% VLT</span>
                   </div>
