@@ -212,61 +212,50 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             onClose={() => setCustomizeOpen(false)}
           />
 
-          <div
-            ref={canvasRef}
-            className="relative max-w-4xl w-full"
-            onDrop={handleCanvasDrop}
-            onDragOver={(e) => e.preventDefault()}
-            onDragEnter={(e) => e.preventDefault()}
-          >
+          <div className="flex items-center gap-6 max-w-5xl w-full">
             <div
-              className="relative w-full bg-white rounded-lg overflow-hidden"
-              style={{
-                paddingBottom: '56%',
-              }}
+              ref={canvasRef}
+              className="relative flex-1 w-full"
+              onDrop={handleCanvasDrop}
+              onDragOver={(e) => e.preventDefault()}
+              onDragEnter={(e) => e.preventDefault()}
             >
-              {/* Show dynamic lens overlay */
-              (
-                <div
-                  className="absolute inset-0 w-full h-full pointer-events-none mix-blend-multiply"
-                  style={{
-                    zIndex: 1,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    maskImage: `url(${selectedFrame.frameImages?.[0]?.replace('_-_CLEAR', '') || ''})`,
-                    maskSize: 'contain',
-                    maskRepeat: 'no-repeat',
-                    maskPosition: 'center',
-                    WebkitMaskImage: `url(${selectedFrame.frameImages?.[0]?.replace('_-_CLEAR', '') || ''})`,
-                    WebkitMaskSize: 'contain',
-                    WebkitMaskRepeat: 'no-repeat',
-                    WebkitMaskPosition: 'center',
-                    opacity: Math.max(0, Math.min(0.8, 1 - (vlt || 50) / 100))
-                  }}
+              <div
+                className="relative w-full rounded-lg overflow-hidden"
+                style={{
+                  paddingBottom: '56%',
+                }}
+              >
+                <img
+                  src={lensColor?.image || selectedFrame.frameImages?.[0]}
+                  alt={`${selectedFrame.name} - ${lensColor?.name || 'Default'}`}
+                  className="absolute w-full h-full object-contain pointer-events-none"
                 />
-              )}
-              <img
-                src={lensColor?.image || selectedFrame.frameImages?.[0]}
-                alt={`${selectedFrame.name} - ${lensColor?.name || 'Default'}`}
-                className="absolute w-full h-full object-contain pointer-events-none"
-                style={{ zIndex: 2 }}
-              />
-            </div>
-          </div>
-
-          {povMode && (
-            <div
-              className="fixed inset-0 pointer-events-none transition-all duration-500"
-              style={{
-                backgroundColor: lensColor?.id?.includes('amber') ? '#d97706' : (lensColor?.image ? 'rgba(0,0,0,1)' : '#71717a'),
-                opacity: Math.max(0.15, Math.min(0.6, 1 - vlt / 100)),
-                zIndex: 9999,
-              }}
-            >
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
-                POV Preview: {vlt}% VLT
               </div>
             </div>
-          )}
+
+            {povMode && (
+              <div className="flex-shrink-0 w-52 flex flex-col items-center gap-2">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">POV Preview</span>
+                <div
+                  className="relative rounded-xl border border-border overflow-hidden shadow-md w-full"
+                  style={{ aspectRatio: '4/3' }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-b from-sky-300 via-blue-100 to-green-200" />
+                  <div
+                    className="absolute inset-0 transition-all duration-300"
+                    style={{
+                      backgroundColor: lensColor?.id?.includes('amber') ? '#d97706' : (lensColor?.image ? '#000' : '#71717a'),
+                      opacity: Math.max(0.15, Math.min(0.6, 1 - vlt / 100)),
+                    }}
+                  />
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center">
+                    <span className="text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">{vlt}% VLT</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
