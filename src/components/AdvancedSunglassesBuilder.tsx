@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Glasses, Sparkles, RotateCcw, Waves, Eye } from "lucide-react";
+import { Glasses, Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
@@ -163,14 +163,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
 
 
         <div className="flex items-center gap-2 ml-auto">
-          <Button
-            variant={povMode ? "default" : "luxe-outline"}
-            size="sm"
-            onClick={() => setPovMode(!povMode)}
-          >
-            <Eye className="w-3.5 h-3.5" />
-            Visual Filter
-          </Button>
           <Button variant="luxe-outline" size="sm" onClick={() => {
             setFrameLibraryOpen(!frameLibraryOpen);
             setCustomizeOpen(false);
@@ -203,7 +195,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
 
           <SunglassesCustomizeLibrary
             open={customizeOpen}
-            onSelectLensColor={(color) => setLensColor(color)}
+            onSelectLensColor={(color) => { setLensColor(color); if (color.id !== 'clear') setPovMode(true); }}
             onSelectSecondaryColor={(color) => setGradientSecondary(color)}
             currentLensColorId={lensColor?.id}
             currentSecondaryColorId={gradientSecondary?.id}
