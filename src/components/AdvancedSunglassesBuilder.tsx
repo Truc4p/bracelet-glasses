@@ -136,29 +136,20 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
 
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Lens Tint</span>
-          <button 
-            onClick={() => {
-              setCustomizeOpen(true);
-              setFrameLibraryOpen(false);
-              // Small hack to switch to the Lens Colors tab if we had references, 
-              // but we just let the user see the customize panel for now.
-            }}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 transition-colors text-sm font-body cursor-pointer group"
-          >
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-body">
             <div 
               className="w-3.5 h-3.5 rounded-full border border-black/10 overflow-hidden flex-shrink-0"
               style={{ 
                 backgroundImage: `url(${lensColor?.image || ''})`, 
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                backgroundColor: lensColor?.id?.includes('amber') ? '#FFBF00' : (lensColor?.image ? 'transparent' : '#71717a') // Fallback color
+                backgroundColor: lensColor?.id?.includes('amber') ? '#FFBF00' : (lensColor?.image ? 'transparent' : '#71717a')
               }} 
             />
             <span>
               {lensColor?.name} {gradientMode && <span className="opacity-60 text-xs">/ {gradientSecondary?.name}</span>}
             </span>
-            <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity ml-1">Change</span>
-          </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
