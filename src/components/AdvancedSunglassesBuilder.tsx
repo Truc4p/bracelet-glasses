@@ -192,7 +192,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
             setFrameLibraryOpen(false);
           }}>
             <Sparkles className="w-3.5 h-3.5" />
-            Customize
+            Lens Tint
           </Button>
           <Button variant="ghost" size="icon" onClick={handleReset}>
             <RotateCcw className="w-4 h-4" />
