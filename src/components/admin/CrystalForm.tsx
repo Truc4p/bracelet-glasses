@@ -19,9 +19,31 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
   };
   const [form, setForm] = useState<CrystalEntry>(initial ?? blank);
   const [showPreview, setShowPreview] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const set = (k: keyof CrystalEntry, v: string | number) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("image", file);
+    setUploading(true);
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+      const res = await fetch(`${backendUrl}/api/upload`, { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      set("image", data.imageUrl);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setUploading(false);
+      if (e.target) e.target.value = "";
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,22 +102,14 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                      set("image", ev.target?.result as string);
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
+                disabled={uploading}
+                onChange={handleUpload}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">
-                Upload image
+                {uploading ? "Uploading..." : "Upload image"}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
                 PNG, JPG or SVG.
