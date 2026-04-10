@@ -90,7 +90,6 @@ function SortableBead({
     // z-index 20 ensures bead buttons sit above the z-10 HTML5 drop zone overlay
     // so click-to-place works on empty slots even when the drop zone is active.
     zIndex: 20,
-    overflow: "hidden",
   };
 
   const title = bead
@@ -108,7 +107,7 @@ function SortableBead({
       onClick={() => !bead && onSlotClick(position)}
       className={`absolute border transition-all duration-200 hover:scale-110 active:scale-95 group ${
         bead ? "cursor-grab active:cursor-grabbing" : "cursor-pointer hover:border-primary/60"
-      } rounded-full`}
+      } ${!beadImageSrc ? "rounded-full" : "rounded-sm"}`}
       title={title}
     >
       {beadImageSrc && (
@@ -117,10 +116,10 @@ function SortableBead({
           alt=""
           draggable={false}
           style={{
+            position: "absolute",
             width: "100%",
             height: "100%",
-            objectFit: "cover",
-            transform: "scale(2)",
+            objectFit: "contain",
             pointerEvents: "none",
             userSelect: "none",
           }}
@@ -331,13 +330,13 @@ const SortableCircularStrand = ({
               const ghostImgSrc = getBeadImageSrc(activeBead);
               return (
                 <div
-                  className="border-2 border-primary shadow-xl rounded-full"
+                  className={`border-2 border-primary shadow-xl ${ghostImgSrc ? "rounded-sm" : "rounded-full"}`}
                   style={{
                     width: ghostSize,
                     height: ghostSize,
                     background: getBeadBackground(activeBead),
                     opacity: 0.9,
-                    overflow: "hidden",
+                    position: "relative",
                   }}
                 >
                   {ghostImgSrc && (
@@ -346,10 +345,10 @@ const SortableCircularStrand = ({
                       alt=""
                       draggable={false}
                       style={{
+                        position: "absolute",
                         width: "100%",
                         height: "100%",
-                        objectFit: "cover",
-                        transform: "scale(2)",
+                        objectFit: "contain",
                         pointerEvents: "none",
                       }}
                     />
