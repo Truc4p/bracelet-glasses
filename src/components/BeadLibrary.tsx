@@ -106,7 +106,7 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
                 <img
                   src={bead.image}
                   alt={bead.name}
-                  className="w-7 h-7 rounded-full border border-border/50 flex-shrink-0 shadow-sm object-cover"
+                  className="w-9 h-9 flex-shrink-0 object-contain"
                   onError={(e) => {
                     const img = e.target as HTMLImageElement;
                     img.style.display = "none";

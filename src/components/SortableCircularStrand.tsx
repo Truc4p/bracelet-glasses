@@ -73,6 +73,8 @@ function SortableBead({
     id: `bead-${position}`,
   });
 
+  const hasImage = !!(bead?.type === "crystal" && bead.crystal?.image);
+
   const style: React.CSSProperties = {
     width: beadPixelSize,
     height: beadPixelSize,
@@ -80,9 +82,10 @@ function SortableBead({
     top: y - beadPixelSize / 2,
     // No CSS.Transform — absolute position is driven by left/top only.
     // Applying dnd-kit's transform to abs-positioned items breaks layout.
-    background: getBeadBackground(bead),
-    borderColor: bead ? "transparent" : "hsl(var(--border))",
-    boxShadow: bead ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
+    background: hasImage ? "transparent" : getBeadBackground(bead),
+    border: hasImage ? "none" : undefined,
+    borderColor: !hasImage && bead ? "transparent" : !hasImage ? "hsl(var(--border))" : undefined,
+    boxShadow: !hasImage && bead ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
     opacity: isDragging ? 0 : 1, // hide original while overlay ghost is shown
     transition: isDragActive ? undefined : "opacity 0.15s, background 0.2s",
     // z-index 20 ensures bead buttons sit above the z-10 HTML5 drop zone overlay
@@ -103,9 +106,13 @@ function SortableBead({
       {...attributes}
       {...(bead ? listeners : {})}
       onClick={() => !bead && onSlotClick(position)}
-      className={`absolute border transition-all duration-200 hover:scale-110 active:scale-95 group ${
-        bead ? "cursor-grab active:cursor-grabbing" : "cursor-pointer hover:border-primary/60"
-      } rounded-full`}
+      className={`absolute transition-all duration-200 hover:scale-110 active:scale-95 group ${
+        hasImage
+          ? "cursor-grab active:cursor-grabbing"
+          : bead
+          ? "border rounded-full cursor-grab active:cursor-grabbing"
+          : "border rounded-full cursor-pointer hover:border-primary/60"
+      }`}
       title={title}
     >
       {bead && bead.type === "crystal" && (
