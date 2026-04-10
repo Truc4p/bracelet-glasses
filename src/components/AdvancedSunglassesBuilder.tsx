@@ -1,7 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Glasses, Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import FrameLibrary from "@/components/FrameLibrary";
 import SunglassesCustomizeLibrary from "@/components/SunglassesCustomizeLibrary";
 import { FRAME_BASE_PRICE, type FrameOption } from "@/lib/luxe-data";
@@ -47,9 +46,6 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
 
   const defaultLensColor: LensColor = availableLensColors[0] || { id: "default", name: "Default Base", image: "" };
   const [lensColor, setLensColor] = useState<LensColor>(defaultLensColor);
-  const [vlt, setVlt] = useState(15);
-  const [gradientMode, setGradientMode] = useState(false);
-  const [gradientSecondary, setGradientSecondary] = useState<LensColor>(availableLensColors[1] || availableLensColors[0] || defaultLensColor);
 
   // Update selected frame data if it gets updated in the catalogue
   useEffect(() => {
@@ -72,45 +68,20 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   useEffect(() => {
     if (availableLensColors.length > 0) {
       setLensColor(prev => availableLensColors.find(l => l.id === prev?.id) || availableLensColors[0]);
-      setGradientSecondary(prev => availableLensColors.find(l => l.id === prev?.id) || availableLensColors[1] || availableLensColors[0]);
     } else {
-      const fb = { id: "default", name: "Default Base", image: "" };
-      setLensColor(fb);
-      setGradientSecondary(fb);
+      setLensColor({ id: "default", name: "Default Base", image: "" });
     }
   }, [selectedFrame.lensColors]);
   const [frameLibraryOpen, setFrameLibraryOpen] = useState(true);
   const [customizeOpen, setCustomizeOpen] = useState(false);
-  const [povMode, setPovMode] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const updatePrice = useCallback(
-    (currentVlt: number, isGradient: boolean) => {
-      const basePrice = FRAME_BASE_PRICE;
-      const vltPrice = currentVlt < 20 ? 25 : currentVlt < 50 ? 15 : 10;
-      const gradientPrice = isGradient ? 20 : 0;
-      onPriceChange(basePrice + vltPrice + gradientPrice);
-    },
-    [onPriceChange]
-  );
-
   useEffect(() => {
-    updatePrice(vlt, gradientMode);
-  }, [updatePrice, vlt, gradientMode]);
+    onPriceChange(FRAME_BASE_PRICE);
+  }, [onPriceChange]);
 
   const handleFrameSelect = (frame: FrameOption) => {
     setSelectedFrame(frame);
-    updatePrice(vlt, gradientMode);
-  };
-
-  const handleVltChange = (val: number[]) => {
-    setVlt(val[0]);
-    updatePrice(val[0], gradientMode);
-  };
-
-  const handleGradientToggle = (checked: boolean) => {
-    setGradientMode(checked);
-    updatePrice(vlt, checked);
   };
 
   const handleCanvasDrop = (e: React.DragEvent) => {
@@ -118,10 +89,7 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
   };
 
   const handleReset = () => {
-    setVlt(15);
-    setGradientMode(false);
     setLensColor(availableLensColors[0] || { id: "default", name: "Default Base", image: "" });
-    updatePrice(15, false);
   };
 
   return (
@@ -146,20 +114,9 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 backgroundColor: lensColor?.id?.includes('amber') ? '#FFBF00' : (lensColor?.image ? 'transparent' : '#71717a')
               }} 
             />
-            <span>
-              {lensColor?.name} {gradientMode && <span className="opacity-60 text-xs">/ {gradientSecondary?.name}</span>}
-            </span>
+            <span>{lensColor?.name}</span>
           </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Lens Density</span>
-          <div className="w-32">
-            <Slider value={[vlt]} onValueChange={handleVltChange} min={0} max={100} step={5} />
-          </div>
-          <span className="text-sm font-body">{vlt}% VLT</span>
-        </div>
-
 
 
         <div className="flex items-center gap-2 ml-auto">
@@ -195,11 +152,10 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
 
           <SunglassesCustomizeLibrary
             open={customizeOpen}
-            onSelectLensColor={(color) => { setLensColor(color); if (color.id !== 'clear') setPovMode(true); }}
-            onSelectSecondaryColor={(color) => setGradientSecondary(color)}
+            onSelectLensColor={(color) => setLensColor(color)}
+            onSelectSecondaryColor={() => {}}
             currentLensColorId={lensColor?.id}
-            currentSecondaryColorId={gradientSecondary?.id}
-            gradientMode={gradientMode}
+            gradientMode={false}
             availableLensColors={availableLensColors}
             onClose={() => setCustomizeOpen(false)}
           />
@@ -219,47 +175,14 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
                 }}
               >
                 <img
-                  src={selectedFrame.frameImages?.[0]}
+                  src={lensColor?.id !== 'clear' && lensColor?.image ? lensColor.image : selectedFrame.frameImages?.[0]}
                   alt={`${selectedFrame.name} - ${lensColor?.name || 'Default'}`}
                   className="absolute w-full h-full object-contain pointer-events-none"
                 />
               </div>
             </div>
 
-            {povMode && (
-              <div className="flex-shrink-0 w-52 flex flex-col items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">POV Preview</span>
-                <div
-                  className="relative rounded-xl border border-border overflow-hidden shadow-md w-full"
-                  style={{ aspectRatio: '4/3' }}
-                >
-                  <div className="absolute inset-0 bg-white" />
-                  {lensColor?.image ? (
-                    <div
-                      className="absolute inset-0 transition-all duration-300"
-                      style={{
-                        backgroundImage: `url(${lensColor.image})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        opacity: Math.max(0.2, Math.min(0.85, 1 - vlt / 100)),
-                        mixBlendMode: 'multiply',
-                      }}
-                    />
-                  ) : lensColor?.id !== 'clear' && (
-                    <div
-                      className="absolute inset-0 transition-all duration-300"
-                      style={{
-                        backgroundColor: '#71717a',
-                        opacity: Math.max(0.15, Math.min(0.6, 1 - vlt / 100)),
-                      }}
-                    />
-                  )}
-                  <div className="absolute bottom-2 left-0 right-0 flex justify-center">
-                    <span className="text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">{vlt}% VLT</span>
-                  </div>
-                </div>
-              </div>
-            )}
+
           </div>
         </div>
       </div>
