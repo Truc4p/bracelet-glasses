@@ -41,15 +41,18 @@ interface SortableBeadProps {
 
 function getBeadBackground(bead: PlacedBead | null): string {
   if (!bead) return "hsl(var(--muted))";
-  if (bead.type === "crystal" && bead.crystal) {
-    if (bead.crystal.image) {
-      const isDataUrl = bead.crystal.image.startsWith("data:");
-      return `url("${bead.crystal.image}${isDataUrl ? "" : "?v=2"}") center / cover no-repeat`;
-    }
-    return "hsl(var(--muted))"; // Fallback if no image
+  if (bead.type === "crystal" && bead.crystal && bead.crystal.image) {
+    return "transparent";
   }
-
   return "hsl(var(--muted))";
+}
+
+function getBeadImageSrc(bead: PlacedBead | null): string | null {
+  if (bead?.type === "crystal" && bead.crystal?.image) {
+    const isDataUrl = bead.crystal.image.startsWith("data:");
+    return bead.crystal.image + (isDataUrl ? "" : "?v=2");
+  }
+  return null;
 }
 
 function SortableBead({
@@ -70,6 +73,8 @@ function SortableBead({
     id: `bead-${position}`,
   });
 
+  const beadImageSrc = getBeadImageSrc(bead);
+
   const style: React.CSSProperties = {
     width: beadPixelSize,
     height: beadPixelSize,
@@ -85,6 +90,7 @@ function SortableBead({
     // z-index 20 ensures bead buttons sit above the z-10 HTML5 drop zone overlay
     // so click-to-place works on empty slots even when the drop zone is active.
     zIndex: 20,
+    overflow: "hidden",
   };
 
   const title = bead
@@ -105,9 +111,21 @@ function SortableBead({
       } rounded-full`}
       title={title}
     >
-      {/* 
-      <div 
-      */}
+      {beadImageSrc && (
+        <img
+          src={beadImageSrc}
+          alt=""
+          draggable={false}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            transform: "scale(2)",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
+      )}
       {bead && bead.type === "crystal" && (
         <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
           {bead.beadSize}mm
@@ -308,18 +326,37 @@ const SortableCircularStrand = ({
 
           {/* dnd-kit drag overlay ghost */}
           <DragOverlay dropAnimation={null}>
-            {activeBead ? (
-              <div
-                className={`border-2 border-primary shadow-xl flex items-center justify-center rounded-full`}
-                style={{
-                  width: activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26,
-                  height: activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26,
-                  background: getBeadBackground(activeBead),
-                  opacity: 0.9,
-                }}
-              >
-              </div>
-            ) : null}
+            {activeBead ? (() => {
+              const ghostSize = activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26;
+              const ghostImgSrc = getBeadImageSrc(activeBead);
+              return (
+                <div
+                  className="border-2 border-primary shadow-xl rounded-full"
+                  style={{
+                    width: ghostSize,
+                    height: ghostSize,
+                    background: getBeadBackground(activeBead),
+                    opacity: 0.9,
+                    overflow: "hidden",
+                  }}
+                >
+                  {ghostImgSrc && (
+                    <img
+                      src={ghostImgSrc}
+                      alt=""
+                      draggable={false}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        transform: "scale(2)",
+                        pointerEvents: "none",
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })() : null}
           </DragOverlay>
 
           {/* Center counter */}
