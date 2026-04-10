@@ -73,8 +73,6 @@ function SortableBead({
     id: `bead-${position}`,
   });
 
-  const beadImageSrc = getBeadImageSrc(bead);
-
   const style: React.CSSProperties = {
     width: beadPixelSize,
     height: beadPixelSize,
@@ -107,24 +105,9 @@ function SortableBead({
       onClick={() => !bead && onSlotClick(position)}
       className={`absolute border transition-all duration-200 hover:scale-110 active:scale-95 group ${
         bead ? "cursor-grab active:cursor-grabbing" : "cursor-pointer hover:border-primary/60"
-      } ${!beadImageSrc ? "rounded-full" : "rounded-sm"}`}
+      } rounded-full`}
       title={title}
     >
-      {beadImageSrc && (
-        <img
-          src={beadImageSrc}
-          alt=""
-          draggable={false}
-          style={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-        />
-      )}
       {bead && bead.type === "crystal" && (
         <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
           {bead.beadSize}mm
@@ -298,6 +281,35 @@ const SortableCircularStrand = ({
             />
           </svg>
 
+          {/* Bead images — rendered directly on the canvas, precisely centered at the
+              bracelet circle point. Kept separate from the button so the image is
+              never clipped or offset by the small interaction hitbox. */}
+          {slots.map((slot) => {
+            if (!slot.placed || `bead-${slot.index}` === activeId) return null;
+            const imgSrc = getBeadImageSrc(slot.placed);
+            if (!imgSrc) return null;
+            const displaySize = slot.beadPixelSize * 2;
+            return (
+              <img
+                key={`bead-img-${slot.index}`}
+                src={imgSrc}
+                alt=""
+                draggable={false}
+                style={{
+                  position: "absolute",
+                  left: slot.x - displaySize / 2,
+                  top: slot.y - displaySize / 2,
+                  width: displaySize,
+                  height: displaySize,
+                  objectFit: "contain",
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  zIndex: 19,
+                }}
+              />
+            );
+          })}
+
           {/* Bead slots (dnd-kit sortable) */}
           <SortableContext items={slots.map((slot) => `bead-${slot.index}`)}>
             {slots.map((slot) => (
@@ -346,8 +358,10 @@ const SortableCircularStrand = ({
                       draggable={false}
                       style={{
                         position: "absolute",
-                        width: "100%",
-                        height: "100%",
+                        width: "200%",
+                        height: "200%",
+                        top: "-50%",
+                        left: "-50%",
                         objectFit: "contain",
                         pointerEvents: "none",
                       }}
