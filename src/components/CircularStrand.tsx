@@ -20,7 +20,7 @@ function getBeadBackground(bead: PlacedBead | null | undefined): string {
 }
 
 const CircularStrand = ({ beadCount, placedBeads, onSlotClick, onBeadDrop, label, wristSize }: CircularStrandProps) => {
-  const canvasSize = 440;
+  const canvasSize = 320;
   const center = canvasSize / 2;
   const radius = canvasSize / 2 - 36;
 

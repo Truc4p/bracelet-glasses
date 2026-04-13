@@ -136,7 +136,7 @@ const SortableCircularStrand = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const canvasSize = 440;
+  const canvasSize = 320;
   const center = canvasSize / 2;
   const radius = canvasSize / 2 - 36;
 
