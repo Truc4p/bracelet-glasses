@@ -90,7 +90,7 @@ const BraceletBuilder = ({ onPriceChange }: BraceletBuilderProps) => {
         ? placedBeads.map((b) => (b.position === position ? newBead : b))
         : [...placedBeads, newBead];
     } else {
-      // Nothing selected and slot is empty → open crystal library
+      // Nothing selected and slot is empty → open bead library
       setLibraryOpen(true);
       return;
     }

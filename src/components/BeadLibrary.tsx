@@ -40,7 +40,7 @@ const BeadLibrary = ({ onSelectBead, open, onClose }: BeadLibraryProps) => {
   return (
     <div className="absolute left-0 top-0 bottom-0 w-72 glass-panel rounded-lg z-20 flex flex-col animate-slide-in">
       <div className="flex items-center justify-between p-4 border-b border-border">
-        <h3 className="font-display text-sm font-semibold">Crystal Library</h3>
+        <h3 className="font-display text-sm font-semibold">Bead Library</h3>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
           <X className="w-4 h-4" />
         </button>
