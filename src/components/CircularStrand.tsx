@@ -29,7 +29,8 @@ const CircularStrand = ({ beadCount, placedBeads, onSlotClick, onBeadDrop, label
     const x = center + radius * Math.cos(angle);
     const y = center + radius * Math.sin(angle);
     const placed = placedBeads.find((b) => b.position === i);
-    const beadPixelSize = placed ? (placed.beadSize === 6 ? 18 : placed.beadSize === 8 ? 22 : 26) : 20;
+    const MM_TO_PX = 96 / 25.4;
+    const beadPixelSize = placed ? Math.round(placed.beadSize * MM_TO_PX) : 20;
     return { index: i, x, y, placed, beadPixelSize };
   });
 
