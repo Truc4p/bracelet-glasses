@@ -31,7 +31,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   }
 
   const uploadStream = cloudinary.uploader.upload_stream(
-    { folder: 'bino-foundry' },
+    { folder: 'bracelet-glasses' },
     (error, result) => {
       if (error) {
         console.error('Cloudinary upload error:', error);
@@ -45,7 +45,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/bino-foundry';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/bracelet-glasses';
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI)
