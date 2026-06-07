@@ -165,6 +165,29 @@ const SortableCircularStrand = ({
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
+
+    // One-shot debug measurement: compare the actual rendered pixel size of
+    // a placed bead image vs. the drag-overlay ghost image.
+    requestAnimationFrame(() => {
+      const allImgs = Array.from(document.querySelectorAll("img"));
+      const placedImg = allImgs.find((img) => canvasRef.current?.contains(img));
+      const overlayImg = allImgs.find((img) => !canvasRef.current?.contains(img));
+      const log = (label: string, img?: HTMLImageElement) => {
+        if (!img) return console.log(label, "not found");
+        const rect = img.getBoundingClientRect();
+        console.log(label, {
+          renderedWidth: rect.width,
+          renderedHeight: rect.height,
+          cssWidth: img.style.width,
+          cssHeight: img.style.height,
+          naturalWidth: img.naturalWidth,
+          naturalHeight: img.naturalHeight,
+          src: img.src,
+        });
+      };
+      log("[size-check] placed bead:", placedImg);
+      log("[size-check] overlay ghost:", overlayImg);
+    });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -294,7 +317,6 @@ const SortableCircularStrand = ({
             const imgSrc = getBeadImageSrc(slot.placed);
             if (!imgSrc) return null;
             const displaySize = slot.beadPixelSize * 2;
-            console.log("[placed]", { position: slot.index, beadSize: slot.placed.beadSize, beadPixelSize: slot.beadPixelSize, displaySize, imgSrc });
             return (
               <img
                 key={`bead-img-${slot.index}`}
@@ -350,7 +372,6 @@ const SortableCircularStrand = ({
               const beadPixelSize = activeBead.beadSize * 2.5;
               const displaySize = beadPixelSize * 2;
               const ghostImgSrc = getBeadImageSrc(activeBead);
-              console.log("[ghost]", { beadSize: activeBead.beadSize, beadPixelSize, displaySize, ghostImgSrc });
 
               // Image-backed crystals: render the bare image, exactly like they
               // appear on the bracelet — no added border/background/shape.
