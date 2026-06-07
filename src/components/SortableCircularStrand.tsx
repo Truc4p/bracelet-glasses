@@ -343,7 +343,11 @@ const SortableCircularStrand = ({
           {/* dnd-kit drag overlay ghost */}
           <DragOverlay dropAnimation={null}>
             {activeBead ? (() => {
-              const ghostSize = activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26;
+              // Mirror the exact sizing math used to render beads on the
+              // bracelet (slots.beadPixelSize / displaySize), so the dragged
+              // ghost is the same size as the bead it replaces.
+              const beadPixelSize = activeBead.beadSize * 2.5;
+              const displaySize = beadPixelSize * 2;
               const ghostImgSrc = getBeadImageSrc(activeBead);
 
               // Image-backed crystals: render the bare image, exactly like they
@@ -355,8 +359,8 @@ const SortableCircularStrand = ({
                     alt=""
                     draggable={false}
                     style={{
-                      width: ghostSize * 2,
-                      height: ghostSize * 2,
+                      width: displaySize,
+                      height: displaySize,
                       objectFit: "contain",
                       opacity: 0.9,
                       pointerEvents: "none",
@@ -369,8 +373,8 @@ const SortableCircularStrand = ({
                 <div
                   className="border-2 border-primary shadow-xl rounded-full"
                   style={{
-                    width: ghostSize,
-                    height: ghostSize,
+                    width: beadPixelSize,
+                    height: beadPixelSize,
                     background: getBeadBackground(activeBead),
                     opacity: 0.9,
                   }}
