@@ -169,9 +169,10 @@ const SortableCircularStrand = ({
     // One-shot debug measurement: compare the actual rendered pixel size of
     // a placed bead image vs. the drag-overlay ghost image.
     requestAnimationFrame(() => {
-      const allImgs = Array.from(document.querySelectorAll("img"));
+      const allImgs = Array.from(document.querySelectorAll<HTMLImageElement>('img[alt=""]'));
       const placedImg = allImgs.find((img) => canvasRef.current?.contains(img));
       const overlayImg = allImgs.find((img) => !canvasRef.current?.contains(img));
+      console.log("[size-check] candidate imgs outside canvas:", allImgs.filter((img) => !canvasRef.current?.contains(img)).map((img) => ({ src: img.src, w: img.style.width, h: img.style.height, parent: img.parentElement?.outerHTML?.slice(0, 200) })));
       const log = (label: string, img?: HTMLImageElement) => {
         if (!img) return console.log(label, "not found");
         const rect = img.getBoundingClientRect();
