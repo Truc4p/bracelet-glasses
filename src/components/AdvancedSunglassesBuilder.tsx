@@ -105,14 +105,15 @@ const AdvancedSunglassesBuilder = ({ onPriceChange }: AdvancedSunglassesBuilderP
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground font-body uppercase tracking-wider">Lens Tint</span>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm font-body">
-            <div 
-              className="w-3.5 h-3.5 rounded-full border border-black/10 overflow-hidden flex-shrink-0"
-              style={{ 
-                backgroundImage: `url(${lensColor?.image || ''})`, 
-                backgroundSize: 'cover',
+            <div
+              className="w-3.5 h-3.5 rounded-sm border border-black/10 overflow-hidden flex-shrink-0"
+              style={{
+                backgroundImage: `url(${lensColor?.image || ''})`,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
                 backgroundColor: lensColor?.id?.includes('amber') ? '#FFBF00' : (lensColor?.image ? 'transparent' : '#71717a')
-              }} 
+              }}
             />
             <span>{lensColor?.name}</span>
           </div>
