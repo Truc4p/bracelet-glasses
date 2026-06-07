@@ -294,6 +294,7 @@ const SortableCircularStrand = ({
             const imgSrc = getBeadImageSrc(slot.placed);
             if (!imgSrc) return null;
             const displaySize = slot.beadPixelSize * 2;
+            console.log("[placed]", { position: slot.index, beadSize: slot.placed.beadSize, beadPixelSize: slot.beadPixelSize, displaySize, imgSrc });
             return (
               <img
                 key={`bead-img-${slot.index}`}
@@ -349,6 +350,7 @@ const SortableCircularStrand = ({
               const beadPixelSize = activeBead.beadSize * 2.5;
               const displaySize = beadPixelSize * 2;
               const ghostImgSrc = getBeadImageSrc(activeBead);
+              console.log("[ghost]", { beadSize: activeBead.beadSize, beadPixelSize, displaySize, ghostImgSrc });
 
               // Image-backed crystals: render the bare image, exactly like they
               // appear on the bracelet — no added border/background/shape.
