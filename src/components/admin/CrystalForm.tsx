@@ -48,6 +48,10 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) return;
+    if (!form.type) {
+      alert("Please select a type.");
+      return;
+    }
     const id = form.id || form.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     onSave({ ...form, id });
   };
@@ -77,8 +81,9 @@ export const CrystalForm = ({ initial, onSave, onCancel }: CrystalFormProps) => 
         </div>
 
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Type</label>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Type *</label>
           <select
+            required
             value={form.type ?? ""}
             onChange={(e) => set("type", e.target.value)}
             className="w-full px-3 py-2 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-background transition-colors font-body"
