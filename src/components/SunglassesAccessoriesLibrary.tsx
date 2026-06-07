@@ -49,12 +49,12 @@ const SunglassesAccessoriesLibrary = ({
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-left group ${currentLensColorId === lensColor.id ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted/60'}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-full border flex-shrink-0 flex items-center justify-center overflow-hidden ${currentLensColorId === lensColor.id ? 'border-primary' : 'border-border/50'} ${!lensColor.image ? 'bg-gradient-to-br from-white to-gray-200' : ''}`}
+                  className={`w-8 h-8 rounded-md border flex-shrink-0 flex items-center justify-center overflow-hidden ${currentLensColorId === lensColor.id ? 'border-primary' : 'border-border/50'} ${!lensColor.image ? 'bg-gradient-to-br from-white to-gray-200' : ''}`}
                 >
-                  {lensColor.image && (<img 
-                    src={lensColor.image} 
-                    alt={lensColor.name} 
-                    className="w-full h-full object-cover scale-[1.35]" 
+                  {lensColor.image && (<img
+                    src={lensColor.image}
+                    alt={lensColor.name}
+                    className="w-full h-full object-contain"
                       />
                     )}
                 </div>
@@ -82,13 +82,13 @@ const SunglassesAccessoriesLibrary = ({
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-left group ${currentSecondaryColorId === lensColor.id ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted/60'}`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full border flex-shrink-0 flex items-center justify-center overflow-hidden ${currentSecondaryColorId === lensColor.id ? 'border-primary' : 'border-border/50'} ${!lensColor.image ? 'bg-gradient-to-br from-white to-gray-200' : ''}`}
+                    className={`w-8 h-8 rounded-md border flex-shrink-0 flex items-center justify-center overflow-hidden ${currentSecondaryColorId === lensColor.id ? 'border-primary' : 'border-border/50'} ${!lensColor.image ? 'bg-gradient-to-br from-white to-gray-200' : ''}`}
                   >
                     {lensColor.image && (
-                      <img 
-                        src={lensColor.image} 
-                        alt={lensColor.name} 
-                        className="w-full h-full object-cover scale-[1.35]" 
+                      <img
+                        src={lensColor.image}
+                        alt={lensColor.name}
+                        className="w-full h-full object-contain"
                       />
                     )}
                   </div>
