@@ -345,34 +345,36 @@ const SortableCircularStrand = ({
             {activeBead ? (() => {
               const ghostSize = activeBead.beadSize === 6 ? 18 : activeBead.beadSize === 8 ? 22 : 26;
               const ghostImgSrc = getBeadImageSrc(activeBead);
+
+              // Image-backed crystals: render the bare image, exactly like they
+              // appear on the bracelet — no added border/background/shape.
+              if (ghostImgSrc) {
+                return (
+                  <img
+                    src={ghostImgSrc}
+                    alt=""
+                    draggable={false}
+                    style={{
+                      width: ghostSize * 2,
+                      height: ghostSize * 2,
+                      objectFit: "contain",
+                      opacity: 0.9,
+                      pointerEvents: "none",
+                    }}
+                  />
+                );
+              }
+
               return (
                 <div
-                  className="border-2 border-primary shadow-xl rounded-full overflow-hidden"
+                  className="border-2 border-primary shadow-xl rounded-full"
                   style={{
                     width: ghostSize,
                     height: ghostSize,
                     background: getBeadBackground(activeBead),
                     opacity: 0.9,
-                    position: "relative",
                   }}
-                >
-                  {ghostImgSrc && (
-                    <img
-                      src={ghostImgSrc}
-                      alt=""
-                      draggable={false}
-                      style={{
-                        position: "absolute",
-                        width: "200%",
-                        height: "200%",
-                        top: "-50%",
-                        left: "-50%",
-                        objectFit: "contain",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  )}
-                </div>
+                />
               );
             })() : null}
           </DragOverlay>
