@@ -347,7 +347,7 @@ const SortableCircularStrand = ({
               const ghostImgSrc = getBeadImageSrc(activeBead);
               return (
                 <div
-                  className={`border-2 border-primary shadow-xl ${ghostImgSrc ? "rounded-sm" : "rounded-full"}`}
+                  className="border-2 border-primary shadow-xl rounded-full overflow-hidden"
                   style={{
                     width: ghostSize,
                     height: ghostSize,
